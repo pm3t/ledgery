@@ -1,0 +1,408 @@
+// Prisma Schema untuk Ledgery — SaaS Akuntansi Multi-Tenant
+// PT. Anugerah Bakti Prima
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Enum untuk Kategori Akun pada Chart of Accounts
+enum KategoriAkun {
+  ASET
+  LIABILITAS
+  EKUITAS
+  PENDAPATAN
+  BEBAN
+}
+
+// Enum untuk Kebijakan Posting Jurnal
+enum PostingPolicyMode {
+  AUTO_POST
+  APPROVAL_MANUAL
+}
+
+// Enum Status Langganan Tenant
+enum StatusLangganan {
+  ACTIVE
+  INACTIVE
+  TRIAL
+}
+
+// Enum Status Billing
+enum BillingStatus {
+  PAID
+  UNPAID
+  OVERDUE
+}
+
+// Enum Role User
+enum UserRole {
+  SUPER_ADMIN
+  STAF_AKUNTANSI
+  ADMIN_TENANT
+}
+
+// Model Tenant (Entitas Perusahaan / Pelanggan SaaS)
+model Tenant {
+  id               String          @id @default(uuid())
+  nama_perusahaan  String
+  tahun_buku_mulai Int             @default(2026)
+  mata_uang        String          @default("IDR")
+  status_langganan StatusLangganan @default(ACTIVE)
+  billingDueDate   DateTime?
+  billingStatus    BillingStatus   @default(UNPAID)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  // Relasi
+  chartOfAccounts ChartOfAccount[]
+  apiKeys         ApiKey[]
+  postingPolicy   PostingPolicySetting?
+  journals        Journal[]
+  notifications   Notification[]
+  taxSetting      TaxSetting?
+  taxRecaps       TaxRecap[]
+  IntegrationLog  IntegrationLog[]
+  users           User[]
+  dimensions      Dimension[]
+  exchangeRates   ExchangeRate[]
+  fiscalYears     FiscalYear[]
+}
+
+// Model Chart of Accounts (Daftar Kode Akun)
+model ChartOfAccount {
+  id        String       @id @default(uuid())
+  tenantId  String
+  kode_akun String
+  nama_akun String
+  kategori  KategoriAkun
+  parentId  String?
+  isActive  Boolean      @default(true)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  // Relasi Tenant
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Relasi Induk - Anak (Self-Relation)
+  parent   ChartOfAccount?  @relation("AccountParent", fields: [parentId], references: [id], onDelete: SetNull)
+  children ChartOfAccount[] @relation("AccountParent")
+
+  // Relasi Jurnal
+  journalEntries JournalEntry[]
+
+  @@unique([tenantId, kode_akun])
+}
+
+// Model API Key (Kredensial Integrasi Aplikasi Sumber)
+model ApiKey {
+  id         String    @id @default(uuid())
+  tenantId   String
+  key_hash   String    @unique
+  nama_label String
+  isActive   Boolean   @default(true)
+  createdAt  DateTime  @default(now())
+  lastUsedAt DateTime?
+
+  // Relasi Tenant
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+}
+
+// Model Pengaturan Kebijakan Posting Jurnal per Tenant
+model PostingPolicySetting {
+  id        String            @id @default(uuid())
+  tenantId  String            @unique
+  mode      PostingPolicyMode @default(AUTO_POST)
+  updatedBy String?           @default("system")
+  updatedAt DateTime          @updatedAt
+
+  // Relasi Tenant
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+}
+
+// Enum Status Jurnal
+enum JournalStatus {
+  POSTED
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// Enum Tipe Entri Jurnal
+enum EntryType {
+  DEBIT
+  KREDIT
+}
+
+// Model Header Jurnal
+model Journal {
+  id              String        @id @default(uuid())
+  tenantId        String
+  no_voucher      String
+  tanggal         DateTime
+  deskripsi       String
+  sumber_aplikasi String
+  status          JournalStatus
+  idempotency_key String?
+  mata_uang       String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  // Relasi
+  tenant       Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  entries      JournalEntry[]
+  approvalLogs JournalApprovalLog[]
+
+  // Constraint
+  @@unique([tenantId, no_voucher])
+  @@unique([tenantId, idempotency_key])
+}
+
+// Model Baris Entri Jurnal (Debit/Kredit)
+model JournalEntry {
+  id               String    @id @default(uuid())
+  journalId        String
+  chartOfAccountId String
+  tipe             EntryType
+  jumlah           Decimal   @db.Decimal(19, 4)
+  jumlah_asli      Decimal?  @db.Decimal(19, 4)
+  jumlah_konversi  Decimal?  @db.Decimal(19, 4)
+
+  // Relasi
+  journal        Journal        @relation(fields: [journalId], references: [id], onDelete: Cascade)
+  chartOfAccount ChartOfAccount @relation(fields: [chartOfAccountId], references: [id], onDelete: Restrict)
+  dimensions     JournalEntryDimension[]
+}
+
+// Enum Aksi Approval
+enum ApprovalAction {
+  APPROVED
+  REJECTED
+}
+
+// Model Riwayat Persetujuan Jurnal
+model JournalApprovalLog {
+  id          String         @id @default(uuid())
+  journalId   String
+  action      ApprovalAction
+  alasan      String?
+  actorUserId String
+  createdAt   DateTime       @default(now())
+
+  // Relasi
+  journal Journal @relation(fields: [journalId], references: [id], onDelete: Cascade)
+}
+
+// Model Notifikasi (In-App)
+model Notification {
+  id        String   @id @default(uuid())
+  tenantId  String
+  judul     String
+  pesan     String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  // Relasi
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+}
+
+// Enum untuk Jenis Pajak
+enum JenisPajak {
+  PPN
+  PPH21
+}
+
+// Model Pengaturan Pajak per Tenant
+model TaxSetting {
+  id             String  @id @default(uuid())
+  tenantId       String  @unique
+  tarif_ppn      Float   @default(11.0)
+  npwp           String?
+  aktifkan_pph21 Boolean @default(false)
+
+  // Relasi
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+}
+
+// Model Rekapitulasi Pajak
+model TaxRecap {
+  id                    String     @id @default(uuid())
+  tenantId              String
+  jenis_pajak           JenisPajak
+  periode               String // Format "YYYY-MM"
+  total_dasar_pengenaan Float
+  total_pajak           Float
+  createdAt             DateTime   @default(now())
+
+  // Relasi
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+}
+
+// Model Audit Log untuk akses Super Admin ke data spesifik Tenant
+model AuditLog {
+  id             String   @id @default(uuid())
+  actorRole      String // misal: "SUPER_ADMIN"
+  action         String // misal: "VIEW_TENANT_JOURNALS"
+  targetTenantId String
+  deskripsi      String
+  createdAt      DateTime @default(now())
+}
+
+// Model Log Integrasi API
+model IntegrationLog {
+  id              String   @id @default(uuid())
+  tenantId        String
+  apiKeyId        String? // Null jika gagal autentikasi
+  endpoint        String
+  versi_api       String
+  statusCode      Int
+  payload_ringkas String   @db.Text
+  createdAt       DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+}
+
+// Model User untuk autentikasi dan manajemen hak akses
+model User {
+  id             String    @id @default(uuid())
+  tenantId       String? // Null untuk SUPER_ADMIN (tidak terikat tenant)
+  nama           String
+  email          String    @unique
+  password_hash  String
+  role           UserRole
+  isActive       Boolean   @default(true)
+  lastLoginAt    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  // Relasi (SUPER_ADMIN tidak punya tenant)
+  tenant                Tenant?              @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  passwordResetTokens   PasswordResetToken[]
+}
+
+// Model Token Reset Password (dikirim via email)
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  isUsed    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// Model Dimension (Kategori Dimensi, misal: Project, Cost Center)
+model Dimension {
+  id             String           @id @default(uuid())
+  tenantId       String
+  nama_dimension String
+  isActive       Boolean          @default(true)
+  createdAt      DateTime         @default(now())
+
+  // Relasi
+  tenant         Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  values         DimensionValue[]
+
+  @@unique([tenantId, nama_dimension])
+}
+
+// Model DimensionValue (Nilai dari Dimensi, misal: PRJ001)
+model DimensionValue {
+  id          String    @id @default(uuid())
+  dimensionId String
+  kode        String
+  nama        String
+  isActive    Boolean   @default(true)
+
+  // Relasi
+  dimension      Dimension               @relation(fields: [dimensionId], references: [id], onDelete: Cascade)
+  journalEntries JournalEntryDimension[]
+
+  @@unique([dimensionId, kode])
+}
+
+// Model Pivot JournalEntry dengan DimensionValue
+model JournalEntryDimension {
+  id               String         @id @default(uuid())
+  journalEntryId   String
+  dimensionId      String
+  dimensionValueId String
+
+  // Relasi
+  journalEntry   JournalEntry   @relation(fields: [journalEntryId], references: [id], onDelete: Cascade)
+  dimensionValue DimensionValue @relation(fields: [dimensionValueId], references: [id], onDelete: Restrict)
+}
+
+// Model Currency (Mata Uang)
+model Currency {
+  id        String   @id @default(uuid())
+  kode_iso  String   @unique
+  nama      String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  // Relasi
+  exchangeRates ExchangeRate[]
+}
+
+// Model ExchangeRate (Kurs Harian per Tenant)
+model ExchangeRate {
+  id         String   @id @default(uuid())
+  tenantId   String
+  currencyId String
+  tanggal    DateTime
+  kurs       Float
+  createdBy  String?
+  createdAt  DateTime @default(now())
+
+  // Relasi
+  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  currency Currency @relation(fields: [currencyId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, currencyId, tanggal])
+}
+
+// Enum Status Periode Akuntansi
+enum PeriodStatus {
+  OPEN
+  CLOSED
+}
+
+// Model Tahun Buku
+model FiscalYear {
+  id                String             @id @default(uuid())
+  tenantId          String
+  nama_tahun_buku   String
+  tanggal_mulai     DateTime
+  tanggal_selesai   DateTime
+  createdAt         DateTime           @default(now())
+
+  // Relasi
+  tenant            Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  accountingPeriods AccountingPeriod[]
+}
+
+// Model Periode Akuntansi
+model AccountingPeriod {
+  id              String       @id @default(uuid())
+  fiscalYearId    String
+  nomor_periode   Int
+  tanggal_mulai   DateTime
+  tanggal_selesai DateTime
+  status          PeriodStatus @default(OPEN)
+  closedAt        DateTime?
+  closedBy        String?
+  reopenedAt      DateTime?
+  reopenedBy      String?
+
+  // Relasi
+  fiscalYear      FiscalYear   @relation(fields: [fiscalYearId], references: [id], onDelete: Cascade)
+
+  @@unique([fiscalYearId, nomor_periode])
+}
+
