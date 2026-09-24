@@ -18,8 +18,23 @@ export const ExchangeRateTab: React.FC<Props> = ({ currentTenant }) => {
   const [tanggal, setTanggal] = useState(new Date().toISOString().split('T')[0]);
   const [kurs, setKurs] = useState<number | ''>('');
 
+  // New Currency State
+  const [showAddCurrency, setShowAddCurrency] = useState(false);
+  const [newCurrencyCode, setNewCurrencyCode] = useState('');
+  const [newCurrencyName, setNewCurrencyName] = useState('');
+  const [savingCurrency, setSavingCurrency] = useState(false);
+
+  const fetchCurrencies = async () => {
+    try {
+      const data = await api.getCurrencies();
+      setCurrencies(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
-    api.getCurrencies().then(setCurrencies).catch(console.error);
+    fetchCurrencies();
   }, []);
 
   const fetchRates = async () => {
@@ -62,6 +77,29 @@ export const ExchangeRateTab: React.FC<Props> = ({ currentTenant }) => {
     }
   };
 
+  const handleSaveCurrency = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newCurrencyCode || !newCurrencyName) return;
+
+    setSavingCurrency(true);
+    try {
+      const created = await api.createCurrency({
+        kode_iso: newCurrencyCode.toUpperCase(),
+        nama: newCurrencyName,
+      });
+      alert('Mata uang berhasil ditambahkan');
+      setNewCurrencyCode('');
+      setNewCurrencyName('');
+      setShowAddCurrency(false);
+      setSelectedCurrencyId(created.id);
+      fetchCurrencies();
+    } catch (err: any) {
+      alert('Gagal menambahkan mata uang: ' + err.message);
+    } finally {
+      setSavingCurrency(false);
+    }
+  };
+
   if (!currentTenant) return <div>Pilih tenant terlebih dahulu</div>;
 
   return (
@@ -83,20 +121,67 @@ export const ExchangeRateTab: React.FC<Props> = ({ currentTenant }) => {
           </h3>
           <form onSubmit={handleSave} className="space-y-4">
             <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1">Mata Uang Asing</label>
-              <select
-                required
-                value={selectedCurrencyId}
-                onChange={e => setSelectedCurrencyId(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 text-slate-200 text-sm rounded-xl px-3 py-2"
-              >
-                <option value="">-- Pilih Mata Uang --</option>
-                {currencies
-                  .filter(c => c.kode_iso !== currentTenant.mata_uang) // Jangan tampilkan base currency
-                  .map(c => (
-                    <option key={c.id} value={c.id}>{c.kode_iso} - {c.nama}</option>
-                  ))}
-              </select>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-xs font-medium text-slate-400">Mata Uang Asing</label>
+                <button
+                  type="button"
+                  onClick={() => setShowAddCurrency(!showAddCurrency)}
+                  className="text-xs text-indigo-400 hover:text-indigo-300 font-medium"
+                >
+                  {showAddCurrency ? 'Batal Tambah' : '+ Tambah Baru'}
+                </button>
+              </div>
+
+              {showAddCurrency ? (
+                <div className="bg-slate-950 p-3 rounded-xl border border-indigo-500/30 mb-3 space-y-3">
+                  <div>
+                    <label className="block text-[10px] text-slate-500 uppercase tracking-wider mb-1">Kode ISO (ex: SGD)</label>
+                    <input
+                      required={showAddCurrency}
+                      type="text"
+                      maxLength={3}
+                      value={newCurrencyCode}
+                      onChange={e => setNewCurrencyCode(e.target.value.toUpperCase())}
+                      className="w-full bg-slate-900 border border-slate-700 text-slate-200 text-sm rounded-lg px-3 py-1.5 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none uppercase"
+                      placeholder="SGD"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] text-slate-500 uppercase tracking-wider mb-1">Nama Mata Uang</label>
+                    <input
+                      required={showAddCurrency}
+                      type="text"
+                      value={newCurrencyName}
+                      onChange={e => setNewCurrencyName(e.target.value)}
+                      className="w-full bg-slate-900 border border-slate-700 text-slate-200 text-sm rounded-lg px-3 py-1.5 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
+                      placeholder="Singapore Dollar"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleSaveCurrency}
+                    disabled={savingCurrency || !newCurrencyCode || !newCurrencyName}
+                    className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-700 text-white text-xs font-semibold py-1.5 rounded-lg flex items-center justify-center gap-1 transition-colors"
+                  >
+                    {savingCurrency ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+                    Simpan Mata Uang
+                  </button>
+                </div>
+              ) : (
+                <select
+                  required={!showAddCurrency}
+                  value={selectedCurrencyId}
+                  onChange={e => setSelectedCurrencyId(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-800 text-slate-200 text-sm rounded-xl px-3 py-2 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
+                >
+                  <option value="">-- Pilih Mata Uang --</option>
+                  {currencies
+                    .filter(c => c.kode_iso !== currentTenant.mata_uang) // Jangan tampilkan base currency
+                    .map(c => (
+                      <option key={c.id} value={c.id}>{c.kode_iso} - {c.nama}</option>
+                    ))}
+                </select>
+              )}
             </div>
             <div>
               <label className="block text-xs font-medium text-slate-400 mb-1">Berlaku Tanggal</label>

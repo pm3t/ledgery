@@ -473,6 +473,7 @@ export const api = {
 
   // --- CURRENCY API (V2 Delta) ---
   getCurrencies: () => request<Currency[]>('/currencies'),
+  createCurrency: (data: { kode_iso: string; nama: string }) => request<Currency>('/currencies', { method: 'POST', body: JSON.stringify(data) }),
   getExchangeRates: (tenantId: string, tanggal?: string) => {
     const q = new URLSearchParams();
     if (tanggal) q.append('tanggal', tanggal);
