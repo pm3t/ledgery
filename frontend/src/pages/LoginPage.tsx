@@ -10,10 +10,8 @@ export function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Cek apakah kita berada di environment development
-  // PERINGATAN KEAMANAN: Tombol shortcut login di bawah HANYA boleh aktif di development/staging.
-  // Di environment production, tombol ini WAJIB disembunyikan untuk mencegah akses tidak sah.
-  const isDevelopment = (import.meta as any).env?.DEV ?? (window.location.hostname === 'localhost');
+  // Aktifkan tombol akses cepat untuk Live Demo ABP Marketplace
+  const isDevelopment = (import.meta as any).env?.VITE_HIDE_DEMO !== 'true';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -150,28 +148,28 @@ export function LoginPage() {
             Di environment production (NODE_ENV=production), blok ini tidak akan dirender.
             Jangan pernah meng-hardcode atau mengekspos kredensial demo di production build. */}
         {isDevelopment && (
-          <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-5 space-y-3">
+          <div className="bg-indigo-500/10 border border-indigo-500/30 rounded-2xl p-5 space-y-3">
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-              <span className="text-amber-400 text-xs font-bold uppercase tracking-wider">Mode Development — Shortcut Login</span>
+              <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="text-indigo-300 text-xs font-bold uppercase tracking-wider">Akses Instan Live Demo — ABP Cloud</span>
             </div>
-            <p className="text-amber-300/70 text-xs">Tombol ini otomatis tersembunyi di production build.</p>
+            <p className="text-slate-400 text-xs">Klik salah satu peran di bawah untuk langsung mencoba aplikasi (mendukung SSO *.abpcloud.my.id):</p>
             <div className="grid grid-cols-2 gap-3">
               <button
-                onClick={() => loginAsDemo('staf@demo-tenant.id', 'staf123')}
+                onClick={() => loginAsDemo('demo@abpcloud.my.id', 'demo123')}
                 disabled={loading}
-                className="flex items-center justify-center gap-2 bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 text-slate-300 py-2 px-3 rounded-xl text-xs font-medium transition-colors"
+                className="flex items-center justify-center gap-2 bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 text-slate-200 py-2.5 px-3 rounded-xl text-xs font-semibold transition-colors"
               >
                 <User className="w-3.5 h-3.5 text-indigo-400" />
-                Login sbg Tenant
+                Demo Tenant (PT Demo)
               </button>
               <button
                 onClick={() => loginAsDemo('admin@ledgery.id', 'admin123')}
                 disabled={loading}
-                className="flex items-center justify-center gap-2 bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 text-slate-300 py-2 px-3 rounded-xl text-xs font-medium transition-colors"
+                className="flex items-center justify-center gap-2 bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 text-slate-200 py-2.5 px-3 rounded-xl text-xs font-semibold transition-colors"
               >
                 <ShieldCheck className="w-3.5 h-3.5 text-rose-400" />
-                Login sbg Super Admin
+                Demo Super Admin
               </button>
             </div>
           </div>

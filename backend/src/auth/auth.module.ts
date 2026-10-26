@@ -10,7 +10,7 @@ import { RolesGuard } from './roles.guard';
   imports: [
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
-      secret: process.env.JWT_SECRET || 'ledgery_secret',
+      secret: process.env.JWT_SECRET || 'abp_sso_shared_secret_2026',
       signOptions: { expiresIn: process.env.JWT_EXPIRES_IN || '7d' },
     }),
   ],
