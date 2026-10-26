@@ -1,20 +1,28 @@
-const path = require('path');
-const Module = require('module');
-
-// Pastikan resolusi module mencakup backend/node_modules baik untuk file ini maupun seluruh child modules
-const backendNodeModules = path.join(__dirname, '..', 'backend', 'node_modules');
-process.env.NODE_PATH = process.env.NODE_PATH
-  ? `${backendNodeModules}${path.delimiter}${process.env.NODE_PATH}`
-  : backendNodeModules;
-Module._initPaths();
-if (!module.paths.includes(backendNodeModules)) {
-  module.paths.unshift(backendNodeModules);
-}
-
 require('reflect-metadata');
+// Explicit requires so Vercel Node File Tracer (@vercel/nft) bundles all NestJS + Prisma runtime dependencies
+require('@nestjs/core');
+require('@nestjs/common');
+require('@nestjs/config');
+require('@nestjs/event-emitter');
+require('@nestjs/jwt');
+require('@nestjs/passport');
+require('@nestjs/platform-express');
+require('@prisma/client');
+require('bcrypt');
+require('class-transformer');
+require('class-validator');
+require('passport');
+require('passport-jwt');
+require('rxjs');
+
+const fs = require('fs');
+const path = require('path');
 const { NestFactory } = require('@nestjs/core');
 const { ValidationPipe } = require('@nestjs/common');
-const { AppModule } = require('../backend/dist/src/app.module');
+const appModulePath = fs.existsSync(path.join(__dirname, '../backend/dist/app.module.js'))
+  ? '../backend/dist/app.module'
+  : '../backend/dist/src/app.module';
+const { AppModule } = require(appModulePath);
 
 let cachedServer = null;
 
