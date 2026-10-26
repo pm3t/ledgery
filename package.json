@@ -4,7 +4,7 @@
   "private": true,
   "description": "Ledgery — Multi-Tenant Accounting Engine SaaS (PT. Anugerah Bakti Prima)",
   "scripts": {
-    "build": "npx prisma generate --schema=backend/prisma/schema.prisma && npx tsc -p backend/tsconfig.json && npm --prefix frontend install --legacy-peer-deps && npm --prefix frontend run build",
+    "build": "rm -rf backend/node_modules backend/dist && npx prisma generate --schema=backend/prisma/schema.prisma && npx tsc -p backend/tsconfig.json && npm --prefix frontend install --legacy-peer-deps && npm --prefix frontend run build",
     "dev:backend": "npm --prefix backend run start:dev",
     "dev:frontend": "npm --prefix frontend run dev"
   },
