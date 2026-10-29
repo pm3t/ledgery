@@ -1,0 +1,427 @@
+openapi: 3.0.3
+info:
+  title: Ledgery Public API v1 - Tambahan untuk integrasi EAM
+  version: 1.1.0
+  description: Kontrak integrasi API Publik v1 Ledgery untuk sistem eksternal (termasuk EAM / Enterprise Asset Management)
+servers:
+  - url: https://{host}
+    variables:
+      host:
+        default: api.ledgery.example
+security:
+  - ApiKeyAuth: []
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+  schemas:
+    ApiError:
+      type: object
+      required:
+        - statusCode
+        - code
+        - message
+      properties:
+        statusCode:
+          type: integer
+          example: 400
+        code:
+          type: string
+          enum:
+            - VALIDATION_ERROR
+            - PERIOD_CLOSED
+            - ACCOUNT_NOT_FOUND
+            - ACCOUNT_INACTIVE
+            - UNBALANCED_JOURNAL
+            - DIMENSION_VALUE_NOT_FOUND
+            - IDEMPOTENCY_CONFLICT
+            - INVALID_API_KEY
+            - FORBIDDEN
+            - NOT_FOUND
+            - RATE_LIMITED
+            - INTERNAL_ERROR
+          example: PERIOD_CLOSED
+        message:
+          type: string
+          example: Periode akuntansi untuk tanggal tersebut telah ditutup
+        error:
+          type: string
+          example: Bad Request
+        details:
+          type: object
+          additionalProperties: true
+          example:
+            date: "2026-09-15"
+        request_id:
+          type: string
+          example: "3f2b9c1e"
+
+    JournalDimension:
+      type: object
+      required:
+        - nama_dimension
+        - kode_value
+      properties:
+        nama_dimension:
+          type: string
+          example: Cost Center
+        kode_value:
+          type: string
+          example: CC-MAINT
+      description: Dimensi akuntansi per baris jurnal (Cost Center, Project, Area, dll)
+
+    JournalItem:
+      type: object
+      required:
+        - kode_akun
+        - debit
+        - kredit
+      properties:
+        kode_akun:
+          type: string
+          example: "6104"
+        debit:
+          type: number
+          minimum: 0
+          example: 5000000
+        kredit:
+          type: number
+          minimum: 0
+          example: 0
+        keterangan:
+          type: string
+          nullable: true
+          example: Beban Penyusutan Mesin CNC
+        dimensions:
+          type: array
+          items:
+            $ref: '#/components/schemas/JournalDimension'
+
+    JournalSourceMetadata:
+      type: object
+      description: Opsional; metadata sumber dari sistem asal
+      properties:
+        system:
+          type: string
+          example: EAM-PROD
+        module:
+          type: string
+          example: ASSET_DEPRECIATION
+        event_type:
+          type: string
+          example: MONTHLY_DEPRECIATION_RUN
+        reference_type:
+          type: string
+          example: DEPRECIATION_BATCH
+        reference_id:
+          type: string
+          example: BATCH-2026-09-001
+        run_id:
+          type: string
+          nullable: true
+          example: RUN-77889
+
+    JournalCreateRequest:
+      type: object
+      required:
+        - tanggal
+        - sumber_aplikasi
+        - items
+      properties:
+        tanggal:
+          type: string
+          format: date
+          example: "2026-09-15"
+        deskripsi:
+          type: string
+          nullable: true
+          example: Jurnal Penyusutan Aset Tetap Bulan September 2026
+        referensi:
+          type: string
+          nullable: true
+          example: REF-DEP-2026-09
+        sumber_aplikasi:
+          type: string
+          example: EAM
+        mata_uang:
+          type: string
+          nullable: true
+          example: IDR
+        idempotency_key:
+          type: string
+          minLength: 1
+          maxLength: 128
+          pattern: '^[A-Za-z0-9:_.-]+$'
+          example: "thi:depreciation:batch-2026-09-001:v1"
+        source:
+          $ref: '#/components/schemas/JournalSourceMetadata'
+        items:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/JournalItem'
+
+    JournalResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "e63a15dc-3d84-4861-8bbf-8515c0e12918"
+        voucher_no:
+          type: string
+          example: "JNL-2026-0042"
+        status:
+          type: string
+          enum:
+            - POSTED
+            - PENDING_REVIEW
+            - REJECTED
+          example: POSTED
+        tanggal:
+          type: string
+          format: date
+          example: "2026-09-15"
+        total_debit:
+          type: number
+          example: 5000000
+        total_kredit:
+          type: number
+          example: 5000000
+        idempotency_key:
+          type: string
+          nullable: true
+          example: "thi:depreciation:batch-2026-09-001:v1"
+        idempotent_replay:
+          type: boolean
+          example: false
+        is_replay:
+          type: boolean
+          example: false
+
+    PeriodInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "40d04c4f-c7bf-4f28-8547-750d4f5c907b"
+        name:
+          type: string
+          example: "Periode 9 (Tahun Buku 2026)"
+        start_date:
+          type: string
+          format: date
+          example: "2026-09-01"
+        end_date:
+          type: string
+          format: date
+          example: "2026-09-30"
+
+    PeriodCheck:
+      type: object
+      required:
+        - date
+        - status
+        - can_post
+      properties:
+        date:
+          type: string
+          format: date
+          example: "2026-09-15"
+        status:
+          type: string
+          enum:
+            - OPEN
+            - CLOSED
+            - NOT_DEFINED
+          example: OPEN
+        can_post:
+          type: boolean
+          example: true
+        period:
+          allOf:
+            - $ref: '#/components/schemas/PeriodInfo'
+          nullable: true
+
+  responses:
+    Error:
+      description: Galat terstruktur API Ledgery V1
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+
+paths:
+  /v1/journals:
+    post:
+      summary: Buat jurnal (idempotent bila idempotency_key dikirim)
+      description: |
+        Mencatat jurnal akuntansi baru ke Ledgery. Jika header `Idempotency-Key` atau field body `idempotency_key` disertakan, Ledgery akan memastikan rekaman bersifat idempotent (key sama + payload sama mengembalikan 200 replay tanpa menduplikasi data).
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 128
+            pattern: '^[A-Za-z0-9:_.-]+$'
+          description: Kunci idempotensi alternatif via header HTTP
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JournalCreateRequest'
+      responses:
+        '201':
+          description: Jurnal baru berhasil dibuat
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JournalResponse'
+        '200':
+          description: Replay - Kunci idempotensi sama dan payload identik
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JournalResponse'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '409':
+          description: Konflik idempotensi - Kunci idempotensi sama namun rincian payload berbeda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+    get:
+      summary: Cari jurnal berdasarkan idempotency_key atau filter status
+      description: Mencari jurnal milik tenant berdasarkan idempotency_key (untuk polling status).
+      parameters:
+        - in: query
+          name: idempotency_key
+          required: false
+          schema:
+            type: string
+          description: Kunci idempotensi yang dicari
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: string
+            enum: [POSTED, PENDING, APPROVED, REJECTED]
+        - in: query
+          name: startDate
+          required: false
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: endDate
+          required: false
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Detail jurnal atau daftar jurnal berhasil diambil
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JournalResponse'
+        '404':
+          $ref: '#/components/responses/Error'
+
+  /v1/journals/{id}:
+    get:
+      summary: Baca detail jurnal dan status terkini
+      description: Mengambil status dan detail jurnal berdasarkan UUID jurnal atau No Voucher untuk keperluan polling EAM.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: ID UUID jurnal atau No Voucher (mis. JNL-2026-0042)
+      responses:
+        '200':
+          description: Detail jurnal berhasil diambil
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JournalResponse'
+        '404':
+          $ref: '#/components/responses/Error'
+
+  /v1/periods/check:
+    get:
+      summary: Pra-validasi apakah tanggal transaksi dapat diposting
+      description: |
+        Memeriksa apakah suatu tanggal jatuh pada periode akuntansi yang sedang OPEN. Hasil `can_post` selalu 100% konsisten dengan validasi posting jurnal.
+      parameters:
+        - in: query
+          name: date
+          required: true
+          schema:
+            type: string
+            format: date
+          example: "2026-09-15"
+          description: Tanggal transaksi kalender dalam format YYYY-MM-DD
+      responses:
+        '200':
+          description: Status periode berhasil diperiksa
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PeriodCheck'
+        '400':
+          $ref: '#/components/responses/Error'
+
+  /v1/periods:
+    get:
+      summary: Daftar periode akuntansi tenant
+      description: Menampilkan seluruh periode akuntansi tenant aktif untuk keperluan cermin kalender di EAM.
+      parameters:
+        - in: query
+          name: from
+          required: false
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: to
+          required: false
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: string
+            enum: [OPEN, CLOSED]
+      responses:
+        '200':
+          description: Daftar periode akuntansi
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      allOf:
+                        - $ref: '#/components/schemas/PeriodInfo'
+                        - type: object
+                          properties:
+                            status:
+                              type: string
+                              enum: [OPEN, CLOSED]
+

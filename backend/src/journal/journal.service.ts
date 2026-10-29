@@ -120,37 +120,48 @@ export class JournalService {
 
   // Membuat Jurnal Baru via API Eksternal
   async createExternal(tenantId: string, createDto: CreateJournalDto) {
-    // 0. Validasi Periode Akuntansi
-    await this.accountingPeriodService.validateJournalDate(tenantId, new Date(createDto.tanggal));
-
-    return this.prisma.$transaction(async (tx) => {
-      // 1. Cek Idempotency Key (Jika ada dan sudah pernah diproses, validasi kecocokan payload)
-      if (createDto.idempotency_key) {
-        const existing = await tx.journal.findUnique({
-          where: {
-            tenantId_idempotency_key: {
-              tenantId,
-              idempotency_key: createDto.idempotency_key,
-            },
+    // 1. Cek Idempotency Key TERLEBIH DAHULU (sebelum validasi periode / akun)
+    if (createDto.idempotency_key) {
+      const existing = await this.prisma.journal.findUnique({
+        where: {
+          tenantId_idempotency_key: {
+            tenantId,
+            idempotency_key: createDto.idempotency_key,
           },
-          include: {
-            entries: {
-              include: {
-                chartOfAccount: true,
+        },
+        include: {
+          entries: {
+            include: {
+              chartOfAccount: {
+                select: { kode_akun: true, nama_akun: true },
               },
             },
           },
-        });
+        },
+      });
 
-        if (existing) {
+      if (existing) {
+        // Cek kecocokan payload
+        if (existing.idempotency_payload_hash && createDto.idempotency_payload_hash) {
+          if (existing.idempotency_payload_hash !== createDto.idempotency_payload_hash) {
+            throw new ConflictException({
+              errorCode: 'IDEMPOTENCY_CONFLICT',
+              message: `Idempotency key '${createDto.idempotency_key}' sudah pernah digunakan untuk transaksi dengan rincian yang berbeda.`,
+              details: {
+                journal_id: existing.id,
+                voucher_no: existing.no_voucher,
+                idempotency_key: createDto.idempotency_key,
+              },
+            });
+          }
+        } else if (existing.idempotency_payload_hash && !createDto.idempotency_payload_hash) {
+          // Fallback legacy compare
           const isSameDate =
             new Date(existing.tanggal).toISOString().slice(0, 10) ===
             new Date(createDto.tanggal).toISOString().slice(0, 10);
-
           const existingCurrency = existing.mata_uang || 'IDR';
           const requestCurrency = createDto.mata_uang || 'IDR';
           const isSameCurrency = existingCurrency === requestCurrency;
-
           let isSameEntries = existing.entries.length === createDto.entries.length;
           if (isSameEntries) {
             for (const entry of createDto.entries) {
@@ -166,153 +177,264 @@ export class JournalService {
               }
             }
           }
-
           if (!isSameDate || !isSameCurrency || !isSameEntries) {
             throw new ConflictException({
-              errorCode: 'IDEMPOTENCY_KEY_PAYLOAD_MISMATCH',
+              errorCode: 'IDEMPOTENCY_CONFLICT',
               message: `Idempotency key '${createDto.idempotency_key}' sudah pernah digunakan untuk transaksi dengan rincian yang berbeda.`,
               details: {
+                journal_id: existing.id,
+                voucher_no: existing.no_voucher,
                 idempotency_key: createDto.idempotency_key,
-                existingVoucher: existing.no_voucher,
-                existingDate: existing.tanggal,
               },
             });
           }
-
-          return {
-            ...existing,
-            is_replay: true,
-          };
         }
+        // Jurnal lama dengan hash null ATAU hash cocok -> kembalikan replay tanpa validasi ulang!
+        return {
+          ...existing,
+          is_replay: true,
+          idempotent_replay: true,
+        };
       }
+    }
 
-      // 2. Validasi Balance Debit & Kredit
-      this.validateBalance(createDto.entries);
+    // 2. Validasi Periode Akuntansi
+    await this.accountingPeriodService.validateJournalDate(tenantId, new Date(createDto.tanggal));
 
-      // 3. Validasi Keberadaan Kode Akun per Tenant
-      const kodeAkuns = createDto.entries.map((e) => e.kode_akun);
-      const validAccounts = await tx.chartOfAccount.findMany({
-        where: {
-          tenantId,
-          kode_akun: { in: kodeAkuns },
-          isActive: true,
-        },
-      });
+    // 3. Validasi Balance Debit & Kredit
+    this.validateBalance(createDto.entries);
 
-      const validAccountMap = new Map(validAccounts.map((acc) => [acc.kode_akun, acc.id]));
-      
-      const dimMap = await this.getValidDimensionMap(tx, tenantId, createDto.entries);
-      
-      // 3.8 Validasi Multicurrency
-      const tenantData = await tx.tenant.findUnique({ where: { id: tenantId } });
-      const baseCurrency = tenantData?.mata_uang || 'IDR';
-      const docCurrency = createDto.mata_uang || baseCurrency;
-      let exchangeRate = 1;
-
-      if (docCurrency !== baseCurrency) {
-        const rate = await tx.exchangeRate.findFirst({
-          where: {
-            tenantId,
-            currency: { kode_iso: docCurrency },
-            tanggal: new Date(createDto.tanggal),
-          },
-          orderBy: { createdAt: 'desc' },
-        });
-
-        if (!rate) {
-          throw new BadRequestException({
-            errorCode: 'EXCHANGE_RATE_NOT_FOUND',
-            message: `Kurs ${docCurrency} ke ${baseCurrency} untuk tanggal ${createDto.tanggal} belum diisi di Setting`,
-            details: { currency: docCurrency, baseCurrency, date: createDto.tanggal },
+    try {
+      return await this.prisma.$transaction(async (tx) => {
+        // Double check idempotency inside transaction
+        if (createDto.idempotency_key) {
+          const existingTx = await tx.journal.findUnique({
+            where: {
+              tenantId_idempotency_key: {
+                tenantId,
+                idempotency_key: createDto.idempotency_key,
+              },
+            },
+            include: {
+              entries: {
+                include: {
+                  chartOfAccount: {
+                    select: { kode_akun: true, nama_akun: true },
+                  },
+                },
+              },
+            },
           });
-        }
-        exchangeRate = rate.kurs;
-      }
-      
-      const entryData = [];
-      for (const entry of createDto.entries) {
-        const accountId = validAccountMap.get(entry.kode_akun);
-        if (!accountId) {
-          throw new BadRequestException({
-            errorCode: 'ACCOUNT_NOT_FOUND',
-            message: `Kode akun '${entry.kode_akun}' tidak ditemukan atau sedang tidak aktif di tenant ini.`,
-            details: { kode_akun: entry.kode_akun },
-          });
-        }
 
-        const entryDimensions = [];
-        if (entry.dimensions) {
-          for (const d of entry.dimensions) {
-            const dimIds = dimMap.get(`${d.nama_dimension}|${d.kode_value}`);
-            if (dimIds) {
-              entryDimensions.push({ dimensionId: dimIds.dimensionId, dimensionValueId: dimIds.dimensionValueId });
+          if (existingTx) {
+            if (
+              existingTx.idempotency_payload_hash &&
+              createDto.idempotency_payload_hash &&
+              existingTx.idempotency_payload_hash !== createDto.idempotency_payload_hash
+            ) {
+              throw new ConflictException({
+                errorCode: 'IDEMPOTENCY_CONFLICT',
+                message: `Idempotency key '${createDto.idempotency_key}' sudah pernah digunakan untuk transaksi dengan rincian yang berbeda.`,
+                details: {
+                  journal_id: existingTx.id,
+                  voucher_no: existingTx.no_voucher,
+                  idempotency_key: createDto.idempotency_key,
+                },
+              });
             }
+            return {
+              ...existingTx,
+              is_replay: true,
+              idempotent_replay: true,
+            };
           }
         }
 
-        const jumlahAsli = entry.jumlah;
-        const jumlahKonversi = jumlahAsli * exchangeRate;
-
-        entryData.push({
-          chartOfAccountId: accountId,
-          tipe: entry.tipe,
-          jumlah: jumlahKonversi,
-          jumlah_asli: docCurrency !== baseCurrency ? jumlahAsli : null,
-          jumlah_konversi: jumlahKonversi,
-          dimensions: entryDimensions.length > 0 ? { create: entryDimensions } : undefined,
-        });
-      }
-
-      // 4. Generate No Voucher
-      const no_voucher = await this.generateVoucherNumber(tenantId, createDto.tanggal);
-
-      // 5. Cek Posting Policy Setting
-      let statusToSave: JournalStatus = JournalStatus.POSTED;
-      const policy = await tx.postingPolicySetting.findUnique({
-        where: { tenantId },
-      });
-
-      if (policy && policy.mode === PostingPolicyMode.APPROVAL_MANUAL) {
-        statusToSave = JournalStatus.PENDING;
-      }
-
-      // 6. Simpan Jurnal & Entri
-      const newJournal = await tx.journal.create({
-        data: {
-          tenantId,
-          no_voucher,
-          tanggal: new Date(createDto.tanggal),
-          deskripsi: createDto.deskripsi,
-          sumber_aplikasi: createDto.sumber_aplikasi,
-          status: statusToSave,
-          idempotency_key: createDto.idempotency_key || null,
-          mata_uang: docCurrency,
-          entries: {
-            create: entryData,
+        // Validasi Keberadaan Kode Akun per Tenant & Status Aktif
+        const kodeAkuns = createDto.entries.map((e) => e.kode_akun);
+        const validAccounts = await tx.chartOfAccount.findMany({
+          where: {
+            tenantId,
+            kode_akun: { in: kodeAkuns },
           },
-        },
-        include: {
-          entries: {
-            include: {
-              chartOfAccount: {
-                select: { kode_akun: true, nama_akun: true },
+        });
+
+        const validAccountMap = new Map(validAccounts.map((acc) => [acc.kode_akun, acc]));
+        
+        for (const entry of createDto.entries) {
+          const acc = validAccountMap.get(entry.kode_akun) as any;
+          if (!acc) {
+            throw new BadRequestException({
+              errorCode: 'ACCOUNT_NOT_FOUND',
+              message: `Kode akun '${entry.kode_akun}' tidak ditemukan di tenant ini.`,
+              details: { kode_akun: entry.kode_akun },
+            });
+          }
+          if (!acc.isActive || acc.isControlAccount) {
+            throw new BadRequestException({
+              errorCode: 'ACCOUNT_INACTIVE',
+              message: `Akun '${acc.kode_akun} - ${acc.nama_akun}' sedang tidak aktif atau merupakan akun induk (control account).`,
+              details: { kode_akun: acc.kode_akun, isActive: acc.isActive, isControlAccount: acc.isControlAccount },
+            });
+          }
+        }
+
+        const dimMap = await this.getValidDimensionMap(tx, tenantId, createDto.entries);
+        
+        // Validasi Multicurrency
+        const tenantData = await tx.tenant.findUnique({ where: { id: tenantId } });
+        const baseCurrency = tenantData?.mata_uang || 'IDR';
+        const docCurrency = createDto.mata_uang || baseCurrency;
+        let exchangeRate = 1;
+
+        if (docCurrency !== baseCurrency) {
+          const rate = await tx.exchangeRate.findFirst({
+            where: {
+              tenantId,
+              currency: { kode_iso: docCurrency },
+              tanggal: new Date(createDto.tanggal),
+            },
+            orderBy: { createdAt: 'desc' },
+          });
+
+          if (!rate) {
+            throw new BadRequestException({
+              errorCode: 'EXCHANGE_RATE_NOT_FOUND',
+              message: `Kurs ${docCurrency} ke ${baseCurrency} untuk tanggal ${createDto.tanggal} belum diisi di Setting`,
+              details: { currency: docCurrency, baseCurrency, date: createDto.tanggal },
+            });
+          }
+          exchangeRate = rate.kurs;
+        }
+        
+        const entryData = [];
+        for (const entry of createDto.entries) {
+          const acc = validAccountMap.get(entry.kode_akun)! as any;
+          const accountId = acc.id;
+
+          const entryDimensions = [];
+          if (entry.dimensions) {
+            for (const d of entry.dimensions) {
+              const dimIds = dimMap.get(`${d.nama_dimension}|${d.kode_value}`);
+              if (dimIds) {
+                entryDimensions.push({ dimensionId: dimIds.dimensionId, dimensionValueId: dimIds.dimensionValueId });
+              }
+            }
+          }
+
+          const jumlahAsli = entry.jumlah;
+          const jumlahKonversi = jumlahAsli * exchangeRate;
+
+          entryData.push({
+            chartOfAccountId: accountId,
+            tipe: entry.tipe,
+            jumlah: jumlahKonversi,
+            jumlah_asli: docCurrency !== baseCurrency ? jumlahAsli : null,
+            jumlah_konversi: jumlahKonversi,
+            dimensions: entryDimensions.length > 0 ? { create: entryDimensions } : undefined,
+          });
+        }
+
+        // Generate No Voucher
+        const no_voucher = await this.generateVoucherNumber(tenantId, createDto.tanggal);
+
+        // Cek Posting Policy Setting
+        let statusToSave: JournalStatus = JournalStatus.POSTED;
+        const policy = await tx.postingPolicySetting.findUnique({
+          where: { tenantId },
+        });
+
+        if (policy && policy.mode === PostingPolicyMode.APPROVAL_MANUAL) {
+          statusToSave = JournalStatus.PENDING;
+        }
+
+        // Simpan Jurnal & Entri
+        const newJournal = await tx.journal.create({
+          data: {
+            tenantId,
+            no_voucher,
+            tanggal: new Date(createDto.tanggal),
+            deskripsi: createDto.deskripsi,
+            sumber_aplikasi: createDto.sumber_aplikasi,
+            status: statusToSave,
+            idempotency_key: createDto.idempotency_key || null,
+            idempotency_payload_hash: createDto.idempotency_payload_hash || null,
+            mata_uang: docCurrency,
+            entries: {
+              create: entryData,
+            },
+          },
+          include: {
+            entries: {
+              include: {
+                chartOfAccount: {
+                  select: { kode_akun: true, nama_akun: true },
+                },
               },
             },
           },
-        },
-      });
-
-      // Panggil event jika status PENDING
-      if (statusToSave === JournalStatus.PENDING) {
-        this.eventEmitter.emit('journal.pending', {
-          tenantId,
-          journalId: newJournal.id,
-          no_voucher: newJournal.no_voucher,
         });
-      }
 
-      return newJournal;
-    });
+        // Panggil event jika status PENDING
+        if (statusToSave === JournalStatus.PENDING) {
+          this.eventEmitter.emit('journal.pending', {
+            tenantId,
+            journalId: newJournal.id,
+            no_voucher: newJournal.no_voucher,
+          });
+        }
+
+        return newJournal;
+      });
+    } catch (err: any) {
+      // Tangani race condition Prisma P2002 (Unique constraint violation)
+      if (
+        err.code === 'P2002' &&
+        createDto.idempotency_key &&
+        (err.meta?.target?.includes('idempotency_key') || String(err.message).includes('idempotency_key'))
+      ) {
+        const winner = await this.prisma.journal.findUnique({
+          where: {
+            tenantId_idempotency_key: {
+              tenantId,
+              idempotency_key: createDto.idempotency_key,
+            },
+          },
+          include: {
+            entries: {
+              include: {
+                chartOfAccount: {
+                  select: { kode_akun: true, nama_akun: true },
+                },
+              },
+            },
+          },
+        });
+        if (winner) {
+          if (
+            !winner.idempotency_payload_hash ||
+            !createDto.idempotency_payload_hash ||
+            winner.idempotency_payload_hash === createDto.idempotency_payload_hash
+          ) {
+            return {
+              ...winner,
+              is_replay: true,
+              idempotent_replay: true,
+            };
+          }
+          throw new ConflictException({
+            errorCode: 'IDEMPOTENCY_CONFLICT',
+            message: `Idempotency key '${createDto.idempotency_key}' sudah pernah digunakan untuk transaksi dengan rincian yang berbeda.`,
+            details: {
+              journal_id: winner.id,
+              voucher_no: winner.no_voucher,
+              idempotency_key: createDto.idempotency_key,
+            },
+          });
+        }
+      }
+      throw err;
+    }
   }
 
   // Membuat Jurnal Manual (Dashboard Internal Staf)

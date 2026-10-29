@@ -59,6 +59,10 @@ export class CreateJournalDto {
   idempotency_key?: string;
 
   @IsOptional()
+  @IsString({ message: 'Payload hash harus berupa teks' })
+  idempotency_payload_hash?: string;
+
+  @IsOptional()
   @IsString({ message: 'Mata uang harus berupa teks' })
   mata_uang?: string;
 

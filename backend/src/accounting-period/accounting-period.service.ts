@@ -115,29 +115,41 @@ export class AccountingPeriodService {
   }
 
   /**
-   * Helper function untuk memvalidasi apakah jurnal bisa diposting di tanggal tertentu
+   * Helper function untuk mengevaluasi apakah tanggal dapat diposting tanpa melempar exception
    */
-  async validateJournalDate(tenantId: string, tanggal: Date) {
+  async evaluatePostingDate(tenantId: string, tanggal: Date) {
+    const dateStr = tanggal.toISOString().slice(0, 10);
+
     // Cari Fiscal Year yang mencakup tanggal jurnal
     const fiscalYear = await this.prisma.fiscalYear.findFirst({
       where: {
         tenantId,
         tanggal_mulai: { lte: tanggal },
-        tanggal_selesai: { gte: tanggal }
-      }
+        tanggal_selesai: { gte: tanggal },
+      },
     });
 
-    // Jika belum ada setup tahun buku sama sekali, biarkan (untuk backward compatibility tenant lama yang belum setup periode)
+    // Jika belum ada setup tahun buku sama sekali
     if (!fiscalYear) {
-      // Kita cek apakah tenant ini punya fiscal year sama sekali
       const anyFiscal = await this.prisma.fiscalYear.findFirst({ where: { tenantId } });
-      if (!anyFiscal) return true; // Belum pakai modul ini, loloskan
-      
-      throw new BadRequestException({
+      if (!anyFiscal) {
+        return {
+          can_post: true,
+          status: 'NOT_DEFINED' as const,
+          date: dateStr,
+          period: null,
+        };
+      }
+
+      return {
+        can_post: false,
+        status: 'NOT_DEFINED' as const,
+        date: dateStr,
+        period: null,
         errorCode: 'PERIOD_NOT_FOUND',
-        message: 'Tanggal transaksi tidak berada di dalam tahun buku aktif manapun.',
-        details: { date: tanggal.toISOString().slice(0, 10) },
-      });
+        errorMessage: 'Tanggal transaksi tidak berada di dalam tahun buku aktif manapun.',
+        details: { date: dateStr },
+      };
     }
 
     // Cari Periode di dalam Fiscal Year tersebut
@@ -145,32 +157,112 @@ export class AccountingPeriodService {
       where: {
         fiscalYearId: fiscalYear.id,
         tanggal_mulai: { lte: tanggal },
-        tanggal_selesai: { gte: tanggal }
-      }
+        tanggal_selesai: { gte: tanggal },
+      },
     });
 
     if (!period) {
-      throw new BadRequestException({
+      return {
+        can_post: false,
+        status: 'NOT_DEFINED' as const,
+        date: dateStr,
+        period: null,
         errorCode: 'PERIOD_NOT_FOUND',
-        message: 'Tanggal transaksi tidak berada di dalam periode akuntansi aktif manapun.',
-        details: { date: tanggal.toISOString().slice(0, 10), fiscalYear: fiscalYear.nama_tahun_buku },
-      });
+        errorMessage: 'Tanggal transaksi tidak berada di dalam periode akuntansi aktif manapun.',
+        details: { date: dateStr, fiscalYear: fiscalYear.nama_tahun_buku },
+      };
     }
 
+    const periodInfo = {
+      id: period.id,
+      name: `Periode ${period.nomor_periode} (${fiscalYear.nama_tahun_buku})`,
+      start_date: period.tanggal_mulai.toISOString().slice(0, 10),
+      end_date: period.tanggal_selesai.toISOString().slice(0, 10),
+    };
+
     if (period.status === PeriodStatus.CLOSED) {
-      throw new BadRequestException({
+      return {
+        can_post: false,
+        status: 'CLOSED' as const,
+        date: dateStr,
+        period: periodInfo,
         errorCode: 'PERIOD_CLOSED',
-        message: `Periode ${period.nomor_periode} (${fiscalYear.nama_tahun_buku}) sudah ditutup. Jurnal tidak dapat diposting.`,
+        errorMessage: `Periode ${period.nomor_periode} (${fiscalYear.nama_tahun_buku}) sudah ditutup. Jurnal tidak dapat diposting.`,
         details: {
-          date: tanggal.toISOString().slice(0, 10),
+          date: dateStr,
           periodNumber: period.nomor_periode,
           fiscalYear: fiscalYear.nama_tahun_buku,
           closedAt: period.closedAt,
         },
-      });
+      };
     }
 
+    return {
+      can_post: true,
+      status: 'OPEN' as const,
+      date: dateStr,
+      period: periodInfo,
+    };
+  }
+
+  /**
+   * Helper function untuk memvalidasi apakah jurnal bisa diposting di tanggal tertentu
+   */
+  async validateJournalDate(tenantId: string, tanggal: Date) {
+    const evaluation = await this.evaluatePostingDate(tenantId, tanggal);
+    if (!evaluation.can_post) {
+      throw new BadRequestException({
+        errorCode: evaluation.errorCode,
+        message: evaluation.errorMessage,
+        details: evaluation.details,
+      });
+    }
     return true;
+  }
+
+  /**
+   * Mengambil daftar periode untuk API V1
+   */
+  async getPeriodsV1(
+    tenantId: string,
+    filter?: { from?: string; to?: string; status?: PeriodStatus },
+  ) {
+    const where: any = {
+      fiscalYear: {
+        tenantId,
+      },
+    };
+
+    if (filter?.status) {
+      where.status = filter.status;
+    }
+
+    if (filter?.from) {
+      where.tanggal_selesai = { gte: new Date(filter.from) };
+    }
+
+    if (filter?.to) {
+      where.tanggal_mulai = { lte: new Date(`${filter.to}T23:59:59.999Z`) };
+    }
+
+    const periods = await this.prisma.accountingPeriod.findMany({
+      where,
+      orderBy: { tanggal_mulai: 'asc' },
+      take: 200,
+      include: {
+        fiscalYear: {
+          select: { nama_tahun_buku: true },
+        },
+      },
+    });
+
+    return periods.map((p) => ({
+      id: p.id,
+      name: `Periode ${p.nomor_periode} (${p.fiscalYear.nama_tahun_buku})`,
+      start_date: p.tanggal_mulai.toISOString().slice(0, 10),
+      end_date: p.tanggal_selesai.toISOString().slice(0, 10),
+      status: p.status,
+    }));
   }
 
   /**

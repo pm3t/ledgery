@@ -163,6 +163,6 @@ describe('JournalsV1Controller (Backward Compatibility)', () => {
       alasan: 'Koreksi',
     });
     expect(result.statusCode).toBe(201);
-    expect(result.data.status).toBe('PENDING');
+    expect(result.data.status).toBe('PENDING_REVIEW');
   });
 });

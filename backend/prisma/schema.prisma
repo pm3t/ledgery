@@ -141,17 +141,18 @@ enum EntryType {
 
 // Model Header Jurnal
 model Journal {
-  id              String        @id @default(uuid())
-  tenantId        String
-  no_voucher      String
-  tanggal         DateTime
-  deskripsi       String
-  sumber_aplikasi String
-  status          JournalStatus
-  idempotency_key String?
-  mata_uang       String?
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  id                      String        @id @default(uuid())
+  tenantId                String
+  no_voucher              String
+  tanggal                 DateTime
+  deskripsi               String
+  sumber_aplikasi         String
+  status                  JournalStatus
+  idempotency_key         String?
+  idempotency_payload_hash String?
+  mata_uang               String?
+  createdAt               DateTime      @default(now())
+  updatedAt               DateTime      @updatedAt
 
   // Relasi
   tenant       Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
