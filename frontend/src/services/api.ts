@@ -364,6 +364,11 @@ export const api = {
     sumber_aplikasi: string;
     entries: { kode_akun: string; tipe: 'DEBIT' | 'KREDIT'; jumlah: number }[];
   }) => request<Journal>('/journals/manual', { method: 'POST', body: JSON.stringify(payload) }),
+  reverseJournal: (journalId: string, payload: { tenantId: string; tanggal?: string; alasan?: string }) =>
+    request<Journal>(`/journals/${journalId}/reverse`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
 
   // --- GENERAL LEDGER API ---
   getAccountLedger: (tenantId: string, accountId: string, startDate?: string, endDate?: string, dimensionValues?: string) => {

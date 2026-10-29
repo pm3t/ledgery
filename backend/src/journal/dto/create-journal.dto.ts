@@ -73,3 +73,17 @@ export class CreateManualJournalDto extends CreateJournalDto {
   @IsString({ message: 'ID Tenant harus berupa teks' })
   tenantId: string;
 }
+
+export class ReverseJournalDto {
+  @IsNotEmpty({ message: 'ID Tenant tidak boleh kosong' })
+  @IsString({ message: 'ID Tenant harus berupa teks' })
+  tenantId: string;
+
+  @IsOptional()
+  @IsDateString({}, { message: 'Format tanggal reversal tidak valid (gunakan ISO-8601 / YYYY-MM-DD)' })
+  tanggal?: string;
+
+  @IsOptional()
+  @IsString({ message: 'Alasan harus berupa teks' })
+  alasan?: string;
+}

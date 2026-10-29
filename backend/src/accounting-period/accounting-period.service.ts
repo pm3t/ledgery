@@ -133,7 +133,11 @@ export class AccountingPeriodService {
       const anyFiscal = await this.prisma.fiscalYear.findFirst({ where: { tenantId } });
       if (!anyFiscal) return true; // Belum pakai modul ini, loloskan
       
-      throw new BadRequestException('Tanggal transaksi tidak berada di dalam tahun buku aktif manapun.');
+      throw new BadRequestException({
+        errorCode: 'PERIOD_NOT_FOUND',
+        message: 'Tanggal transaksi tidak berada di dalam tahun buku aktif manapun.',
+        details: { date: tanggal.toISOString().slice(0, 10) },
+      });
     }
 
     // Cari Periode di dalam Fiscal Year tersebut
@@ -146,13 +150,103 @@ export class AccountingPeriodService {
     });
 
     if (!period) {
-      throw new BadRequestException('Tanggal transaksi tidak berada di dalam periode akuntansi aktif manapun.');
+      throw new BadRequestException({
+        errorCode: 'PERIOD_NOT_FOUND',
+        message: 'Tanggal transaksi tidak berada di dalam periode akuntansi aktif manapun.',
+        details: { date: tanggal.toISOString().slice(0, 10), fiscalYear: fiscalYear.nama_tahun_buku },
+      });
     }
 
     if (period.status === PeriodStatus.CLOSED) {
-      throw new BadRequestException(`Periode ${period.nomor_periode} (${fiscalYear.nama_tahun_buku}) sudah ditutup. Jurnal tidak dapat diposting.`);
+      throw new BadRequestException({
+        errorCode: 'PERIOD_CLOSED',
+        message: `Periode ${period.nomor_periode} (${fiscalYear.nama_tahun_buku}) sudah ditutup. Jurnal tidak dapat diposting.`,
+        details: {
+          date: tanggal.toISOString().slice(0, 10),
+          periodNumber: period.nomor_periode,
+          fiscalYear: fiscalYear.nama_tahun_buku,
+          closedAt: period.closedAt,
+        },
+      });
     }
 
     return true;
+  }
+
+  /**
+   * Query status periode akuntansi untuk tanggal tertentu (digunakan oleh API Key eksternal)
+   */
+  async checkPeriodStatus(tenantId: string, tanggal: Date) {
+    const fiscalYear = await this.prisma.fiscalYear.findFirst({
+      where: {
+        tenantId,
+        tanggal_mulai: { lte: tanggal },
+        tanggal_selesai: { gte: tanggal },
+      },
+    });
+
+    const dateStr = tanggal.toISOString().slice(0, 10);
+
+    if (!fiscalYear) {
+      const anyFiscal = await this.prisma.fiscalYear.findFirst({ where: { tenantId } });
+      if (!anyFiscal) {
+        return {
+          date: dateStr,
+          isOpen: true,
+          status: 'OPEN',
+          periodNumber: null,
+          fiscalYear: null,
+          fiscalYearId: null,
+          periodId: null,
+          message: 'Tenant belum mengaktifkan pembatasan periode akuntansi',
+        };
+      }
+
+      return {
+        date: dateStr,
+        isOpen: false,
+        status: 'PERIOD_NOT_FOUND',
+        periodNumber: null,
+        fiscalYear: null,
+        fiscalYearId: null,
+        periodId: null,
+        message: 'Tanggal transaksi tidak berada di dalam tahun buku aktif manapun',
+      };
+    }
+
+    const period = await this.prisma.accountingPeriod.findFirst({
+      where: {
+        fiscalYearId: fiscalYear.id,
+        tanggal_mulai: { lte: tanggal },
+        tanggal_selesai: { gte: tanggal },
+      },
+    });
+
+    if (!period) {
+      return {
+        date: dateStr,
+        isOpen: false,
+        status: 'PERIOD_NOT_FOUND',
+        periodNumber: null,
+        fiscalYear: fiscalYear.nama_tahun_buku,
+        fiscalYearId: fiscalYear.id,
+        periodId: null,
+        message: 'Tanggal transaksi tidak berada di dalam periode akuntansi aktif manapun',
+      };
+    }
+
+    const isOpen = period.status === PeriodStatus.OPEN;
+    return {
+      date: dateStr,
+      isOpen,
+      status: period.status,
+      periodNumber: period.nomor_periode,
+      fiscalYear: fiscalYear.nama_tahun_buku,
+      fiscalYearId: fiscalYear.id,
+      periodId: period.id,
+      message: isOpen
+        ? `Periode ${period.nomor_periode} (${fiscalYear.nama_tahun_buku}) terbuka untuk posting transaksi`
+        : `Periode ${period.nomor_periode} (${fiscalYear.nama_tahun_buku}) sudah ditutup`,
+    };
   }
 }

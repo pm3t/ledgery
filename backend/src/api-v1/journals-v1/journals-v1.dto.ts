@@ -58,6 +58,10 @@ export class CreateJournalV1Dto {
   referensi?: string;
 
   @IsString()
+  @IsOptional()
+  idempotency_key?: string;
+
+  @IsString()
   @IsNotEmpty()
   sumber_aplikasi: string;
 

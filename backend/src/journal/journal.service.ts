@@ -7,7 +7,7 @@ import {
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateJournalDto, CreateManualJournalDto } from './dto/create-journal.dto';
-import { JournalStatus, PostingPolicyMode } from '@prisma/client';
+import { JournalStatus, PostingPolicyMode, EntryType } from '@prisma/client';
 
 import { AccountingPeriodService } from '../accounting-period/accounting-period.service';
 
@@ -63,9 +63,11 @@ export class JournalService {
 
     // Menggunakan epsilon kecil untuk mengatasi isu floating point precision bawaan JS
     if (Math.abs(totalDebit - totalKredit) > 0.001) {
-      throw new BadRequestException(
-        `Jurnal tidak balance! Total Debit: ${totalDebit}, Total Kredit: ${totalKredit}`,
-      );
+      throw new BadRequestException({
+        errorCode: 'UNBALANCED_JOURNAL',
+        message: `Jurnal tidak balance! Total Debit: ${totalDebit}, Total Kredit: ${totalKredit}`,
+        details: { totalDebit, totalKredit, difference: Math.abs(totalDebit - totalKredit) },
+      });
     }
   }
 
@@ -96,11 +98,19 @@ export class JournalService {
 
       const dim = dimensions.find((d: any) => d.nama_dimension === req.nama_dimension);
       if (!dim) {
-        throw new BadRequestException(`Dimensi '${req.nama_dimension}' tidak ditemukan atau tidak aktif di tenant ini.`);
+        throw new BadRequestException({
+          errorCode: 'DIMENSION_NOT_FOUND',
+          message: `Dimensi '${req.nama_dimension}' tidak ditemukan atau tidak aktif di tenant ini.`,
+          details: { nama_dimension: req.nama_dimension },
+        });
       }
       const val = dim.values.find((v: any) => v.kode === req.kode_value);
       if (!val) {
-        throw new BadRequestException(`Nilai dimensi '${req.kode_value}' untuk dimensi '${req.nama_dimension}' tidak ditemukan.`);
+        throw new BadRequestException({
+          errorCode: 'DIMENSION_VALUE_NOT_FOUND',
+          message: `Nilai dimensi '${req.kode_value}' untuk dimensi '${req.nama_dimension}' tidak ditemukan.`,
+          details: { nama_dimension: req.nama_dimension, kode_value: req.kode_value },
+        });
       }
       dimMap.set(key, { dimensionId: dim.id, dimensionValueId: val.id });
     }
@@ -114,7 +124,7 @@ export class JournalService {
     await this.accountingPeriodService.validateJournalDate(tenantId, new Date(createDto.tanggal));
 
     return this.prisma.$transaction(async (tx) => {
-      // 1. Cek Idempotency Key (Jika ada dan sudah pernah diproses, kembalikan data yang ada)
+      // 1. Cek Idempotency Key (Jika ada dan sudah pernah diproses, validasi kecocokan payload)
       if (createDto.idempotency_key) {
         const existing = await tx.journal.findUnique({
           where: {
@@ -123,10 +133,56 @@ export class JournalService {
               idempotency_key: createDto.idempotency_key,
             },
           },
-          include: { entries: true },
+          include: {
+            entries: {
+              include: {
+                chartOfAccount: true,
+              },
+            },
+          },
         });
+
         if (existing) {
-          return existing; // Return existing untuk mencegah duplikasi (retry sukses)
+          const isSameDate =
+            new Date(existing.tanggal).toISOString().slice(0, 10) ===
+            new Date(createDto.tanggal).toISOString().slice(0, 10);
+
+          const existingCurrency = existing.mata_uang || 'IDR';
+          const requestCurrency = createDto.mata_uang || 'IDR';
+          const isSameCurrency = existingCurrency === requestCurrency;
+
+          let isSameEntries = existing.entries.length === createDto.entries.length;
+          if (isSameEntries) {
+            for (const entry of createDto.entries) {
+              const match = existing.entries.find(
+                (e) =>
+                  e.chartOfAccount.kode_akun === entry.kode_akun &&
+                  e.tipe === entry.tipe &&
+                  Math.abs(Number(e.jumlah_asli || e.jumlah) - Number(entry.jumlah)) < 0.001,
+              );
+              if (!match) {
+                isSameEntries = false;
+                break;
+              }
+            }
+          }
+
+          if (!isSameDate || !isSameCurrency || !isSameEntries) {
+            throw new ConflictException({
+              errorCode: 'IDEMPOTENCY_KEY_PAYLOAD_MISMATCH',
+              message: `Idempotency key '${createDto.idempotency_key}' sudah pernah digunakan untuk transaksi dengan rincian yang berbeda.`,
+              details: {
+                idempotency_key: createDto.idempotency_key,
+                existingVoucher: existing.no_voucher,
+                existingDate: existing.tanggal,
+              },
+            });
+          }
+
+          return {
+            ...existing,
+            is_replay: true,
+          };
         }
       }
 
@@ -164,7 +220,11 @@ export class JournalService {
         });
 
         if (!rate) {
-          throw new BadRequestException(`Kurs ${docCurrency} ke ${baseCurrency} untuk tanggal ${createDto.tanggal} belum diisi di Setting`);
+          throw new BadRequestException({
+            errorCode: 'EXCHANGE_RATE_NOT_FOUND',
+            message: `Kurs ${docCurrency} ke ${baseCurrency} untuk tanggal ${createDto.tanggal} belum diisi di Setting`,
+            details: { currency: docCurrency, baseCurrency, date: createDto.tanggal },
+          });
         }
         exchangeRate = rate.kurs;
       }
@@ -173,9 +233,11 @@ export class JournalService {
       for (const entry of createDto.entries) {
         const accountId = validAccountMap.get(entry.kode_akun);
         if (!accountId) {
-          throw new BadRequestException(
-            `Kode akun '${entry.kode_akun}' tidak ditemukan atau sedang tidak aktif di tenant ini.`,
-          );
+          throw new BadRequestException({
+            errorCode: 'ACCOUNT_NOT_FOUND',
+            message: `Kode akun '${entry.kode_akun}' tidak ditemukan atau sedang tidak aktif di tenant ini.`,
+            details: { kode_akun: entry.kode_akun },
+          });
         }
 
         const entryDimensions = [];
@@ -394,6 +456,155 @@ export class JournalService {
         },
       },
       orderBy: { tanggal: 'desc' },
+    });
+  }
+
+  // Mengambil 1 Jurnal berdasarkan ID, No Voucher, atau Idempotency Key (untuk Polling EAM)
+  async findByIdOrIdentifier(tenantId: string, identifier: string) {
+    const journal = await this.prisma.journal.findFirst({
+      where: {
+        tenantId,
+        OR: [
+          { id: identifier },
+          { no_voucher: identifier },
+          { idempotency_key: identifier },
+        ],
+      },
+      include: {
+        entries: {
+          include: {
+            chartOfAccount: {
+              select: { kode_akun: true, nama_akun: true },
+            },
+            dimensions: {
+              include: {
+                dimensionValue: {
+                  include: {
+                    dimension: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!journal) {
+      throw new NotFoundException({
+        errorCode: 'JOURNAL_NOT_FOUND',
+        message: `Jurnal dengan identifier '${identifier}' tidak ditemukan`,
+      });
+    }
+
+    return journal;
+  }
+
+  // Membuat Jurnal Reversal (Pembalik) dengan status PENDING untuk diposting manual setelahnya
+  async reverseJournal(
+    tenantId: string,
+    journalIdOrIdentifier: string,
+    dto: { tanggal?: string; alasan?: string },
+  ) {
+    // 1. Ambil jurnal asli
+    const original = await this.prisma.journal.findFirst({
+      where: {
+        tenantId,
+        OR: [
+          { id: journalIdOrIdentifier },
+          { no_voucher: journalIdOrIdentifier },
+          { idempotency_key: journalIdOrIdentifier },
+        ],
+      },
+      include: {
+        entries: {
+          include: {
+            dimensions: true,
+          },
+        },
+      },
+    });
+
+    if (!original) {
+      throw new NotFoundException({
+        errorCode: 'JOURNAL_NOT_FOUND',
+        message: `Jurnal dengan ID/identifier '${journalIdOrIdentifier}' tidak ditemukan.`,
+      });
+    }
+
+    if (original.status === JournalStatus.REJECTED) {
+      throw new BadRequestException({
+        errorCode: 'INVALID_JOURNAL_STATUS',
+        message: 'Jurnal yang berstatus REJECTED tidak dapat dibalik.',
+      });
+    }
+
+    // 2. Tentukan tanggal reversal (default hari ini jika tidak dispesifikasikan)
+    const reversalDateStr = dto.tanggal || new Date().toISOString().slice(0, 10);
+    const reversalDate = new Date(reversalDateStr);
+
+    // 3. Validasi status periode akuntansi untuk tanggal reversal
+    await this.accountingPeriodService.validateJournalDate(tenantId, reversalDate);
+
+    return this.prisma.$transaction(async (tx) => {
+      // 4. Generate no voucher baru
+      const no_voucher = await this.generateVoucherNumber(tenantId, reversalDateStr);
+
+      // 5. Susun rincian entri baru dengan membalik DEBIT <-> KREDIT
+      const reversedEntries = original.entries.map((entry) => {
+        const reversedType = entry.tipe === EntryType.DEBIT ? EntryType.KREDIT : EntryType.DEBIT;
+        const dimensionCreates = entry.dimensions.map((d) => ({
+          dimensionId: d.dimensionId,
+          dimensionValueId: d.dimensionValueId,
+        }));
+
+        return {
+          chartOfAccountId: entry.chartOfAccountId,
+          tipe: reversedType,
+          jumlah: entry.jumlah,
+          jumlah_asli: entry.jumlah_asli,
+          jumlah_konversi: entry.jumlah_konversi,
+          dimensions: dimensionCreates.length > 0 ? { create: dimensionCreates } : undefined,
+        };
+      });
+
+      const deskripsi = dto.alasan
+        ? `[REVERSAL] Reversal ${original.no_voucher}: ${dto.alasan}`
+        : `[REVERSAL] Reversal voucher ${original.no_voucher}: ${original.deskripsi}`;
+
+      // 6. Buat jurnal pembalik dengan status PENDING (posting manual setelahnya)
+      const reversalJournal = await tx.journal.create({
+        data: {
+          tenantId,
+          no_voucher,
+          tanggal: reversalDate,
+          deskripsi,
+          sumber_aplikasi: 'Reversal',
+          status: JournalStatus.PENDING,
+          mata_uang: original.mata_uang,
+          entries: {
+            create: reversedEntries,
+          },
+        },
+        include: {
+          entries: {
+            include: {
+              chartOfAccount: {
+                select: { kode_akun: true, nama_akun: true },
+              },
+            },
+          },
+        },
+      });
+
+      // Panggil event agar muncul notifikasi approval di dashboard
+      this.eventEmitter.emit('journal.pending', {
+        tenantId,
+        journalId: reversalJournal.id,
+        no_voucher: reversalJournal.no_voucher,
+      });
+
+      return reversalJournal;
     });
   }
 }

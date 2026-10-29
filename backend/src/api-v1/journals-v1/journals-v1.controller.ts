@@ -4,8 +4,10 @@ import {
   Post,
   Body,
   Query,
+  Param,
   UseGuards,
   Req,
+  Res,
   HttpStatus,
   HttpCode,
   UseInterceptors,
@@ -35,7 +37,11 @@ export class JournalsV1Controller {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async createExternalJournal(@Req() req: any, @Body() createDto: CreateJournalV1Dto) {
+  async createExternalJournal(
+    @Req() req: any,
+    @Body() createDto: CreateJournalV1Dto,
+    @Res({ passthrough: true }) res?: any,
+  ) {
     const tenantId = req.tenantId;
     const sumber = req.apiKeyLabel ? req.apiKeyLabel : createDto.sumber_aplikasi;
     
@@ -47,17 +53,26 @@ export class JournalsV1Controller {
       return arr;
     });
 
-    const journal = await this.journalService.createExternal(tenantId, {
+    const journal: any = await this.journalService.createExternal(tenantId, {
       tanggal: createDto.tanggal,
       deskripsi: createDto.deskripsi || createDto.referensi,
       sumber_aplikasi: sumber,
       mata_uang: createDto.mata_uang,
+      idempotency_key: createDto.idempotency_key,
       entries: mappedEntries,
     });
     
+    const isReplay = Boolean(journal.is_replay);
+    if (isReplay && res?.status) {
+      res.status(HttpStatus.OK);
+    }
+
     return {
-      statusCode: HttpStatus.CREATED,
-      message: 'Jurnal eksternal berhasil dicatat (API v1)',
+      statusCode: isReplay ? HttpStatus.OK : HttpStatus.CREATED,
+      message: isReplay
+        ? 'Jurnal sudah pernah dicatat sebelumnya (Idempotent Replay)'
+        : 'Jurnal eksternal berhasil dicatat (API v1)',
+      is_replay: isReplay,
       data: journal,
     };
   }
@@ -76,6 +91,38 @@ export class JournalsV1Controller {
       statusCode: HttpStatus.OK,
       message: 'Daftar jurnal berhasil diambil via API Key (API v1)',
       data: journals,
+    };
+  }
+
+  @Get(':identifier')
+  async getJournalByIdentifier(
+    @Req() req: any,
+    @Param('identifier') identifier: string,
+  ) {
+    const tenantId = req.tenantId;
+    const journal = await this.journalService.findByIdOrIdentifier(tenantId, identifier);
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Detail jurnal berhasil diambil via API Key (API v1)',
+      data: journal,
+    };
+  }
+
+  @Post(':identifier/reverse')
+  @HttpCode(HttpStatus.CREATED)
+  async reverseExternalJournal(
+    @Req() req: any,
+    @Param('identifier') identifier: string,
+    @Body() dto: { tanggal?: string; alasan?: string },
+  ) {
+    const tenantId = req.tenantId;
+    const journal = await this.journalService.reverseJournal(tenantId, identifier, dto);
+
+    return {
+      statusCode: HttpStatus.CREATED,
+      message: 'Jurnal reversal berhasil dibuat dengan status PENDING (API v1)',
+      data: journal,
     };
   }
 }

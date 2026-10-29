@@ -15,6 +15,7 @@ import { TaxModule } from './tax/tax.module';
 import { SuperAdminModule } from './super-admin/super-admin.module';
 import { JournalsV1Module } from './api-v1/journals-v1/journals-v1.module';
 import { CoaV1Module } from './api-v1/coa-v1/coa-v1.module';
+import { PeriodsV1Module } from './api-v1/periods-v1/periods-v1.module';
 import { IntegrationLogModule } from './integration-log/integration-log.module';
 import { AuthModule } from './auth/auth.module';
 import { UserManagementModule } from './user-management/user-management.module';
@@ -42,6 +43,7 @@ import { AccountingPeriodModule } from './accounting-period/accounting-period.mo
     SuperAdminModule,
     JournalsV1Module,
     CoaV1Module,
+    PeriodsV1Module,
     IntegrationLogModule,
     AuthModule,
     UserManagementModule,

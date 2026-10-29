@@ -93,4 +93,76 @@ describe('JournalsV1Controller (Backward Compatibility)', () => {
     );
     expect(result).toBeDefined();
   });
+
+  it('should forward idempotency_key and return replay marker when replaying', async () => {
+    (journalService.createExternal as jest.Mock).mockResolvedValueOnce({
+      id: 'journal-replay-id',
+      no_voucher: 'JNL-2026-0001',
+      is_replay: true,
+    });
+
+    const payload = {
+      tanggal: '2026-10-29',
+      deskripsi: 'Depreciation Run Test',
+      idempotency_key: 'DEP-2026-10-OCT',
+      sumber_aplikasi: 'Assetry',
+      items: [
+        { kode_akun: '6-1001', debit: 5000000, kredit: 0 },
+        { kode_akun: '1-2901', debit: 0, kredit: 5000000 },
+      ],
+    };
+
+    const req = { tenantId: 'tenant-1', apiKey: 'test-key', apiKeyLabel: 'Assetry' } as any;
+    const res = { status: jest.fn() };
+
+    const result = await controller.createExternalJournal(req, payload as any, res as any);
+
+    expect(journalService.createExternal).toHaveBeenCalledWith(
+      'tenant-1',
+      expect.objectContaining({
+        idempotency_key: 'DEP-2026-10-OCT',
+      })
+    );
+    expect(result.is_replay).toBe(true);
+    expect(result.statusCode).toBe(200);
+    expect(res.status).toHaveBeenCalledWith(200);
+  });
+
+  it('should support polling journal status by identifier (id / voucher / idempotency_key)', async () => {
+    journalService.findByIdOrIdentifier = jest.fn().mockResolvedValue({
+      id: 'jnl-uuid',
+      no_voucher: 'JNL-2026-0001',
+      idempotency_key: 'DEP-2026-10-OCT',
+      status: 'POSTED',
+    });
+
+    const req = { tenantId: 'tenant-1' } as any;
+    const result = await controller.getJournalByIdentifier(req, 'DEP-2026-10-OCT');
+
+    expect(journalService.findByIdOrIdentifier).toHaveBeenCalledWith('tenant-1', 'DEP-2026-10-OCT');
+    expect(result.data.status).toBe('POSTED');
+  });
+
+  it('should support reversing a journal via API Key with status PENDING', async () => {
+    journalService.reverseJournal = jest.fn().mockResolvedValue({
+      id: 'rev-uuid',
+      no_voucher: 'JNL-2026-0002',
+      status: 'PENDING',
+      sumber_aplikasi: 'Reversal',
+      deskripsi: '[REVERSAL] Reversal JNL-2026-0001: Koreksi',
+    });
+
+    const req = { tenantId: 'tenant-1' } as any;
+    const result = await controller.reverseExternalJournal(req, 'JNL-2026-0001', {
+      tanggal: '2026-10-29',
+      alasan: 'Koreksi',
+    });
+
+    expect(journalService.reverseJournal).toHaveBeenCalledWith('tenant-1', 'JNL-2026-0001', {
+      tanggal: '2026-10-29',
+      alasan: 'Koreksi',
+    });
+    expect(result.statusCode).toBe(201);
+    expect(result.data.status).toBe('PENDING');
+  });
 });

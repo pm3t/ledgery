@@ -11,7 +11,7 @@ import {
   HttpCode,
 } from '@nestjs/common';
 import { JournalService } from './journal.service';
-import { CreateJournalDto, CreateManualJournalDto } from './dto/create-journal.dto';
+import { CreateJournalDto, CreateManualJournalDto, ReverseJournalDto } from './dto/create-journal.dto';
 import { ApiKeyGuard } from '../auth/api-key.guard';
 import { JournalStatus } from '@prisma/client';
 
@@ -34,6 +34,24 @@ export class JournalController {
     return {
       statusCode: HttpStatus.CREATED,
       message: 'Jurnal manual berhasil disimpan',
+      data: journal,
+    };
+  }
+
+  // POST /journals/:id/reverse — Buat jurnal pembalik (reversal)
+  @Post('journals/:id/reverse')
+  @HttpCode(HttpStatus.CREATED)
+  async reverseJournal(
+    @Param('id') id: string,
+    @Body() dto: ReverseJournalDto,
+  ) {
+    const journal = await this.journalService.reverseJournal(dto.tenantId, id, {
+      tanggal: dto.tanggal,
+      alasan: dto.alasan,
+    });
+    return {
+      statusCode: HttpStatus.CREATED,
+      message: 'Jurnal reversal berhasil dibuat dengan status PENDING. Silakan lakukan approval/posting manual.',
       data: journal,
     };
   }
