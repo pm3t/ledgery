@@ -72,4 +72,18 @@ export class JournalController {
       data: journals,
     };
   }
+
+  // GET /journals/:id?tenantId=... — Detail 1 jurnal untuk dashboard
+  @Get('journals/:id')
+  async getJournalDetail(
+    @Param('id') id: string,
+    @Query('tenantId') tenantId: string,
+  ) {
+    const journal = await this.journalService.findByIdOrIdentifier(tenantId, id);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Detail jurnal berhasil diambil',
+      data: journal,
+    };
+  }
 }

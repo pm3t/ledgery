@@ -13,8 +13,16 @@ export class GeneralLedgerController {
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
     @Query('dimensionValues') dimensionValues?: string,
+    @Query('deskripsi') deskripsi?: string,
   ) {
-    const ledger = await this.ledgerService.getAccountLedger(tenantId, accountId, startDate, endDate, dimensionValues);
+    const ledger = await this.ledgerService.getAccountLedger(
+      tenantId,
+      accountId,
+      startDate,
+      endDate,
+      dimensionValues,
+      deskripsi,
+    );
     return {
       statusCode: HttpStatus.OK,
       message: 'Buku Besar berhasil diambil',

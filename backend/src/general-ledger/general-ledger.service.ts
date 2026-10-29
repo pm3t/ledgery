@@ -6,7 +6,14 @@ export class GeneralLedgerService {
   constructor(private readonly prisma: PrismaService) {}
 
   // Menampilkan mutasi Buku Besar (General Ledger) untuk satu akun
-  async getAccountLedger(tenantId: string, accountId: string, startDate?: string, endDate?: string, dimensionValues?: string) {
+  async getAccountLedger(
+    tenantId: string,
+    accountId: string,
+    startDate?: string,
+    endDate?: string,
+    dimensionValues?: string,
+    deskripsi?: string,
+  ) {
     const account = await this.prisma.chartOfAccount.findUnique({
       where: { id: accountId },
     });
@@ -20,8 +27,8 @@ export class GeneralLedgerService {
 
     // Filter tanggal
     const dateFilter: any = {};
-    if (startDate) dateFilter.gte = new Date(startDate);
-    if (endDate) dateFilter.lte = new Date(endDate);
+    if (startDate) dateFilter.gte = new Date(`${startDate}T00:00:00.000Z`);
+    if (endDate) dateFilter.lte = new Date(`${endDate}T23:59:59.999Z`);
 
     const whereClause: any = {
       chartOfAccountId: accountId,
@@ -33,6 +40,10 @@ export class GeneralLedgerService {
 
     if (startDate || endDate) {
       whereClause.journal.tanggal = dateFilter;
+    }
+
+    if (deskripsi && deskripsi.trim()) {
+      whereClause.journal.deskripsi = { contains: deskripsi.trim(), mode: 'insensitive' };
     }
 
     if (dimensionValues) {
@@ -53,6 +64,15 @@ export class GeneralLedgerService {
         journal: {
           select: { no_voucher: true, tanggal: true, deskripsi: true, sumber_aplikasi: true },
         },
+        dimensions: {
+          include: {
+            dimensionValue: {
+              include: {
+                dimension: true,
+              },
+            },
+          },
+        },
       },
       orderBy: {
         journal: {
@@ -61,15 +81,20 @@ export class GeneralLedgerService {
       },
     });
 
-    // Kalkulasi saldo berjalan (Running Balance)
+    // Kalkulasi saldo berjalan (Running Balance) dan total debit/kredit
     let runningBalance = 0;
+    let totalDebit = 0;
+    let totalKredit = 0;
+
     const ledgerLines = entries.map((entry) => {
       const amount = Number(entry.jumlah);
       if (entry.tipe === 'DEBIT') {
         runningBalance = isNormalDebit ? runningBalance + amount : runningBalance - amount;
+        totalDebit += amount;
       } else {
         // KREDIT
         runningBalance = isNormalDebit ? runningBalance - amount : runningBalance + amount;
+        totalKredit += amount;
       }
 
       return {
@@ -81,6 +106,11 @@ export class GeneralLedgerService {
         debit: entry.tipe === 'DEBIT' ? amount : 0,
         kredit: entry.tipe === 'KREDIT' ? amount : 0,
         saldo_berjalan: runningBalance,
+        dimensions: entry.dimensions?.map((d) => ({
+          dimensionName: d.dimensionValue?.dimension?.nama_dimension,
+          valueName: d.dimensionValue?.nama,
+          valueCode: d.dimensionValue?.kode,
+        })) || [],
       };
     });
 
@@ -88,6 +118,8 @@ export class GeneralLedgerService {
       akun: account,
       normalBalance: isNormalDebit ? 'DEBIT' : 'KREDIT',
       totalMutasi: ledgerLines.length,
+      totalDebit,
+      totalKredit,
       saldoAkhir: runningBalance,
       mutasi: ledgerLines,
     };

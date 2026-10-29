@@ -10,8 +10,23 @@ import {
   AlertCircle,
   ShieldAlert,
   X,
+  History,
+  Calendar,
+  Layers,
+  RefreshCw,
+  Loader2,
+  Filter,
+  FileText,
+  Building2,
+  ArrowRightLeft,
 } from 'lucide-react';
-import { api, ChartOfAccount, Tenant } from '../services/api';
+import {
+  api,
+  ChartOfAccount,
+  Tenant,
+  LedgerResponse,
+  Dimension,
+} from '../services/api';
 
 interface ChartOfAccountsPageProps {
   currentTenant: Tenant | null;
@@ -36,6 +51,85 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
   });
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState<boolean>(false);
+
+  // State Modal Mutasi Akun (Buku Besar Akun)
+  const [isMutationModalOpen, setIsMutationModalOpen] = useState<boolean>(false);
+  const [mutationAccount, setMutationAccount] = useState<ChartOfAccount | null>(null);
+  const [mutationData, setMutationData] = useState<LedgerResponse | null>(null);
+  const [mutationLoading, setMutationLoading] = useState<boolean>(false);
+  const [mutationError, setMutationError] = useState<string | null>(null);
+
+  // Filter Mutasi Modal: Tanggal, Deskripsi, Dimensi
+  const [mutationStartDate, setMutationStartDate] = useState<string>('');
+  const [mutationEndDate, setMutationEndDate] = useState<string>('');
+  const [mutationDeskripsi, setMutationDeskripsi] = useState<string>('');
+  const [mutationDimensionValue, setMutationDimensionValue] = useState<string>('');
+
+  // Master Dimensi untuk dropdown filter
+  const [dimensions, setDimensions] = useState<Dimension[]>([]);
+
+  useEffect(() => {
+    if (currentTenant) {
+      api
+        .getDimensions()
+        .then((res) => setDimensions(res.filter((d) => d.isActive)))
+        .catch(console.error);
+    }
+  }, [currentTenant]);
+
+  const fetchAccountMutation = async (accId?: string) => {
+    const id = accId || mutationAccount?.id;
+    if (!currentTenant || !id) return;
+    setMutationLoading(true);
+    setMutationError(null);
+    try {
+      const data = await api.getAccountLedger(
+        currentTenant.id,
+        id,
+        mutationStartDate || undefined,
+        mutationEndDate || undefined,
+        mutationDimensionValue || undefined,
+        mutationDeskripsi || undefined,
+      );
+      setMutationData(data);
+    } catch (err: any) {
+      setMutationError(err.message || 'Gagal memuat mutasi akun');
+    } finally {
+      setMutationLoading(false);
+    }
+  };
+
+  const handleOpenMutationModal = (acc: ChartOfAccount) => {
+    setMutationAccount(acc);
+    setMutationData(null);
+    setMutationStartDate('');
+    setMutationEndDate('');
+    setMutationDeskripsi('');
+    setMutationDimensionValue('');
+    setMutationError(null);
+    setIsMutationModalOpen(true);
+    fetchAccountMutation(acc.id);
+  };
+
+  const handleApplyMutationFilters = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    fetchAccountMutation();
+  };
+
+  const handleResetMutationFilters = () => {
+    setMutationStartDate('');
+    setMutationEndDate('');
+    setMutationDeskripsi('');
+    setMutationDimensionValue('');
+    if (mutationAccount && currentTenant) {
+      setMutationLoading(true);
+      api
+        .getAccountLedger(currentTenant.id, mutationAccount.id)
+        .then(setMutationData)
+        .catch((err) => setMutationError(err.message))
+        .finally(() => setMutationLoading(false));
+    }
+  };
 
   const fetchCoa = async () => {
     if (!currentTenant) return;
@@ -247,10 +341,17 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
                   return (
                     <tr key={acc.id} className="hover:bg-slate-800/40 transition-colors">
                       <td className="py-3 px-4 font-mono font-bold text-white">
-                        <span className={isChild ? 'pl-4 text-indigo-300' : ''}>
+                        <button
+                          type="button"
+                          onClick={() => handleOpenMutationModal(acc)}
+                          className={`hover:underline flex items-center gap-1.5 text-left transition-colors ${
+                            isChild ? 'pl-4 text-indigo-300 hover:text-indigo-200' : 'text-white hover:text-indigo-300'
+                          }`}
+                          title="Klik untuk melihat kartu mutasi akun ini"
+                        >
                           {isChild && '↳ '}
                           {acc.kode_akun}
-                        </span>
+                        </button>
                       </td>
                       <td className="py-3 px-4 font-medium text-slate-200">
                         <div className="flex items-center gap-2 flex-wrap">
@@ -296,17 +397,28 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
                           </span>
                         )}
                       </td>
-                      <td className="py-3 px-4 text-right space-x-2">
+                      <td className="py-3 px-4 text-right space-x-1.5 whitespace-nowrap">
                         <button
+                          type="button"
+                          onClick={() => handleOpenMutationModal(acc)}
+                          className="px-2 py-1.5 text-xs text-slate-300 hover:text-emerald-300 bg-slate-800/80 hover:bg-emerald-950/40 border border-slate-700/80 hover:border-emerald-500/40 rounded-lg transition-colors inline-flex items-center gap-1.5"
+                          title="Lihat Mutasi Akun (Buku Besar)"
+                        >
+                          <History className="w-3.5 h-3.5 text-emerald-400" />
+                          <span>Mutasi</span>
+                        </button>
+                        <button
+                          type="button"
                           onClick={() => handleOpenEditModal(acc)}
-                          className="p-1.5 text-slate-400 hover:text-indigo-400 hover:bg-indigo-950/50 rounded-lg transition-colors"
+                          className="p-1.5 text-slate-400 hover:text-indigo-400 hover:bg-indigo-950/50 rounded-lg transition-colors inline-flex items-center"
                           title="Edit Akun"
                         >
                           <Edit2 className="w-4 h-4" />
                         </button>
                         <button
+                          type="button"
                           onClick={() => handleDelete(acc.id, acc.nama_akun)}
-                          className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-rose-950/50 rounded-lg transition-colors"
+                          className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-rose-950/50 rounded-lg transition-colors inline-flex items-center"
                           title="Hapus Akun"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -464,6 +576,316 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Mutasi Akun (Kartu Mutasi / Ledger) */}
+      {isMutationModalOpen && mutationAccount && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-5xl w-full max-h-[92vh] flex flex-col shadow-2xl overflow-hidden">
+            {/* Header Modal */}
+            <div className="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-950/70 shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-400">
+                  <History className="w-6 h-6" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2.5 flex-wrap">
+                    <h3 className="text-lg font-bold text-white">Mutasi Akun Buku Besar</h3>
+                    <span className="font-mono text-sm px-2.5 py-0.5 rounded-lg bg-emerald-950/80 border border-emerald-500/30 text-emerald-300 font-semibold">
+                      {mutationAccount.kode_akun}
+                    </span>
+                    <span className="text-white font-semibold text-sm">
+                      {mutationAccount.nama_akun}
+                    </span>
+                    <span
+                      className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border ${getCategoryBadge(
+                        mutationAccount.kategori,
+                      )}`}
+                    >
+                      {mutationAccount.kategori}
+                    </span>
+                    {mutationAccount.isControlAccount && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                        <ShieldAlert className="w-3 h-3 text-amber-400" /> Akun Kontrol
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-slate-400 mt-1">
+                    Kartu riwayat pergerakan debit, kredit, dan saldo berjalan akun ini
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsMutationModalOpen(false)}
+                className="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Filter Bar: Tanggal, Deskripsi Jurnal, Dimensi */}
+            <div className="p-4 bg-slate-950/50 border-b border-slate-800/80 shrink-0">
+              <form onSubmit={handleApplyMutationFilters} className="space-y-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                  {/* Filter 1: Tanggal Dari */}
+                  <div>
+                    <label className="block text-[11px] font-medium text-slate-400 mb-1 flex items-center gap-1">
+                      <Calendar className="w-3 h-3 text-emerald-400" /> Dari Tanggal
+                    </label>
+                    <input
+                      type="date"
+                      value={mutationStartDate}
+                      onChange={(e) => setMutationStartDate(e.target.value)}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500"
+                    />
+                  </div>
+
+                  {/* Filter 2: Tanggal Sampai */}
+                  <div>
+                    <label className="block text-[11px] font-medium text-slate-400 mb-1 flex items-center gap-1">
+                      <Calendar className="w-3 h-3 text-emerald-400" /> Sampai Tanggal
+                    </label>
+                    <input
+                      type="date"
+                      value={mutationEndDate}
+                      onChange={(e) => setMutationEndDate(e.target.value)}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500"
+                    />
+                  </div>
+
+                  {/* Filter 3: Deskripsi Jurnal */}
+                  <div>
+                    <label className="block text-[11px] font-medium text-slate-400 mb-1 flex items-center gap-1">
+                      <Search className="w-3 h-3 text-emerald-400" /> Deskripsi Jurnal
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Cari keterangan..."
+                      value={mutationDeskripsi}
+                      onChange={(e) => setMutationDeskripsi(e.target.value)}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500"
+                    />
+                  </div>
+
+                  {/* Filter 4: Dimensi */}
+                  <div>
+                    <label className="block text-[11px] font-medium text-slate-400 mb-1 flex items-center gap-1">
+                      <Layers className="w-3 h-3 text-emerald-400" /> Dimensi
+                    </label>
+                    <select
+                      value={mutationDimensionValue}
+                      onChange={(e) => setMutationDimensionValue(e.target.value)}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500"
+                    >
+                      <option value="">Semua Dimensi</option>
+                      {dimensions.map((d) => (
+                        <optgroup key={d.id} label={d.nama_dimension}>
+                          {d.values
+                            .filter((v) => v.isActive)
+                            .map((v) => (
+                              <option key={v.id} value={v.id}>
+                                {d.nama_dimension}: {v.nama} ({v.kode})
+                              </option>
+                            ))}
+                        </optgroup>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-1">
+                  <span className="text-[11px] text-slate-400">
+                    Normal Balance: <strong className="text-emerald-400">{mutationData?.normalBalance || 'DEBIT'}</strong>
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={handleResetMutationFilters}
+                      disabled={mutationLoading}
+                      className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-medium transition-colors"
+                    >
+                      Reset Filter
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={mutationLoading}
+                      className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold shadow-md shadow-emerald-600/20 transition-colors flex items-center gap-1.5"
+                    >
+                      {mutationLoading ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <Filter className="w-3.5 h-3.5" />
+                      )}
+                      Terapkan Filter
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+
+            {/* Modal Body: Ringkasan & Tabel Mutasi */}
+            <div className="p-5 overflow-y-auto space-y-4 flex-1">
+              {/* Summary Cards */}
+              {mutationData && (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <div className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-3">
+                    <span className="text-[11px] font-medium text-slate-400">Jumlah Transaksi</span>
+                    <div className="text-base font-bold text-white mt-0.5">
+                      {mutationData.totalMutasi}{' '}
+                      <span className="text-xs font-normal text-slate-400">mutasi</span>
+                    </div>
+                  </div>
+
+                  <div className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-3">
+                    <span className="text-[11px] font-medium text-slate-400">Total Mutasi Debit</span>
+                    <div className="text-base font-bold text-emerald-400 mt-0.5 font-mono">
+                      {(mutationData.totalDebit || 0).toLocaleString('id-ID')}
+                    </div>
+                  </div>
+
+                  <div className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-3">
+                    <span className="text-[11px] font-medium text-slate-400">Total Mutasi Kredit</span>
+                    <div className="text-base font-bold text-rose-400 mt-0.5 font-mono">
+                      {(mutationData.totalKredit || 0).toLocaleString('id-ID')}
+                    </div>
+                  </div>
+
+                  <div className="bg-emerald-950/20 border border-emerald-500/30 rounded-xl p-3">
+                    <span className="text-[11px] font-medium text-emerald-300">Saldo Akhir Berjalan</span>
+                    <div className="text-base font-bold text-emerald-400 mt-0.5 font-mono">
+                      {currentTenant?.mata_uang || 'IDR'}{' '}
+                      {mutationData.saldoAkhir.toLocaleString('id-ID')}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Error Banner */}
+              {mutationError && (
+                <div className="p-3 bg-rose-500/10 border border-rose-500/30 rounded-xl text-xs text-rose-300 flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{mutationError}</span>
+                </div>
+              )}
+
+              {/* Tabel Mutasi Transaksi */}
+              <div className="border border-slate-800 rounded-xl overflow-hidden bg-slate-950 shadow-inner">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="bg-slate-900 border-b border-slate-800 text-slate-400 uppercase tracking-wider font-semibold">
+                      <th className="py-2.5 px-3 min-w-[95px]">Tanggal</th>
+                      <th className="py-2.5 px-3 min-w-[130px]">No. Voucher</th>
+                      <th className="py-2.5 px-3 min-w-[200px]">Keterangan Jurnal</th>
+                      <th className="py-2.5 px-3 min-w-[170px]">Dimensi</th>
+                      <th className="py-2.5 px-3 text-right text-emerald-400/90 min-w-[110px]">Debit</th>
+                      <th className="py-2.5 px-3 text-right text-rose-400/90 min-w-[110px]">Kredit</th>
+                      <th className="py-2.5 px-3.5 text-right text-indigo-300 font-bold min-w-[125px]">Saldo Berjalan</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-800/60">
+                    {mutationLoading ? (
+                      <tr>
+                        <td colSpan={7} className="py-12 text-center text-slate-400">
+                          <div className="flex flex-col items-center justify-center gap-2">
+                            <Loader2 className="w-6 h-6 animate-spin text-emerald-400" />
+                            <span>Memuat mutasi akun...</span>
+                          </div>
+                        </td>
+                      </tr>
+                    ) : !mutationData || mutationData.mutasi.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} className="py-12 text-center text-slate-500">
+                          <div className="flex flex-col items-center justify-center gap-2">
+                            <History className="w-7 h-7 text-slate-600" />
+                            <span>Tidak ada riwayat mutasi transaksi untuk akun ini dengan filter yang dipilih.</span>
+                          </div>
+                        </td>
+                      </tr>
+                    ) : (
+                      mutationData.mutasi.map((m) => {
+                        const dims = m.dimensions || [];
+                        return (
+                          <tr key={m.id} className="hover:bg-slate-900/50 transition-colors">
+                            <td className="py-2.5 px-3 text-slate-300 font-mono">
+                              {new Date(m.tanggal).toLocaleDateString('id-ID')}
+                            </td>
+                            <td className="py-2.5 px-3 font-mono font-medium text-indigo-400">
+                              {m.no_voucher}
+                            </td>
+                            <td className="py-2.5 px-3 text-slate-200">
+                              <div>{m.deskripsi}</div>
+                              <span className="text-[10px] text-slate-500">
+                                {m.sumber_aplikasi}
+                              </span>
+                            </td>
+                            <td className="py-2.5 px-3">
+                              {dims.length > 0 ? (
+                                <div className="flex flex-wrap gap-1">
+                                  {dims.map((d, dIdx) => (
+                                    <span
+                                      key={dIdx}
+                                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium bg-indigo-500/10 text-indigo-300 border border-indigo-500/20"
+                                    >
+                                      <span className="text-slate-400">{d.dimensionName}:</span>
+                                      <span className="font-semibold text-slate-200">
+                                        {d.valueName}
+                                        {d.valueCode && (
+                                          <span className="text-indigo-400 ml-0.5">({d.valueCode})</span>
+                                        )}
+                                      </span>
+                                    </span>
+                                  ))}
+                                </div>
+                              ) : (
+                                <span className="text-slate-600 text-[11px] italic">-</span>
+                              )}
+                            </td>
+                            <td className="py-2.5 px-3 text-right font-mono font-medium">
+                              {m.debit > 0 ? (
+                                <span className="text-emerald-400">
+                                  {m.debit.toLocaleString('id-ID')}
+                                </span>
+                              ) : (
+                                <span className="text-slate-600">-</span>
+                              )}
+                            </td>
+                            <td className="py-2.5 px-3 text-right font-mono font-medium">
+                              {m.kredit > 0 ? (
+                                <span className="text-rose-400">
+                                  {m.kredit.toLocaleString('id-ID')}
+                                </span>
+                              ) : (
+                                <span className="text-slate-600">-</span>
+                              )}
+                            </td>
+                            <td className="py-2.5 px-3.5 text-right font-mono font-bold text-slate-100">
+                              {m.saldo_berjalan.toLocaleString('id-ID')}
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-4 bg-slate-950/80 border-t border-slate-800 flex justify-between items-center shrink-0">
+              <span className="text-xs text-slate-500">
+                Data diperbarui secara realtime dari jurnal akuntansi yang telah diposting.
+              </span>
+              <button
+                type="button"
+                onClick={() => setIsMutationModalOpen(false)}
+                className="px-5 py-2 text-sm font-medium text-slate-200 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-xl transition-colors"
+              >
+                Tutup
+              </button>
+            </div>
           </div>
         </div>
       )}

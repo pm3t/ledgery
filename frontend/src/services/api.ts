@@ -61,15 +61,34 @@ export interface PostingPolicySetting {
   updatedAt: string;
 }
 
+export interface JournalEntryDimensionItem {
+  id: string;
+  dimensionId: string;
+  dimensionValueId: string;
+  dimensionValue?: {
+    id: string;
+    kode: string;
+    nama: string;
+    dimension?: {
+      id: string;
+      nama_dimension: string;
+    };
+  };
+}
+
 export interface JournalEntryItem {
   id: string;
   chartOfAccountId: string;
   tipe: 'DEBIT' | 'KREDIT';
   jumlah: number;
+  jumlah_asli?: number | null;
+  jumlah_konversi?: number | null;
   chartOfAccount?: {
     kode_akun: string;
     nama_akun: string;
+    kategori?: string;
   };
+  dimensions?: JournalEntryDimensionItem[];
 }
 
 export interface Journal {
@@ -95,12 +114,19 @@ export interface LedgerLine {
   debit: number;
   kredit: number;
   saldo_berjalan: number;
+  dimensions?: {
+    dimensionName?: string;
+    valueName?: string;
+    valueCode?: string;
+  }[];
 }
 
 export interface LedgerResponse {
   akun: ChartOfAccount;
   normalBalance: 'DEBIT' | 'KREDIT';
   totalMutasi: number;
+  totalDebit?: number;
+  totalKredit?: number;
   saldoAkhir: number;
   mutasi: LedgerLine[];
 }
@@ -389,6 +415,9 @@ export const api = {
     const qs = query.toString() ? `?${query.toString()}` : '';
     return request<Journal[]>(`/journals/tenant/${tenantId}${qs}`);
   },
+  getJournalDetail: (tenantId: string, id: string) => {
+    return request<Journal>(`/journals/${id}?tenantId=${tenantId}`);
+  },
   createManualJournal: (payload: {
     tenantId: string;
     tanggal: string;
@@ -409,11 +438,19 @@ export const api = {
     }),
 
   // --- GENERAL LEDGER API ---
-  getAccountLedger: (tenantId: string, accountId: string, startDate?: string, endDate?: string, dimensionValues?: string) => {
+  getAccountLedger: (
+    tenantId: string,
+    accountId: string,
+    startDate?: string,
+    endDate?: string,
+    dimensionValues?: string,
+    deskripsi?: string,
+  ) => {
     const query = new URLSearchParams();
     if (startDate) query.append('startDate', startDate);
     if (endDate) query.append('endDate', endDate);
     if (dimensionValues) query.append('dimensionValues', dimensionValues);
+    if (deskripsi) query.append('deskripsi', deskripsi);
     const qs = query.toString() ? `?${query.toString()}` : '';
     return request<LedgerResponse>(`/ledger/tenant/${tenantId}/account/${accountId}${qs}`);
   },

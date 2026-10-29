@@ -464,7 +464,16 @@ export class JournalService {
         entries: {
           include: {
             chartOfAccount: {
-              select: { kode_akun: true, nama_akun: true },
+              select: { kode_akun: true, nama_akun: true, kategori: true },
+            },
+            dimensions: {
+              include: {
+                dimensionValue: {
+                  include: {
+                    dimension: true,
+                  },
+                },
+              },
             },
           },
         },
