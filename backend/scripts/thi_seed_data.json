@@ -1,0 +1,6026 @@
+{
+  "coa_list": [
+    {
+      "kode": "1000",
+      "nama": "Cash and Bank",
+      "kategori": "ASET",
+      "is_control": true,
+      "parent_kode": null
+    },
+    {
+      "kode": "1000002",
+      "nama": "Bank Mandiri 2928",
+      "kategori": "ASET",
+      "is_control": false,
+      "parent_kode": "1000"
+    },
+    {
+      "kode": "1100",
+      "nama": "Account Receivable",
+      "kategori": "ASET",
+      "is_control": true,
+      "parent_kode": null
+    },
+    {
+      "kode": "110002",
+      "nama": "Advance Purchase IDR",
+      "kategori": "ASET",
+      "is_control": false,
+      "parent_kode": "1100"
+    },
+    {
+      "kode": "1400",
+      "nama": "Prepaid Expense",
+      "kategori": "ASET",
+      "is_control": true,
+      "parent_kode": null
+    },
+    {
+      "kode": "1400001",
+      "nama": "Prepaid Rent",
+      "kategori": "ASET",
+      "is_control": false,
+      "parent_kode": "1400"
+    },
+    {
+      "kode": "1400003",
+      "nama": "Prepaid Expense",
+      "kategori": "ASET",
+      "is_control": false,
+      "parent_kode": "1400"
+    },
+    {
+      "kode": "1500",
+      "nama": "Prepaid Tax",
+      "kategori": "ASET",
+      "is_control": true,
+      "parent_kode": null
+    },
+    {
+      "kode": "1500001",
+      "nama": "VAT In",
+      "kategori": "ASET",
+      "is_control": false,
+      "parent_kode": "1500"
+    },
+    {
+      "kode": "1600",
+      "nama": "Other Current Asset",
+      "kategori": "ASET",
+      "is_control": true,
+      "parent_kode": null
+    },
+    {
+      "kode": "1600003",
+      "nama": "Deposit",
+      "kategori": "ASET",
+      "is_control": false,
+      "parent_kode": "1600"
+    },
+    {
+      "kode": "1600005",
+      "nama": "Other Receivable",
+      "kategori": "ASET",
+      "is_control": false,
+      "parent_kode": "1600"
+    },
+    {
+      "kode": "1600006",
+      "nama": "Shareholder Receivable",
+      "kategori": "ASET",
+      "is_control": false,
+      "parent_kode": "1600"
+    },
+    {
+      "kode": "2100",
+      "nama": "Witholding Tax Payable",
+      "kategori": "LIABILITAS",
+      "is_control": true,
+      "parent_kode": null
+    },
+    {
+      "kode": "2100003",
+      "nama": "Witholding Tax Payable - Art 21",
+      "kategori": "LIABILITAS",
+      "is_control": false,
+      "parent_kode": "2100"
+    },
+    {
+      "kode": "2100004",
+      "nama": "Witholding Tax Payable - Art 4(2)",
+      "kategori": "LIABILITAS",
+      "is_control": false,
+      "parent_kode": "2100"
+    },
+    {
+      "kode": "210102",
+      "nama": "Account Payable IDR",
+      "kategori": "LIABILITAS",
+      "is_control": false,
+      "parent_kode": null
+    },
+    {
+      "kode": "2400",
+      "nama": "Other Current Liability",
+      "kategori": "LIABILITAS",
+      "is_control": true,
+      "parent_kode": null
+    },
+    {
+      "kode": "2400002",
+      "nama": "Other Payable",
+      "kategori": "LIABILITAS",
+      "is_control": false,
+      "parent_kode": "2400"
+    },
+    {
+      "kode": "2400009",
+      "nama": "Salary Payable",
+      "kategori": "LIABILITAS",
+      "is_control": false,
+      "parent_kode": "2400"
+    },
+    {
+      "kode": "3000",
+      "nama": "Equity",
+      "kategori": "EKUITAS",
+      "is_control": true,
+      "parent_kode": null
+    },
+    {
+      "kode": "300001",
+      "nama": "Equity - Lo Fredrick",
+      "kategori": "EKUITAS",
+      "is_control": false,
+      "parent_kode": "3000"
+    },
+    {
+      "kode": "300002",
+      "nama": "Equity - Bayu Nurcahyono",
+      "kategori": "EKUITAS",
+      "is_control": false,
+      "parent_kode": "3000"
+    },
+    {
+      "kode": "300003",
+      "nama": "Equity - Kov Jokowidjaja",
+      "kategori": "EKUITAS",
+      "is_control": false,
+      "parent_kode": "3000"
+    },
+    {
+      "kode": "300004",
+      "nama": "Equity - Hubert Jo Sumarno",
+      "kategori": "EKUITAS",
+      "is_control": false,
+      "parent_kode": "3000"
+    },
+    {
+      "kode": "300005",
+      "nama": "Equity - Hendra Sumarno",
+      "kategori": "EKUITAS",
+      "is_control": false,
+      "parent_kode": "3000"
+    },
+    {
+      "kode": "300006",
+      "nama": "Equity - Elbert Jo Sumarno",
+      "kategori": "EKUITAS",
+      "is_control": false,
+      "parent_kode": "3000"
+    },
+    {
+      "kode": "320001",
+      "nama": "RETAINED EARNING",
+      "kategori": "EKUITAS",
+      "is_control": false,
+      "parent_kode": null
+    },
+    {
+      "kode": "6000",
+      "nama": "Sales & General Administration Expense",
+      "kategori": "BEBAN",
+      "is_control": true,
+      "parent_kode": null
+    },
+    {
+      "kode": "6100",
+      "nama": "Sales Expense",
+      "kategori": "BEBAN",
+      "is_control": true,
+      "parent_kode": "6000"
+    },
+    {
+      "kode": "6104",
+      "nama": "Entertainment Expense",
+      "kategori": "BEBAN",
+      "is_control": false,
+      "parent_kode": "6100"
+    },
+    {
+      "kode": "6200",
+      "nama": "General and Administration Expense",
+      "kategori": "BEBAN",
+      "is_control": true,
+      "parent_kode": "6000"
+    },
+    {
+      "kode": "6201",
+      "nama": "Employee Salary and Benefit",
+      "kategori": "BEBAN",
+      "is_control": true,
+      "parent_kode": "6200"
+    },
+    {
+      "kode": "620101",
+      "nama": "Salary, Overtime & THR Expense",
+      "kategori": "BEBAN",
+      "is_control": false,
+      "parent_kode": "6201"
+    },
+    {
+      "kode": "620103",
+      "nama": "Tax allowance - 21",
+      "kategori": "BEBAN",
+      "is_control": false,
+      "parent_kode": "6201"
+    },
+    {
+      "kode": "6203",
+      "nama": "Utilitization, Adm, Rent & Others Expense",
+      "kategori": "BEBAN",
+      "is_control": true,
+      "parent_kode": "6000"
+    },
+    {
+      "kode": "620305",
+      "nama": "Rent Expense",
+      "kategori": "BEBAN",
+      "is_control": false,
+      "parent_kode": "6203"
+    },
+    {
+      "kode": "620310",
+      "nama": "Office Supplies Expense",
+      "kategori": "BEBAN",
+      "is_control": false,
+      "parent_kode": "6203"
+    },
+    {
+      "kode": "620312",
+      "nama": "Legal & Licence Expense",
+      "kategori": "BEBAN",
+      "is_control": false,
+      "parent_kode": "6203"
+    },
+    {
+      "kode": "620314",
+      "nama": "Software Expense",
+      "kategori": "BEBAN",
+      "is_control": false,
+      "parent_kode": "6203"
+    },
+    {
+      "kode": "7100",
+      "nama": "Other Income",
+      "kategori": "PENDAPATAN",
+      "is_control": true,
+      "parent_kode": null
+    },
+    {
+      "kode": "710001",
+      "nama": "Interest Income",
+      "kategori": "PENDAPATAN",
+      "is_control": false,
+      "parent_kode": "7100"
+    },
+    {
+      "kode": "7200",
+      "nama": "Other Expense",
+      "kategori": "BEBAN",
+      "is_control": true,
+      "parent_kode": null
+    },
+    {
+      "kode": "720002",
+      "nama": "Bank Administration Expense",
+      "kategori": "BEBAN",
+      "is_control": false,
+      "parent_kode": "7200"
+    },
+    {
+      "kode": "720003",
+      "nama": "Tax on Interest Income",
+      "kategori": "BEBAN",
+      "is_control": false,
+      "parent_kode": "7200"
+    }
+  ],
+  "opening_balances": [
+    {
+      "account_no": "1000002",
+      "type": "DEBIT",
+      "amount": 256082.21
+    },
+    {
+      "account_no": "1400001",
+      "type": "DEBIT",
+      "amount": 2000000.0
+    },
+    {
+      "account_no": "1400003",
+      "type": "DEBIT",
+      "amount": 1872914.45
+    },
+    {
+      "account_no": "1600005",
+      "type": "DEBIT",
+      "amount": 33687711.0
+    },
+    {
+      "account_no": "1600006",
+      "type": "DEBIT",
+      "amount": 125000000.0
+    },
+    {
+      "account_no": "2100004",
+      "type": "KREDIT",
+      "amount": 600000.0
+    },
+    {
+      "account_no": "300001",
+      "type": "KREDIT",
+      "amount": 100000000.0
+    },
+    {
+      "account_no": "300002",
+      "type": "KREDIT",
+      "amount": 25000000.0
+    },
+    {
+      "account_no": "320001",
+      "type": "KREDIT",
+      "amount": 37216707.66
+    }
+  ],
+  "vouchers": [
+    {
+      "no_voucher": "MANDIRI 2026/01/001",
+      "tanggal": "2026-01-28T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Biaya Admin Kartu",
+      "entries": [
+        {
+          "account_no": "720002",
+          "tipe": "DEBIT",
+          "jumlah": 10000.0,
+          "deskripsi": "Biaya Admin Kartu"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 10000.0,
+          "deskripsi": "Biaya Admin Kartu"
+        }
+      ]
+    },
+    {
+      "no_voucher": "EXPENSE 2026/01/001",
+      "tanggal": "2026-01-31T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Domain technohub.id - Januari 2026",
+      "entries": [
+        {
+          "account_no": "620314",
+          "tipe": "DEBIT",
+          "jumlah": 22083.33,
+          "deskripsi": "Domain technohub.id - Januari 2026"
+        },
+        {
+          "account_no": "1400003",
+          "tipe": "KREDIT",
+          "jumlah": 22083.33,
+          "deskripsi": "Domain technohub.id - Januari 2026"
+        }
+      ]
+    },
+    {
+      "no_voucher": "EXPENSE 2026/01/002",
+      "tanggal": "2026-01-31T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "D-Net Medium - Januari 2026",
+      "entries": [
+        {
+          "account_no": "620314",
+          "tipe": "DEBIT",
+          "jumlah": 50000.0,
+          "deskripsi": "D-Net Medium - Januari 2026"
+        },
+        {
+          "account_no": "1400003",
+          "tipe": "KREDIT",
+          "jumlah": 50000.0,
+          "deskripsi": "D-Net Medium - Januari 2026"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/01/002",
+      "tanggal": "2026-01-31T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Biaya Admin Bulanan",
+      "entries": [
+        {
+          "account_no": "720002",
+          "tipe": "DEBIT",
+          "jumlah": 12500.0,
+          "deskripsi": "Biaya Admin Bulanan"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 12500.0,
+          "deskripsi": "Biaya Admin Bulanan"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/01/003",
+      "tanggal": "2026-01-31T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "By Saldo Minimum",
+      "entries": [
+        {
+          "account_no": "720002",
+          "tipe": "DEBIT",
+          "jumlah": 25000.0,
+          "deskripsi": "By Saldo Minimum"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 25000.0,
+          "deskripsi": "By Saldo Minimum"
+        }
+      ]
+    },
+    {
+      "no_voucher": "EXPENSE 2026/01/003",
+      "tanggal": "2026-01-31T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Premium plan Core - Januari 2026",
+      "entries": [
+        {
+          "account_no": "620314",
+          "tipe": "DEBIT",
+          "jumlah": 232678.25,
+          "deskripsi": "Premium plan Core - Januari 2026"
+        },
+        {
+          "account_no": "1400003",
+          "tipe": "KREDIT",
+          "jumlah": 232678.25,
+          "deskripsi": "Premium plan Core - Januari 2026"
+        }
+      ]
+    },
+    {
+      "no_voucher": "RENT 2026/01/001",
+      "tanggal": "2026-01-31T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Sewa - Januari 2026",
+      "entries": [
+        {
+          "account_no": "620305",
+          "tipe": "DEBIT",
+          "jumlah": 500000.0,
+          "deskripsi": "Sewa - Januari 2026"
+        },
+        {
+          "account_no": "1400001",
+          "tipe": "KREDIT",
+          "jumlah": 500000.0,
+          "deskripsi": "Sewa - Januari 2026"
+        }
+      ]
+    },
+    {
+      "no_voucher": "EQUITY 2026/02/001",
+      "tanggal": "2026-02-05T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pengalihan Modal Bayu Nurcahyono - Kov Jokowidjaja",
+      "entries": [
+        {
+          "account_no": "300002",
+          "tipe": "DEBIT",
+          "jumlah": 25000000.0,
+          "deskripsi": "Pengalihan Modal Bayu Nurcahyono - Kov Jokowidjaja"
+        },
+        {
+          "account_no": "300003",
+          "tipe": "KREDIT",
+          "jumlah": 25000000.0,
+          "deskripsi": "Pengalihan Modal Bayu Nurcahyono - Kov Jokowidjaja"
+        }
+      ]
+    },
+    {
+      "no_voucher": "EQUITY 2026/02/002",
+      "tanggal": "2026-02-05T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penambahan Modal Perseroan",
+      "entries": [
+        {
+          "account_no": "1600006",
+          "tipe": "DEBIT",
+          "jumlah": 2375000000.0,
+          "deskripsi": "Penambahan Modal Perseroan"
+        },
+        {
+          "account_no": "300003",
+          "tipe": "KREDIT",
+          "jumlah": 1400000000.0,
+          "deskripsi": "Penambahan Modal Perseroan"
+        },
+        {
+          "account_no": "300004",
+          "tipe": "KREDIT",
+          "jumlah": 400000000.0,
+          "deskripsi": "Penambahan Modal Perseroan"
+        },
+        {
+          "account_no": "300003",
+          "tipe": "KREDIT",
+          "jumlah": 175000000.0,
+          "deskripsi": "Penambahan Modal Perseroan"
+        },
+        {
+          "account_no": "300005",
+          "tipe": "KREDIT",
+          "jumlah": 200000000.0,
+          "deskripsi": "Penambahan Modal Perseroan"
+        },
+        {
+          "account_no": "300006",
+          "tipe": "KREDIT",
+          "jumlah": 200000000.0,
+          "deskripsi": "Penambahan Modal Perseroan"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/02/001",
+      "tanggal": "2026-02-12T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penyetoran Modal - Hendra Sumarno",
+      "entries": [
+        {
+          "account_no": "1000002",
+          "tipe": "DEBIT",
+          "jumlah": 100000000.0,
+          "deskripsi": "Penyetoran Modal - Hendra Sumarno"
+        },
+        {
+          "account_no": "1600006",
+          "tipe": "KREDIT",
+          "jumlah": 100000000.0,
+          "deskripsi": "Penyetoran Modal - Hendra Sumarno"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/02/002",
+      "tanggal": "2026-02-13T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penyetoran Modal - Kov Jokowidjaja",
+      "entries": [
+        {
+          "account_no": "1000002",
+          "tipe": "DEBIT",
+          "jumlah": 100000000.0,
+          "deskripsi": "Penyetoran Modal - Kov Jokowidjaja"
+        },
+        {
+          "account_no": "1600006",
+          "tipe": "KREDIT",
+          "jumlah": 100000000.0,
+          "deskripsi": "Penyetoran Modal - Kov Jokowidjaja"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/02/003",
+      "tanggal": "2026-02-13T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penyetoran Modal - Kov Jokowidjaja",
+      "entries": [
+        {
+          "account_no": "1000002",
+          "tipe": "DEBIT",
+          "jumlah": 100000000.0,
+          "deskripsi": "Penyetoran Modal - Kov Jokowidjaja"
+        },
+        {
+          "account_no": "1600006",
+          "tipe": "KREDIT",
+          "jumlah": 100000000.0,
+          "deskripsi": "Penyetoran Modal - Kov Jokowidjaja"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/02/004",
+      "tanggal": "2026-02-13T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penyetoran Modal - Hubert Jo Sumarno",
+      "entries": [
+        {
+          "account_no": "1000002",
+          "tipe": "DEBIT",
+          "jumlah": 100000000.0,
+          "deskripsi": "Penyetoran Modal - Hubert Jo Sumarno"
+        },
+        {
+          "account_no": "1600006",
+          "tipe": "KREDIT",
+          "jumlah": 100000000.0,
+          "deskripsi": "Penyetoran Modal - Hubert Jo Sumarno"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/02/005",
+      "tanggal": "2026-02-13T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembayaran Deposit Project XRAY",
+      "entries": [
+        {
+          "account_no": "110002",
+          "tipe": "DEBIT",
+          "jumlah": 250000000.0,
+          "deskripsi": "Pembayaran Deposit Project XRAY"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 250000000.0,
+          "deskripsi": "Pembayaran Deposit Project XRAY"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/02/006",
+      "tanggal": "2026-02-13T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Admin Bank Transfer",
+      "entries": [
+        {
+          "account_no": "720002",
+          "tipe": "DEBIT",
+          "jumlah": 2500.0,
+          "deskripsi": "Admin Bank Transfer"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500.0,
+          "deskripsi": "Admin Bank Transfer"
+        }
+      ]
+    },
+    {
+      "no_voucher": "1004",
+      "tanggal": "2026-02-13T00:00:00.000Z",
+      "sumber_aplikasi": "Purchase Invoice",
+      "deskripsi": "Subscription Google Workspace",
+      "entries": [
+        {
+          "account_no": "1400003",
+          "tipe": "DEBIT",
+          "jumlah": 8543000.0,
+          "deskripsi": "Subscription Google Workspace"
+        },
+        {
+          "account_no": "1500001",
+          "tipe": "DEBIT",
+          "jumlah": 939730.0,
+          "deskripsi": "Subscription Google Workspace"
+        },
+        {
+          "account_no": "210102",
+          "tipe": "KREDIT",
+          "jumlah": 9482730.0,
+          "deskripsi": "Subscription Google Workspace"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/02/007",
+      "tanggal": "2026-02-15T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penyetoran Modal - Hubert Jo Sumarno",
+      "entries": [
+        {
+          "account_no": "1000002",
+          "tipe": "DEBIT",
+          "jumlah": 100000000.0,
+          "deskripsi": "Penyetoran Modal - Hubert Jo Sumarno"
+        },
+        {
+          "account_no": "1600006",
+          "tipe": "KREDIT",
+          "jumlah": 100000000.0,
+          "deskripsi": "Penyetoran Modal - Hubert Jo Sumarno"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/02/008",
+      "tanggal": "2026-02-16T00:00:00.000Z",
+      "sumber_aplikasi": "Purchase Payment",
+      "deskripsi": "Pembayaran Google Workspace EIKON",
+      "entries": [
+        {
+          "account_no": "210102",
+          "tipe": "DEBIT",
+          "jumlah": 9482730.0,
+          "deskripsi": "Pembayaran Google Workspace EIKON"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 9482730.0,
+          "deskripsi": "Pembayaran Google Workspace EIKON"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/02/009",
+      "tanggal": "2026-02-16T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Admin Bank Transfer",
+      "entries": [
+        {
+          "account_no": "720002",
+          "tipe": "DEBIT",
+          "jumlah": 2500.0,
+          "deskripsi": "Admin Bank Transfer"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500.0,
+          "deskripsi": "Admin Bank Transfer"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/02/010",
+      "tanggal": "2026-02-23T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembayaran Pengurusan Akta Perubahan",
+      "entries": [
+        {
+          "account_no": "620312",
+          "tipe": "DEBIT",
+          "jumlah": 7000000.0,
+          "deskripsi": "Pembayaran Pengurusan Akta Perubahan"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 7000000.0,
+          "deskripsi": "Pembayaran Pengurusan Akta Perubahan"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/02/011",
+      "tanggal": "2026-02-23T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Admin Bank Transfer",
+      "entries": [
+        {
+          "account_no": "720002",
+          "tipe": "DEBIT",
+          "jumlah": 2500.0,
+          "deskripsi": "Admin Bank Transfer"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500.0,
+          "deskripsi": "Admin Bank Transfer"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/02/012",
+      "tanggal": "2026-02-23T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembayaran Legalisasi Akta",
+      "entries": [
+        {
+          "account_no": "620312",
+          "tipe": "DEBIT",
+          "jumlah": 1500000.0,
+          "deskripsi": "Pembayaran Legalisasi Akta"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 1500000.0,
+          "deskripsi": "Pembayaran Legalisasi Akta"
+        }
+      ]
+    },
+    {
+      "no_voucher": "SALARY 2026/02/001",
+      "tanggal": "2026-02-25T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Salary February 2026 - Lo Fredrick",
+      "entries": [
+        {
+          "account_no": "620101",
+          "tipe": "DEBIT",
+          "jumlah": 36000000.0,
+          "deskripsi": "Salary February 2026 - Lo Fredrick"
+        },
+        {
+          "account_no": "620103",
+          "tipe": "DEBIT",
+          "jumlah": 4000000.0,
+          "deskripsi": "Salary February 2026 - Lo Fredrick"
+        },
+        {
+          "account_no": "2100003",
+          "tipe": "KREDIT",
+          "jumlah": 6000000.0,
+          "deskripsi": "Salary February 2026 - Lo Fredrick"
+        },
+        {
+          "account_no": "2400009",
+          "tipe": "KREDIT",
+          "jumlah": 34000000.0,
+          "deskripsi": "Salary February 2026 - Lo Fredrick"
+        }
+      ]
+    },
+    {
+      "no_voucher": "SALARY 2026/02/002",
+      "tanggal": "2026-02-25T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Salary February 2026 - Hubert Jo Sumarno",
+      "entries": [
+        {
+          "account_no": "620101",
+          "tipe": "DEBIT",
+          "jumlah": 17000000.0,
+          "deskripsi": "Salary February 2026 - Hubert Jo Sumarno"
+        },
+        {
+          "account_no": "620103",
+          "tipe": "DEBIT",
+          "jumlah": 3000000.0,
+          "deskripsi": "Salary February 2026 - Hubert Jo Sumarno"
+        },
+        {
+          "account_no": "2100003",
+          "tipe": "KREDIT",
+          "jumlah": 1800000.0,
+          "deskripsi": "Salary February 2026 - Hubert Jo Sumarno"
+        },
+        {
+          "account_no": "2400009",
+          "tipe": "KREDIT",
+          "jumlah": 18200000.0,
+          "deskripsi": "Salary February 2026 - Hubert Jo Sumarno"
+        }
+      ]
+    },
+    {
+      "no_voucher": "SALARY 2026/02/003",
+      "tanggal": "2026-02-25T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Salary February 2026 - Bayu Nurcahyono",
+      "entries": [
+        {
+          "account_no": "620101",
+          "tipe": "DEBIT",
+          "jumlah": 5000000.0,
+          "deskripsi": "Salary February 2026 - Bayu Nurcahyono"
+        },
+        {
+          "account_no": "620103",
+          "tipe": "DEBIT",
+          "jumlah": 1000000.0,
+          "deskripsi": "Salary February 2026 - Bayu Nurcahyono"
+        },
+        {
+          "account_no": "2400009",
+          "tipe": "KREDIT",
+          "jumlah": 6000000.0,
+          "deskripsi": "Salary February 2026 - Bayu Nurcahyono"
+        }
+      ]
+    },
+    {
+      "no_voucher": "SALARY 2026/02/004",
+      "tanggal": "2026-02-25T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Salary February 2026 - Afif Puji Prabowo",
+      "entries": [
+        {
+          "account_no": "620101",
+          "tipe": "DEBIT",
+          "jumlah": 5000000.0,
+          "deskripsi": "Salary February 2026 - Afif Puji Prabowo"
+        },
+        {
+          "account_no": "620103",
+          "tipe": "DEBIT",
+          "jumlah": 1000000.0,
+          "deskripsi": "Salary February 2026 - Afif Puji Prabowo"
+        },
+        {
+          "account_no": "2100003",
+          "tipe": "KREDIT",
+          "jumlah": 45000.0,
+          "deskripsi": "Salary February 2026 - Afif Puji Prabowo"
+        },
+        {
+          "account_no": "2400009",
+          "tipe": "KREDIT",
+          "jumlah": 5955000.0,
+          "deskripsi": "Salary February 2026 - Afif Puji Prabowo"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/02/013",
+      "tanggal": "2026-02-26T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembayaran di muka",
+      "entries": [
+        {
+          "account_no": "110002",
+          "tipe": "DEBIT",
+          "jumlah": 2331000.02,
+          "deskripsi": "Pembayaran di muka"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2331000.02,
+          "deskripsi": "Pembayaran di muka"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/02/014",
+      "tanggal": "2026-02-26T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Admin Bank Transfer",
+      "entries": [
+        {
+          "account_no": "720002",
+          "tipe": "DEBIT",
+          "jumlah": 2500.0,
+          "deskripsi": "Admin Bank Transfer"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500.0,
+          "deskripsi": "Admin Bank Transfer"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/02/015",
+      "tanggal": "2026-02-26T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembayaran Retainer Co-Working",
+      "entries": [
+        {
+          "account_no": "620305",
+          "tipe": "DEBIT",
+          "jumlah": 1458000.0,
+          "deskripsi": "Pembayaran Retainer Co-Working"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 1458000.0,
+          "deskripsi": "Pembayaran Retainer Co-Working"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/02/016",
+      "tanggal": "2026-02-26T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Admin Bank Transfer",
+      "entries": [
+        {
+          "account_no": "720002",
+          "tipe": "DEBIT",
+          "jumlah": 2500.0,
+          "deskripsi": "Admin Bank Transfer"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500.0,
+          "deskripsi": "Admin Bank Transfer"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/02/017",
+      "tanggal": "2026-02-26T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembayaran CoWorking Space HQ March 2026",
+      "entries": [
+        {
+          "account_no": "1400001",
+          "tipe": "DEBIT",
+          "jumlah": 2051280.0,
+          "deskripsi": "Pembayaran CoWorking Space HQ March 2026"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2051280.0,
+          "deskripsi": "Pembayaran CoWorking Space HQ March 2026"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/02/018",
+      "tanggal": "2026-02-26T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Admin Bank Transfer",
+      "entries": [
+        {
+          "account_no": "720002",
+          "tipe": "DEBIT",
+          "jumlah": 2500.0,
+          "deskripsi": "Admin Bank Transfer"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500.0,
+          "deskripsi": "Admin Bank Transfer"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/02/019",
+      "tanggal": "2026-02-27T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembayaran Gaji Februari 2026 - Lo Fredrick",
+      "entries": [
+        {
+          "account_no": "2400009",
+          "tipe": "DEBIT",
+          "jumlah": 34000000.0,
+          "deskripsi": "Pembayaran Gaji Februari 2026 - Lo Fredrick"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 34000000.0,
+          "deskripsi": "Pembayaran Gaji Februari 2026 - Lo Fredrick"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/02/020",
+      "tanggal": "2026-02-27T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembayaran Gaji Februari 2026 - Bayu Nurcahyono",
+      "entries": [
+        {
+          "account_no": "2400009",
+          "tipe": "DEBIT",
+          "jumlah": 6000000.0,
+          "deskripsi": "Pembayaran Gaji Februari 2026 - Bayu Nurcahyono"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 6000000.0,
+          "deskripsi": "Pembayaran Gaji Februari 2026 - Bayu Nurcahyono"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/02/021",
+      "tanggal": "2026-02-27T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Admin Bank Transfer",
+      "entries": [
+        {
+          "account_no": "720002",
+          "tipe": "DEBIT",
+          "jumlah": 2500.0,
+          "deskripsi": "Admin Bank Transfer"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500.0,
+          "deskripsi": "Admin Bank Transfer"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/02/022",
+      "tanggal": "2026-02-27T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembayaran Gaji Februari 2026 - Hubert Jo Sumarno",
+      "entries": [
+        {
+          "account_no": "2400009",
+          "tipe": "DEBIT",
+          "jumlah": 18200000.0,
+          "deskripsi": "Pembayaran Gaji Februari 2026 - Hubert Jo Sumarno"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 18200000.0,
+          "deskripsi": "Pembayaran Gaji Februari 2026 - Hubert Jo Sumarno"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/02/023",
+      "tanggal": "2026-02-27T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembayaran Gaji Februari 2026 - Afif Puji Prabowo",
+      "entries": [
+        {
+          "account_no": "2400009",
+          "tipe": "DEBIT",
+          "jumlah": 5955000.0,
+          "deskripsi": "Pembayaran Gaji Februari 2026 - Afif Puji Prabowo"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 5955000.0,
+          "deskripsi": "Pembayaran Gaji Februari 2026 - Afif Puji Prabowo"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/02/024",
+      "tanggal": "2026-02-27T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Admin Bank Transfer",
+      "entries": [
+        {
+          "account_no": "720002",
+          "tipe": "DEBIT",
+          "jumlah": 2500.0,
+          "deskripsi": "Admin Bank Transfer"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500.0,
+          "deskripsi": "Admin Bank Transfer"
+        }
+      ]
+    },
+    {
+      "no_voucher": "EXPENSE 2026/02/001",
+      "tanggal": "2026-02-28T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Domain technohub.id - Februari 2026",
+      "entries": [
+        {
+          "account_no": "620314",
+          "tipe": "DEBIT",
+          "jumlah": 22083.33,
+          "deskripsi": "Domain technohub.id - Februari 2026"
+        },
+        {
+          "account_no": "1400003",
+          "tipe": "KREDIT",
+          "jumlah": 22083.33,
+          "deskripsi": "Domain technohub.id - Februari 2026"
+        }
+      ]
+    },
+    {
+      "no_voucher": "EXPENSE 2026/02/002",
+      "tanggal": "2026-02-28T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "D-Net Medium - Februari 2026",
+      "entries": [
+        {
+          "account_no": "620314",
+          "tipe": "DEBIT",
+          "jumlah": 50000.0,
+          "deskripsi": "D-Net Medium - Februari 2026"
+        },
+        {
+          "account_no": "1400003",
+          "tipe": "KREDIT",
+          "jumlah": 50000.0,
+          "deskripsi": "D-Net Medium - Februari 2026"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/02/025",
+      "tanggal": "2026-02-28T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Biyaa Admin Bulanan",
+      "entries": [
+        {
+          "account_no": "720002",
+          "tipe": "DEBIT",
+          "jumlah": 12500.0,
+          "deskripsi": "Biyaa Admin Bulanan"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 12500.0,
+          "deskripsi": "Biyaa Admin Bulanan"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/02/026",
+      "tanggal": "2026-02-28T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pendapatan atas Bunga",
+      "entries": [
+        {
+          "account_no": "1000002",
+          "tipe": "DEBIT",
+          "jumlah": 39269.01,
+          "deskripsi": "Pendapatan atas Bunga"
+        },
+        {
+          "account_no": "710001",
+          "tipe": "KREDIT",
+          "jumlah": 39269.01,
+          "deskripsi": "Pendapatan atas Bunga"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/02/027",
+      "tanggal": "2026-02-28T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pajak atas Pendapatan Bunga",
+      "entries": [
+        {
+          "account_no": "720003",
+          "tipe": "DEBIT",
+          "jumlah": 7853.8,
+          "deskripsi": "Pajak atas Pendapatan Bunga"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 7853.8,
+          "deskripsi": "Pajak atas Pendapatan Bunga"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/02/028",
+      "tanggal": "2026-02-28T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Biaya Admin Kartu",
+      "entries": [
+        {
+          "account_no": "720002",
+          "tipe": "DEBIT",
+          "jumlah": 10000.0,
+          "deskripsi": "Biaya Admin Kartu"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 10000.0,
+          "deskripsi": "Biaya Admin Kartu"
+        }
+      ]
+    },
+    {
+      "no_voucher": "EXPENSE 2026/02/003",
+      "tanggal": "2026-02-28T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Google Workspace Subs - February 2026",
+      "entries": [
+        {
+          "account_no": "620314",
+          "tipe": "DEBIT",
+          "jumlah": 711916.66,
+          "deskripsi": "Google Workspace Subs - February 2026"
+        },
+        {
+          "account_no": "1400003",
+          "tipe": "KREDIT",
+          "jumlah": 711916.66,
+          "deskripsi": "Google Workspace Subs - February 2026"
+        }
+      ]
+    },
+    {
+      "no_voucher": "EXPENSE 2026/02/004",
+      "tanggal": "2026-02-28T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Premium plan Core - Februari 2026",
+      "entries": [
+        {
+          "account_no": "620314",
+          "tipe": "DEBIT",
+          "jumlah": 232678.25,
+          "deskripsi": "Premium plan Core - Februari 2026"
+        },
+        {
+          "account_no": "1400003",
+          "tipe": "KREDIT",
+          "jumlah": 232678.25,
+          "deskripsi": "Premium plan Core - Februari 2026"
+        }
+      ]
+    },
+    {
+      "no_voucher": "RENT 2026/02/001",
+      "tanggal": "2026-02-28T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Sewa - Februari 2026",
+      "entries": [
+        {
+          "account_no": "620305",
+          "tipe": "DEBIT",
+          "jumlah": 500000.0,
+          "deskripsi": "Sewa - Februari 2026"
+        },
+        {
+          "account_no": "1400001",
+          "tipe": "KREDIT",
+          "jumlah": 500000.0,
+          "deskripsi": "Sewa - Februari 2026"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/03/001",
+      "tanggal": "2026-03-04T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penyetoran Modal - Hendra Sumarno",
+      "entries": [
+        {
+          "account_no": "1000002",
+          "tipe": "DEBIT",
+          "jumlah": 100000000.0,
+          "deskripsi": "Penyetoran Modal - Hendra Sumarno"
+        },
+        {
+          "account_no": "1600006",
+          "tipe": "KREDIT",
+          "jumlah": 100000000.0,
+          "deskripsi": "Penyetoran Modal - Hendra Sumarno"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/03/002",
+      "tanggal": "2026-03-09T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penyetoran Modal - Hubert Jo Sumarno",
+      "entries": [
+        {
+          "account_no": "1000002",
+          "tipe": "DEBIT",
+          "jumlah": 100000000.0,
+          "deskripsi": "Penyetoran Modal - Hubert Jo Sumarno"
+        },
+        {
+          "account_no": "1600006",
+          "tipe": "KREDIT",
+          "jumlah": 100000000.0,
+          "deskripsi": "Penyetoran Modal - Hubert Jo Sumarno"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/03/003",
+      "tanggal": "2026-03-09T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penyetoran Modal - Hendra Sumarno",
+      "entries": [
+        {
+          "account_no": "1000002",
+          "tipe": "DEBIT",
+          "jumlah": 50000000.0,
+          "deskripsi": "Penyetoran Modal - Hendra Sumarno"
+        },
+        {
+          "account_no": "1600006",
+          "tipe": "KREDIT",
+          "jumlah": 50000000.0,
+          "deskripsi": "Penyetoran Modal - Hendra Sumarno"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/03/004",
+      "tanggal": "2026-03-09T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penyetoran Modal - Hendra Sumarno",
+      "entries": [
+        {
+          "account_no": "1000002",
+          "tipe": "DEBIT",
+          "jumlah": 50000000.0,
+          "deskripsi": "Penyetoran Modal - Hendra Sumarno"
+        },
+        {
+          "account_no": "1600006",
+          "tipe": "KREDIT",
+          "jumlah": 50000000.0,
+          "deskripsi": "Penyetoran Modal - Hendra Sumarno"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/03/005",
+      "tanggal": "2026-03-11T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembelian snack di Bandara",
+      "entries": [
+        {
+          "account_no": "6104",
+          "tipe": "DEBIT",
+          "jumlah": 771980.0,
+          "deskripsi": "Pembelian snack di Bandara"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 771980.0,
+          "deskripsi": "Pembelian snack di Bandara"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/03/006",
+      "tanggal": "2026-03-12T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembelian snack di Bandara",
+      "entries": [
+        {
+          "account_no": "6104",
+          "tipe": "DEBIT",
+          "jumlah": 249260.0,
+          "deskripsi": "Pembelian snack di Bandara"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 249260.0,
+          "deskripsi": "Pembelian snack di Bandara"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/03/007",
+      "tanggal": "2026-03-17T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien",
+      "entries": [
+        {
+          "account_no": "6104",
+          "tipe": "DEBIT",
+          "jumlah": 434390.0,
+          "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 434390.0,
+          "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien"
+        }
+      ]
+    },
+    {
+      "no_voucher": "1006",
+      "tanggal": "2026-03-19T00:00:00.000Z",
+      "sumber_aplikasi": "Purchase Invoice",
+      "deskripsi": " Entertainment - SSS",
+      "entries": [
+        {
+          "account_no": "6104",
+          "tipe": "DEBIT",
+          "jumlah": 25000000.0,
+          "deskripsi": " Entertainment - SSS"
+        },
+        {
+          "account_no": "210102",
+          "tipe": "KREDIT",
+          "jumlah": 25000000.0,
+          "deskripsi": " Entertainment - SSS"
+        }
+      ]
+    },
+    {
+      "no_voucher": "1007",
+      "tanggal": "2026-03-21T00:00:00.000Z",
+      "sumber_aplikasi": "Purchase Invoice",
+      "deskripsi": " Entertainment - SSS(DHLTEC)",
+      "entries": [
+        {
+          "account_no": "6104",
+          "tipe": "DEBIT",
+          "jumlah": 30000000.0,
+          "deskripsi": " Entertainment - SSS(DHLTEC)"
+        },
+        {
+          "account_no": "210102",
+          "tipe": "KREDIT",
+          "jumlah": 30000000.0,
+          "deskripsi": " Entertainment - SSS(DHLTEC)"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/03/008",
+      "tanggal": "2026-03-25T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembayaran Deposit",
+      "entries": [
+        {
+          "account_no": "1600003",
+          "tipe": "DEBIT",
+          "jumlah": 1618380.0,
+          "deskripsi": "Pembayaran Deposit"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 1618380.0,
+          "deskripsi": "Pembayaran Deposit"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/03/009",
+      "tanggal": "2026-03-25T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Admin Transfer Bank",
+      "entries": [
+        {
+          "account_no": "720002",
+          "tipe": "DEBIT",
+          "jumlah": 2500.0,
+          "deskripsi": "Admin Transfer Bank"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500.0,
+          "deskripsi": "Admin Transfer Bank"
+        }
+      ]
+    },
+    {
+      "no_voucher": "SALARY 2026/03/001",
+      "tanggal": "2026-03-25T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Basic Salary",
+      "entries": [
+        {
+          "account_no": "620101",
+          "tipe": "DEBIT",
+          "jumlah": 36000000.0,
+          "deskripsi": "Basic Salary"
+        },
+        {
+          "account_no": "620101",
+          "tipe": "DEBIT",
+          "jumlah": 4000000.0,
+          "deskripsi": "Tunjangan Transportasi"
+        },
+        {
+          "account_no": "2100003",
+          "tipe": "KREDIT",
+          "jumlah": 6000000.0,
+          "deskripsi": "PPh 21"
+        },
+        {
+          "account_no": "2400009",
+          "tipe": "KREDIT",
+          "jumlah": 34000000.0,
+          "deskripsi": "Salary Maret 2026 - Lo Fredrick"
+        }
+      ]
+    },
+    {
+      "no_voucher": "SALARY 2026/03/002",
+      "tanggal": "2026-03-25T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Basic Salary",
+      "entries": [
+        {
+          "account_no": "620101",
+          "tipe": "DEBIT",
+          "jumlah": 17000000.0,
+          "deskripsi": "Basic Salary"
+        },
+        {
+          "account_no": "620101",
+          "tipe": "DEBIT",
+          "jumlah": 3000000.0,
+          "deskripsi": "Tunjangan Transoprtasi"
+        },
+        {
+          "account_no": "2100003",
+          "tipe": "KREDIT",
+          "jumlah": 1800000.0,
+          "deskripsi": "Salary Maret 2026 - Hubert Jo Sumarno"
+        },
+        {
+          "account_no": "2400009",
+          "tipe": "KREDIT",
+          "jumlah": 18200000.0,
+          "deskripsi": "Salary Maret 2026 - Hubert Jo Sumarno"
+        }
+      ]
+    },
+    {
+      "no_voucher": "SALARY 2026/03/003",
+      "tanggal": "2026-03-25T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Basic Salary",
+      "entries": [
+        {
+          "account_no": "620101",
+          "tipe": "DEBIT",
+          "jumlah": 5000000.0,
+          "deskripsi": "Basic Salary"
+        },
+        {
+          "account_no": "620101",
+          "tipe": "DEBIT",
+          "jumlah": 1000000.0,
+          "deskripsi": "Tunjangan Transportasi"
+        },
+        {
+          "account_no": "2400009",
+          "tipe": "KREDIT",
+          "jumlah": 6000000.0,
+          "deskripsi": "Gaji Maret 2062 - Bayu Nurcahyono"
+        }
+      ]
+    },
+    {
+      "no_voucher": "SALARY 2026/03/004",
+      "tanggal": "2026-03-25T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Basic Salary",
+      "entries": [
+        {
+          "account_no": "620101",
+          "tipe": "DEBIT",
+          "jumlah": 5000000.0,
+          "deskripsi": "Basic Salary"
+        },
+        {
+          "account_no": "620101",
+          "tipe": "DEBIT",
+          "jumlah": 1000000.0,
+          "deskripsi": "Tunjangan Transportasi"
+        },
+        {
+          "account_no": "620101",
+          "tipe": "DEBIT",
+          "jumlah": 45000.0,
+          "deskripsi": "Insentive dan Lain-Lain"
+        },
+        {
+          "account_no": "2400009",
+          "tipe": "KREDIT",
+          "jumlah": 6045000.0,
+          "deskripsi": "Gaji Maret 2026 - Afif Puji Prabowo"
+        }
+      ]
+    },
+    {
+      "no_voucher": "1008",
+      "tanggal": "2026-03-25T00:00:00.000Z",
+      "sumber_aplikasi": "Purchase Invoice",
+      "deskripsi": " Entertainment - DAP",
+      "entries": [
+        {
+          "account_no": "6104",
+          "tipe": "DEBIT",
+          "jumlah": 10000000.0,
+          "deskripsi": " Entertainment - DAP"
+        },
+        {
+          "account_no": "210102",
+          "tipe": "KREDIT",
+          "jumlah": 10000000.0,
+          "deskripsi": " Entertainment - DAP"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/03/010",
+      "tanggal": "2026-03-27T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembayaran Salary bulan Maret 2026 - Lo Fredrick",
+      "entries": [
+        {
+          "account_no": "2400009",
+          "tipe": "DEBIT",
+          "jumlah": 34000000.0,
+          "deskripsi": "Pembayaran Salary bulan Maret 2026 - Lo Fredrick"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 34000000.0,
+          "deskripsi": "Pembayaran Salary bulan Maret 2026 - Lo Fredrick"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/03/011",
+      "tanggal": "2026-03-27T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembayaran Salary bulan Maret 2026 - Hubert Jo Sumarno",
+      "entries": [
+        {
+          "account_no": "2400009",
+          "tipe": "DEBIT",
+          "jumlah": 18200000.0,
+          "deskripsi": "Pembayaran Salary bulan Maret 2026 - Hubert Jo Sumarno"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 18200000.0,
+          "deskripsi": "Pembayaran Salary bulan Maret 2026 - Hubert Jo Sumarno"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/03/012",
+      "tanggal": "2026-03-27T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembayaran Salary bulan Maret 2026 - Bayu Nurcahyono",
+      "entries": [
+        {
+          "account_no": "2400009",
+          "tipe": "DEBIT",
+          "jumlah": 6000000.0,
+          "deskripsi": "Pembayaran Salary bulan Maret 2026 - Bayu Nurcahyono"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 6000000.0,
+          "deskripsi": "Pembayaran Salary bulan Maret 2026 - Bayu Nurcahyono"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/03/013",
+      "tanggal": "2026-03-27T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Admin Bank Transfer",
+      "entries": [
+        {
+          "account_no": "720002",
+          "tipe": "DEBIT",
+          "jumlah": 2500.0,
+          "deskripsi": "Admin Bank Transfer"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500.0,
+          "deskripsi": "Admin Bank Transfer"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/03/014",
+      "tanggal": "2026-03-27T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembayaran Salary bulan Maret 2026 - Afif Puji Prabowo",
+      "entries": [
+        {
+          "account_no": "2400009",
+          "tipe": "DEBIT",
+          "jumlah": 6045000.0,
+          "deskripsi": "Pembayaran Salary bulan Maret 2026 - Afif Puji Prabowo"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 6045000.0,
+          "deskripsi": "Pembayaran Salary bulan Maret 2026 - Afif Puji Prabowo"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/03/015",
+      "tanggal": "2026-03-27T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Admin Bank Transfer ",
+      "entries": [
+        {
+          "account_no": "720002",
+          "tipe": "DEBIT",
+          "jumlah": 2500.0,
+          "deskripsi": "Admin Bank Transfer "
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500.0,
+          "deskripsi": "Admin Bank Transfer "
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/03/016",
+      "tanggal": "2026-03-28T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Biaya Admin Kartu",
+      "entries": [
+        {
+          "account_no": "720002",
+          "tipe": "DEBIT",
+          "jumlah": 10500.0,
+          "deskripsi": "Biaya Admin Kartu"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 10500.0,
+          "deskripsi": "Biaya Admin Kartu"
+        }
+      ]
+    },
+    {
+      "no_voucher": "1009",
+      "tanggal": "2026-03-30T00:00:00.000Z",
+      "sumber_aplikasi": "Purchase Invoice",
+      "deskripsi": " Entertainment - SSS(DHLOPS)",
+      "entries": [
+        {
+          "account_no": "6104",
+          "tipe": "DEBIT",
+          "jumlah": 15000000.0,
+          "deskripsi": " Entertainment - SSS(DHLOPS)"
+        },
+        {
+          "account_no": "210102",
+          "tipe": "KREDIT",
+          "jumlah": 15000000.0,
+          "deskripsi": " Entertainment - SSS(DHLOPS)"
+        }
+      ]
+    },
+    {
+      "no_voucher": "EXPENSE 2026/03/002",
+      "tanggal": "2026-03-31T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "D-Net Medium - Maret 2026",
+      "entries": [
+        {
+          "account_no": "620314",
+          "tipe": "DEBIT",
+          "jumlah": 50000.0,
+          "deskripsi": "D-Net Medium - Maret 2026"
+        },
+        {
+          "account_no": "1400003",
+          "tipe": "KREDIT",
+          "jumlah": 50000.0,
+          "deskripsi": "D-Net Medium - Maret 2026"
+        }
+      ]
+    },
+    {
+      "no_voucher": "EXPENSE 2026/03/003",
+      "tanggal": "2026-03-31T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Google Workspace Subs - Maret 2026",
+      "entries": [
+        {
+          "account_no": "620314",
+          "tipe": "DEBIT",
+          "jumlah": 711916.66,
+          "deskripsi": "Google Workspace Subs - Maret 2026"
+        },
+        {
+          "account_no": "1400003",
+          "tipe": "KREDIT",
+          "jumlah": 711916.66,
+          "deskripsi": "Google Workspace Subs - Maret 2026"
+        }
+      ]
+    },
+    {
+      "no_voucher": "EXPENSE 2026/03/004",
+      "tanggal": "2026-03-31T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Premium plan Core - Maret 2026",
+      "entries": [
+        {
+          "account_no": "620314",
+          "tipe": "DEBIT",
+          "jumlah": 232678.25,
+          "deskripsi": "Premium plan Core - Maret 2026"
+        },
+        {
+          "account_no": "1400003",
+          "tipe": "KREDIT",
+          "jumlah": 232678.25,
+          "deskripsi": "Premium plan Core - Maret 2026"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/03/017",
+      "tanggal": "2026-03-31T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Biaya Admin Bulanan",
+      "entries": [
+        {
+          "account_no": "720002",
+          "tipe": "DEBIT",
+          "jumlah": 13000.0,
+          "deskripsi": "Biaya Admin Bulanan"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 13000.0,
+          "deskripsi": "Biaya Admin Bulanan"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/03/018",
+      "tanggal": "2026-03-31T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pendapatan Bunga",
+      "entries": [
+        {
+          "account_no": "1000002",
+          "tipe": "DEBIT",
+          "jumlah": 132256.88,
+          "deskripsi": "Pendapatan Bunga"
+        },
+        {
+          "account_no": "710001",
+          "tipe": "KREDIT",
+          "jumlah": 132256.88,
+          "deskripsi": "Pendapatan Bunga"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/03/019",
+      "tanggal": "2026-03-31T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pajak atas Pendapatan Bunga",
+      "entries": [
+        {
+          "account_no": "720003",
+          "tipe": "DEBIT",
+          "jumlah": 26451.38,
+          "deskripsi": "Pajak atas Pendapatan Bunga"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 26451.38,
+          "deskripsi": "Pajak atas Pendapatan Bunga"
+        }
+      ]
+    },
+    {
+      "no_voucher": "RENT 2026/03/001",
+      "tanggal": "2026-03-31T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Sewa - Maret 2026",
+      "entries": [
+        {
+          "account_no": "620305",
+          "tipe": "DEBIT",
+          "jumlah": 500000.0,
+          "deskripsi": "Sewa - Maret 2026"
+        },
+        {
+          "account_no": "1400001",
+          "tipe": "KREDIT",
+          "jumlah": 500000.0,
+          "deskripsi": "Sewa - Maret 2026"
+        }
+      ]
+    },
+    {
+      "no_voucher": "EXPENSE 2026/03/005",
+      "tanggal": "2026-03-31T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Co-Working Space March",
+      "entries": [
+        {
+          "account_no": "620305",
+          "tipe": "DEBIT",
+          "jumlah": 2051280.0,
+          "deskripsi": "Co-Working Space March"
+        },
+        {
+          "account_no": "1400001",
+          "tipe": "KREDIT",
+          "jumlah": 2051280.0,
+          "deskripsi": "Co-Working Space March"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/04/001",
+      "tanggal": "2026-04-06T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien Test DAPK",
+      "entries": [
+        {
+          "account_no": "6104",
+          "tipe": "DEBIT",
+          "jumlah": 602800.0,
+          "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien Test DAPK"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 602800.0,
+          "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien Test DAPK"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/04/002",
+      "tanggal": "2026-04-09T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembayaran Scanning Dokumen",
+      "entries": [
+        {
+          "account_no": "620310",
+          "tipe": "DEBIT",
+          "jumlah": 112000.0,
+          "deskripsi": "Pembayaran Scanning Dokumen"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 112000.0,
+          "deskripsi": "Pembayaran Scanning Dokumen"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/04/003",
+      "tanggal": "2026-04-13T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembayaran Google",
+      "entries": [
+        {
+          "account_no": "620314",
+          "tipe": "DEBIT",
+          "jumlah": 10000.0,
+          "deskripsi": "Pembayaran Google"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 10000.0,
+          "deskripsi": "Pembayaran Google"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/04/004",
+      "tanggal": "2026-04-13T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pengembalian Dana Pembayaran Google",
+      "entries": [
+        {
+          "account_no": "1000002",
+          "tipe": "DEBIT",
+          "jumlah": 10000.0,
+          "deskripsi": "Pengembalian Dana Pembayaran Google"
+        },
+        {
+          "account_no": "620314",
+          "tipe": "KREDIT",
+          "jumlah": 10000.0,
+          "deskripsi": "Pengembalian Dana Pembayaran Google"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/04/005",
+      "tanggal": "2026-04-13T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembayaran Google",
+      "entries": [
+        {
+          "account_no": "620314",
+          "tipe": "DEBIT",
+          "jumlah": 10000.0,
+          "deskripsi": "Pembayaran Google"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 10000.0,
+          "deskripsi": "Pembayaran Google"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/04/006",
+      "tanggal": "2026-04-13T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pengembalian Dana Pembayaran Google",
+      "entries": [
+        {
+          "account_no": "1000002",
+          "tipe": "DEBIT",
+          "jumlah": 10000.0,
+          "deskripsi": "Pengembalian Dana Pembayaran Google"
+        },
+        {
+          "account_no": "620314",
+          "tipe": "KREDIT",
+          "jumlah": 10000.0,
+          "deskripsi": "Pengembalian Dana Pembayaran Google"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/04/007",
+      "tanggal": "2026-04-20T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembayaran Co Working retainer",
+      "entries": [
+        {
+          "account_no": "620305",
+          "tipe": "DEBIT",
+          "jumlah": 1618380.0,
+          "deskripsi": "Pembayaran Co Working retainer"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 1618380.0,
+          "deskripsi": "Pembayaran Co Working retainer"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/04/008",
+      "tanggal": "2026-04-20T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Admin Bank Transfer",
+      "entries": [
+        {
+          "account_no": "720002",
+          "tipe": "DEBIT",
+          "jumlah": 2500.0,
+          "deskripsi": "Admin Bank Transfer"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500.0,
+          "deskripsi": "Admin Bank Transfer"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/04/009",
+      "tanggal": "2026-04-20T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Bank Admin",
+      "entries": [
+        {
+          "account_no": "720002",
+          "tipe": "DEBIT",
+          "jumlah": 5000.0,
+          "deskripsi": "Bank Admin"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 5000.0,
+          "deskripsi": "Bank Admin"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/04/010",
+      "tanggal": "2026-04-20T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "TF out - pemindahan dana",
+      "entries": [
+        {
+          "account_no": "1600005",
+          "tipe": "DEBIT",
+          "jumlah": 4664501.0,
+          "deskripsi": "TF out - pemindahan dana"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 4664501.0,
+          "deskripsi": "TF out - pemindahan dana"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/04/011",
+      "tanggal": "2026-04-20T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Bank Admin",
+      "entries": [
+        {
+          "account_no": "720002",
+          "tipe": "DEBIT",
+          "jumlah": 5000.0,
+          "deskripsi": "Bank Admin"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 5000.0,
+          "deskripsi": "Bank Admin"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/04/012",
+      "tanggal": "2026-04-20T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembayaran Gaji bulan April 2026",
+      "entries": [
+        {
+          "account_no": "2400009",
+          "tipe": "DEBIT",
+          "jumlah": 67969591.0,
+          "deskripsi": "Pembayaran Gaji bulan April 2026"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 67969591.0,
+          "deskripsi": "Pembayaran Gaji bulan April 2026"
+        }
+      ]
+    },
+    {
+      "no_voucher": "SALARY 2026/04/001",
+      "tanggal": "2026-04-25T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Basic Salary",
+      "entries": [
+        {
+          "account_no": "620101",
+          "tipe": "DEBIT",
+          "jumlah": 36000000.0,
+          "deskripsi": "Basic Salary"
+        },
+        {
+          "account_no": "620101",
+          "tipe": "DEBIT",
+          "jumlah": 4000000.0,
+          "deskripsi": "Tunjangan Transportasi"
+        },
+        {
+          "account_no": "620101",
+          "tipe": "DEBIT",
+          "jumlah": 2629941.0,
+          "deskripsi": "Biaya Operasional"
+        },
+        {
+          "account_no": "2100003",
+          "tipe": "KREDIT",
+          "jumlah": 6000000.0,
+          "deskripsi": "PPh 21"
+        },
+        {
+          "account_no": "2400009",
+          "tipe": "KREDIT",
+          "jumlah": 36629941.0,
+          "deskripsi": "Salary April 2026 - Fredrich Lo"
+        }
+      ]
+    },
+    {
+      "no_voucher": "SALARY 2026/04/002",
+      "tanggal": "2026-04-25T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Basic Salary",
+      "entries": [
+        {
+          "account_no": "620101",
+          "tipe": "DEBIT",
+          "jumlah": 17000000.0,
+          "deskripsi": "Basic Salary"
+        },
+        {
+          "account_no": "620101",
+          "tipe": "DEBIT",
+          "jumlah": 3000000.0,
+          "deskripsi": "Tunjangan Transportasi"
+        },
+        {
+          "account_no": "2100003",
+          "tipe": "KREDIT",
+          "jumlah": 1800000.0,
+          "deskripsi": "PPH 21"
+        },
+        {
+          "account_no": "2400009",
+          "tipe": "KREDIT",
+          "jumlah": 18200000.0,
+          "deskripsi": "Salary April 2026 - Hubert Jo Sumarno"
+        }
+      ]
+    },
+    {
+      "no_voucher": "SALARY 2026/04/003",
+      "tanggal": "2026-04-25T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Basic Salary",
+      "entries": [
+        {
+          "account_no": "620101",
+          "tipe": "DEBIT",
+          "jumlah": 5000000.0,
+          "deskripsi": "Basic Salary"
+        },
+        {
+          "account_no": "620101",
+          "tipe": "DEBIT",
+          "jumlah": 1000000.0,
+          "deskripsi": "Tunjangan Trasnportasi"
+        },
+        {
+          "account_no": "2400009",
+          "tipe": "KREDIT",
+          "jumlah": 6000000.0,
+          "deskripsi": "Salary April 2026 - Bayu Nurcahyono"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/04/013",
+      "tanggal": "2026-04-27T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien OMRON",
+      "entries": [
+        {
+          "account_no": "6104",
+          "tipe": "DEBIT",
+          "jumlah": 215380.0,
+          "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien OMRON"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 215380.0,
+          "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien OMRON"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/04/014",
+      "tanggal": "2026-04-28T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien HATI, HONEYWELL",
+      "entries": [
+        {
+          "account_no": "6104",
+          "tipe": "DEBIT",
+          "jumlah": 271037.0,
+          "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien HATI, HONEYWELL"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 271037.0,
+          "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien HATI, HONEYWELL"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/04/015",
+      "tanggal": "2026-04-28T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Biaya Admin Kartu Bulanan",
+      "entries": [
+        {
+          "account_no": "720002",
+          "tipe": "DEBIT",
+          "jumlah": 10500.0,
+          "deskripsi": "Biaya Admin Kartu Bulanan"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 10500.0,
+          "deskripsi": "Biaya Admin Kartu Bulanan"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/04/016",
+      "tanggal": "2026-04-29T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien DAPK, SSS",
+      "entries": [
+        {
+          "account_no": "6104",
+          "tipe": "DEBIT",
+          "jumlah": 256300.0,
+          "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien DAPK, SSS"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 256300.0,
+          "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien DAPK, SSS"
+        }
+      ]
+    },
+    {
+      "no_voucher": "EXPENSE 2026/04/001",
+      "tanggal": "2026-04-30T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "D-Net Medium - April 2026",
+      "entries": [
+        {
+          "account_no": "620314",
+          "tipe": "DEBIT",
+          "jumlah": 50000.0,
+          "deskripsi": "D-Net Medium - April 2026"
+        },
+        {
+          "account_no": "1400003",
+          "tipe": "KREDIT",
+          "jumlah": 50000.0,
+          "deskripsi": "D-Net Medium - April 2026"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/04/017",
+      "tanggal": "2026-04-30T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Biaya Admin",
+      "entries": [
+        {
+          "account_no": "720002",
+          "tipe": "DEBIT",
+          "jumlah": 13000.0,
+          "deskripsi": "Biaya Admin"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 13000.0,
+          "deskripsi": "Biaya Admin"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/04/018",
+      "tanggal": "2026-04-30T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pendapatan Bunga",
+      "entries": [
+        {
+          "account_no": "1000002",
+          "tipe": "DEBIT",
+          "jumlah": 123665.5,
+          "deskripsi": "Pendapatan Bunga"
+        },
+        {
+          "account_no": "710001",
+          "tipe": "KREDIT",
+          "jumlah": 123665.5,
+          "deskripsi": "Pendapatan Bunga"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/04/019",
+      "tanggal": "2026-04-30T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pajak atas Pendapatan Bunga",
+      "entries": [
+        {
+          "account_no": "720003",
+          "tipe": "DEBIT",
+          "jumlah": 24733.1,
+          "deskripsi": "Pajak atas Pendapatan Bunga"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 24733.1,
+          "deskripsi": "Pajak atas Pendapatan Bunga"
+        }
+      ]
+    },
+    {
+      "no_voucher": "RENT 2026/04/001",
+      "tanggal": "2026-04-30T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Sewa - April 2026",
+      "entries": [
+        {
+          "account_no": "620305",
+          "tipe": "DEBIT",
+          "jumlah": 500000.0,
+          "deskripsi": "Sewa - April 2026"
+        },
+        {
+          "account_no": "1400001",
+          "tipe": "KREDIT",
+          "jumlah": 500000.0,
+          "deskripsi": "Sewa - April 2026"
+        }
+      ]
+    },
+    {
+      "no_voucher": "EXPENSE 2026/04/002",
+      "tanggal": "2026-04-30T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Premium plan Core - April 2026",
+      "entries": [
+        {
+          "account_no": "620314",
+          "tipe": "DEBIT",
+          "jumlah": 232678.25,
+          "deskripsi": "Premium plan Core - April 2026"
+        },
+        {
+          "account_no": "1400003",
+          "tipe": "KREDIT",
+          "jumlah": 232678.25,
+          "deskripsi": "Premium plan Core - April 2026"
+        }
+      ]
+    },
+    {
+      "no_voucher": "EXPENSE 2026/04/003",
+      "tanggal": "2026-04-30T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Google Workspace Subs - April 2026",
+      "entries": [
+        {
+          "account_no": "620314",
+          "tipe": "DEBIT",
+          "jumlah": 711916.67,
+          "deskripsi": "Google Workspace Subs - April 2026"
+        },
+        {
+          "account_no": "1400003",
+          "tipe": "KREDIT",
+          "jumlah": 711916.67,
+          "deskripsi": "Google Workspace Subs - April 2026"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/001",
+      "tanggal": "2026-05-03T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien DAPK, SSS",
+      "entries": [
+        {
+          "account_no": "6104",
+          "tipe": "DEBIT",
+          "jumlah": 688850.0,
+          "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien DAPK, SSS"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 688850.0,
+          "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien DAPK, SSS"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/002",
+      "tanggal": "2026-05-06T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "TF out - pemindahan dana",
+      "entries": [
+        {
+          "account_no": "1600005",
+          "tipe": "DEBIT",
+          "jumlah": 4242700.0,
+          "deskripsi": "TF out - pemindahan dana"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 4242700.0,
+          "deskripsi": "TF out - pemindahan dana"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/003",
+      "tanggal": "2026-05-07T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien WDI, DAPK",
+      "entries": [
+        {
+          "account_no": "6104",
+          "tipe": "DEBIT",
+          "jumlah": 459800.0,
+          "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien WDI, DAPK"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 459800.0,
+          "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien WDI, DAPK"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/004",
+      "tanggal": "2026-05-08T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien KEYENCE",
+      "entries": [
+        {
+          "account_no": "6104",
+          "tipe": "DEBIT",
+          "jumlah": 346473.0,
+          "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien KEYENCE"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 346473.0,
+          "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien KEYENCE"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/005",
+      "tanggal": "2026-05-11T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien SSS",
+      "entries": [
+        {
+          "account_no": "6104",
+          "tipe": "DEBIT",
+          "jumlah": 317900.0,
+          "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien SSS"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 317900.0,
+          "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien SSS"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/006",
+      "tanggal": "2026-05-12T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien DAPK, KEYENCE",
+      "entries": [
+        {
+          "account_no": "6104",
+          "tipe": "DEBIT",
+          "jumlah": 493900.0,
+          "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien DAPK, KEYENCE"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 493900.0,
+          "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien DAPK, KEYENCE"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/007",
+      "tanggal": "2026-05-15T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembayaran Google + PPn 33.990",
+      "entries": [
+        {
+          "account_no": "620314",
+          "tipe": "DEBIT",
+          "jumlah": 342990.0,
+          "deskripsi": "Pembayaran Google + PPn 33.990"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 342990.0,
+          "deskripsi": "Pembayaran Google"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/008",
+      "tanggal": "2026-05-16T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penarikan Uang Tunai",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/009",
+      "tanggal": "2026-05-16T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penarikan Uang Tunai",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/010",
+      "tanggal": "2026-05-16T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penarikan Uang Tunai",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/011",
+      "tanggal": "2026-05-16T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penarikan Uang Tunai",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/012",
+      "tanggal": "2026-05-17T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penarikan Uang Tunai",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/013",
+      "tanggal": "2026-05-17T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penarikan Uang Tunai",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/014",
+      "tanggal": "2026-05-17T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penarikan Uang Tunai",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/015",
+      "tanggal": "2026-05-17T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penarikan Uang Tunai",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/016",
+      "tanggal": "2026-05-18T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penarikan Uang Tunai",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/017",
+      "tanggal": "2026-05-18T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penarikan Uang Tunai",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/018",
+      "tanggal": "2026-05-18T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penarikan Uang Tunai",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/019",
+      "tanggal": "2026-05-18T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penarikan Uang Tunai",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "PP 2026/03/001",
+      "tanggal": "2026-05-18T00:00:00.000Z",
+      "sumber_aplikasi": "Purchase Payment",
+      "deskripsi": "Purchase Payment : PP 2026/03/001",
+      "entries": [
+        {
+          "account_no": "210102",
+          "tipe": "DEBIT",
+          "jumlah": 25000000.0,
+          "deskripsi": "Purchase Payment : PP 2026/03/001"
+        },
+        {
+          "account_no": "2400002",
+          "tipe": "KREDIT",
+          "jumlah": 25000000.0,
+          "deskripsi": "Purchase Payment : PP 2026/03/001"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/020",
+      "tanggal": "2026-05-19T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penarikan Uang Tunai",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/021",
+      "tanggal": "2026-05-19T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penarikan Uang Tunai",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/022",
+      "tanggal": "2026-05-19T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penarikan Uang Tunai",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/023",
+      "tanggal": "2026-05-19T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penarikan Uang Tunai",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/024",
+      "tanggal": "2026-05-19T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penarikan Uang Tunai",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 20000000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 20000000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/025",
+      "tanggal": "2026-05-19T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien WDI, FAS",
+      "entries": [
+        {
+          "account_no": "6104",
+          "tipe": "DEBIT",
+          "jumlah": 320000.0,
+          "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien WDI, FAS"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 340000.0,
+          "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien WDI, FAS"
+        },
+        {
+          "account_no": "6104",
+          "tipe": "DEBIT",
+          "jumlah": 20000.0,
+          "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien WDI, FAS"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/026",
+      "tanggal": "2026-05-20T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Transfer melalui ATM",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Transfer melalui ATM"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Transfer melalui ATM"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/027",
+      "tanggal": "2026-05-20T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Transfer melalui ATM",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Transfer melalui ATM"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Transfer melalui ATM"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/028",
+      "tanggal": "2026-05-20T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Transfer melalui ATM",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Transfer melalui ATM"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Transfer melalui ATM"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/029",
+      "tanggal": "2026-05-20T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Transfer melalui ATM",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Transfer melalui ATM"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Transfer melalui ATM"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/030",
+      "tanggal": "2026-05-20T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Transfer melalui ATM",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 20000000.0,
+          "deskripsi": "Transfer melalui ATM"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 20000000.0,
+          "deskripsi": "Transfer melalui ATM"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/031",
+      "tanggal": "2026-05-20T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien SSS, DHL",
+      "entries": [
+        {
+          "account_no": "6104",
+          "tipe": "DEBIT",
+          "jumlah": 762713.0,
+          "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien SSS, DHL"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 762713.0,
+          "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien SSS, DHL"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/032",
+      "tanggal": "2026-05-21T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Biaya Admin Kartu Bulanan",
+      "entries": [
+        {
+          "account_no": "720002",
+          "tipe": "DEBIT",
+          "jumlah": 10500.0,
+          "deskripsi": "Biaya Admin Kartu Bulanan"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 10500.0,
+          "deskripsi": "Biaya Admin Kartu Bulanan"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/033",
+      "tanggal": "2026-05-21T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien KEYENCE",
+      "entries": [
+        {
+          "account_no": "6104",
+          "tipe": "DEBIT",
+          "jumlah": 309815.0,
+          "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien KEYENCE"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 309815.0,
+          "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien KEYENCE"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/034",
+      "tanggal": "2026-05-21T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Admin Penarikan Tunai",
+      "entries": [
+        {
+          "account_no": "720002",
+          "tipe": "DEBIT",
+          "jumlah": 4000.0,
+          "deskripsi": "Admin Penarikan Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 4000.0,
+          "deskripsi": "Admin Penarikan Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/035",
+      "tanggal": "2026-05-21T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penarikan Uang Tunai",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/036",
+      "tanggal": "2026-05-21T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Admin Penarikan Tunai",
+      "entries": [
+        {
+          "account_no": "720002",
+          "tipe": "DEBIT",
+          "jumlah": 7500.0,
+          "deskripsi": "Admin Penarikan Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 7500.0,
+          "deskripsi": "Admin Penarikan Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/037",
+      "tanggal": "2026-05-21T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penarikan Uang Tunai",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/038",
+      "tanggal": "2026-05-21T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Admin Penarikan Tunai",
+      "entries": [
+        {
+          "account_no": "720002",
+          "tipe": "DEBIT",
+          "jumlah": 7500.0,
+          "deskripsi": "Admin Penarikan Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 7500.0,
+          "deskripsi": "Admin Penarikan Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/039",
+      "tanggal": "2026-05-21T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penarikan Uang Tunai",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/040",
+      "tanggal": "2026-05-21T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Admin Penarikan Tunai",
+      "entries": [
+        {
+          "account_no": "720002",
+          "tipe": "DEBIT",
+          "jumlah": 7500.0,
+          "deskripsi": "Admin Penarikan Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 7500.0,
+          "deskripsi": "Admin Penarikan Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/041",
+      "tanggal": "2026-05-21T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penarikan Uang Tunai",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/042",
+      "tanggal": "2026-05-21T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Admin Penarikan Tunai",
+      "entries": [
+        {
+          "account_no": "720002",
+          "tipe": "DEBIT",
+          "jumlah": 7500.0,
+          "deskripsi": "Admin Penarikan Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 7500.0,
+          "deskripsi": "Admin Penarikan Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "PP 2026/03/002",
+      "tanggal": "2026-05-21T00:00:00.000Z",
+      "sumber_aplikasi": "Purchase Payment",
+      "deskripsi": "Purchase Payment : PP 2026/03/002",
+      "entries": [
+        {
+          "account_no": "210102",
+          "tipe": "DEBIT",
+          "jumlah": 30000000.0,
+          "deskripsi": "Purchase Payment : PP 2026/03/002"
+        },
+        {
+          "account_no": "2400002",
+          "tipe": "KREDIT",
+          "jumlah": 30000000.0,
+          "deskripsi": "Purchase Payment : PP 2026/03/002"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/043",
+      "tanggal": "2026-05-22T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien SSS, KEYENCE, DHL",
+      "entries": [
+        {
+          "account_no": "6104",
+          "tipe": "DEBIT",
+          "jumlah": 693000.0,
+          "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien SSS, KEYENCE, DHL"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 693000.0,
+          "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien SSS, KEYENCE, DHL"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/044",
+      "tanggal": "2026-05-22T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien KEYENCE",
+      "entries": [
+        {
+          "account_no": "6104",
+          "tipe": "DEBIT",
+          "jumlah": 339378.0,
+          "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien KEYENCE"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 339378.0,
+          "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien KEYENCE"
+        }
+      ]
+    },
+    {
+      "no_voucher": "EXPENSE 2026/05/003",
+      "tanggal": "2026-05-22T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Subcontractor cost - DHL (backup)",
+      "entries": [
+        {
+          "account_no": "110002",
+          "tipe": "DEBIT",
+          "jumlah": 20000000.0,
+          "deskripsi": "Subcontractor cost - DHL (backup)"
+        },
+        {
+          "account_no": "2400002",
+          "tipe": "KREDIT",
+          "jumlah": 20000000.0,
+          "deskripsi": "Subcontractor cost - DHL (backup)"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/045",
+      "tanggal": "2026-05-23T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penarikan Uang Tunai",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/046",
+      "tanggal": "2026-05-23T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penarikan Uang Tunai",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/047",
+      "tanggal": "2026-05-23T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penarikan Uang Tunai",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/048",
+      "tanggal": "2026-05-23T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penarikan Uang Tunai",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/049",
+      "tanggal": "2026-05-25T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penarikan Uang Tunai",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/050",
+      "tanggal": "2026-05-25T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Admin Penarikan Tunai",
+      "entries": [
+        {
+          "account_no": "720002",
+          "tipe": "DEBIT",
+          "jumlah": 7500.0,
+          "deskripsi": "Admin Penarikan Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 7500.0,
+          "deskripsi": "Admin Penarikan Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/051",
+      "tanggal": "2026-05-25T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penarikan Uang Tunai",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/052",
+      "tanggal": "2026-05-25T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Admin Penarikan Tunai",
+      "entries": [
+        {
+          "account_no": "720002",
+          "tipe": "DEBIT",
+          "jumlah": 7500.0,
+          "deskripsi": "Admin Penarikan Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 7500.0,
+          "deskripsi": "Admin Penarikan Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/053",
+      "tanggal": "2026-05-25T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penarikan Uang Tunai",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/054",
+      "tanggal": "2026-05-25T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Admin Penarikan Tunai",
+      "entries": [
+        {
+          "account_no": "720002",
+          "tipe": "DEBIT",
+          "jumlah": 7500.0,
+          "deskripsi": "Admin Penarikan Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 7500.0,
+          "deskripsi": "Admin Penarikan Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/055",
+      "tanggal": "2026-05-25T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penarikan Uang Tunai",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/056",
+      "tanggal": "2026-05-25T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Admin Penarikan Tunai",
+      "entries": [
+        {
+          "account_no": "720002",
+          "tipe": "DEBIT",
+          "jumlah": 7500.0,
+          "deskripsi": "Admin Penarikan Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 7500.0,
+          "deskripsi": "Admin Penarikan Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/057",
+      "tanggal": "2026-05-25T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembelian Makanan untuk Pertemuan denga Klien WDI",
+      "entries": [
+        {
+          "account_no": "6104",
+          "tipe": "DEBIT",
+          "jumlah": 316910.0,
+          "deskripsi": "Pembelian Makanan untuk Pertemuan denga Klien WDI"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 316910.0,
+          "deskripsi": "Pembelian Makanan untuk Pertemuan denga Klien WDI"
+        }
+      ]
+    },
+    {
+      "no_voucher": "SALARY 2026/04/004",
+      "tanggal": "2026-05-25T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Basic Salary",
+      "entries": [
+        {
+          "account_no": "620101",
+          "tipe": "DEBIT",
+          "jumlah": 5000000.0,
+          "deskripsi": "Basic Salary"
+        },
+        {
+          "account_no": "620101",
+          "tipe": "DEBIT",
+          "jumlah": 1000000.0,
+          "deskripsi": "Tunjangan Transportasi"
+        },
+        {
+          "account_no": "620101",
+          "tipe": "DEBIT",
+          "jumlah": 1139650.0,
+          "deskripsi": "Biaya Operasional"
+        },
+        {
+          "account_no": "2400009",
+          "tipe": "KREDIT",
+          "jumlah": 7139650.0,
+          "deskripsi": "Salary April 2026 - Afif Puji Prabowo"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/058",
+      "tanggal": "2026-05-26T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien NODEFLUX",
+      "entries": [
+        {
+          "account_no": "6104",
+          "tipe": "DEBIT",
+          "jumlah": 318093.0,
+          "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien NODEFLUX"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 318093.0,
+          "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien NODEFLUX"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/059",
+      "tanggal": "2026-05-26T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien WDI, NODEFLUX",
+      "entries": [
+        {
+          "account_no": "6104",
+          "tipe": "DEBIT",
+          "jumlah": 262900.0,
+          "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien WDI, NODEFLUX"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 262900.0,
+          "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien WDI, NODEFLUX"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/060",
+      "tanggal": "2026-05-26T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penarikan Uang Tunai",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/061",
+      "tanggal": "2026-05-26T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penarikan Uang Tunai",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/062",
+      "tanggal": "2026-05-26T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penarikan Uang Tunai",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/063",
+      "tanggal": "2026-05-26T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penarikan Uang Tunai",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/064",
+      "tanggal": "2026-05-27T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembayaran Subcontractor DHL - Transfer melalui ATM",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 20000000.0,
+          "deskripsi": "Pembayaran Subcontractor DHL - Transfer melalui ATM"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 20000000.0,
+          "deskripsi": "Pembayaran Subcontractor DHL - Transfer melalui ATM"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/065",
+      "tanggal": "2026-05-27T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penarikan Uang Tunai",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/066",
+      "tanggal": "2026-05-27T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penarikan Uang Tunai",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/067",
+      "tanggal": "2026-05-27T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penarikan Uang Tunai",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/068",
+      "tanggal": "2026-05-27T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penarikan Uang Tunai",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "SALARY 2026/05/001",
+      "tanggal": "2026-05-27T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Basic Salary",
+      "entries": [
+        {
+          "account_no": "620101",
+          "tipe": "DEBIT",
+          "jumlah": 36000000.0,
+          "deskripsi": "Basic Salary"
+        },
+        {
+          "account_no": "620101",
+          "tipe": "DEBIT",
+          "jumlah": 4000000.0,
+          "deskripsi": "Tunjangan Transportasi"
+        },
+        {
+          "account_no": "2100003",
+          "tipe": "KREDIT",
+          "jumlah": 6000000.0,
+          "deskripsi": "PPh 21"
+        },
+        {
+          "account_no": "2400009",
+          "tipe": "KREDIT",
+          "jumlah": 34000000.0,
+          "deskripsi": "Salary May 2026 - Fredrich Lo"
+        }
+      ]
+    },
+    {
+      "no_voucher": "SALARY 2026/05/002",
+      "tanggal": "2026-05-27T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Basic Salary",
+      "entries": [
+        {
+          "account_no": "620101",
+          "tipe": "DEBIT",
+          "jumlah": 17000000.0,
+          "deskripsi": "Basic Salary"
+        },
+        {
+          "account_no": "620101",
+          "tipe": "DEBIT",
+          "jumlah": 3000000.0,
+          "deskripsi": "Tunjangan Transportasi"
+        },
+        {
+          "account_no": "2100003",
+          "tipe": "KREDIT",
+          "jumlah": 1800000.0,
+          "deskripsi": "PPh 21"
+        },
+        {
+          "account_no": "2400009",
+          "tipe": "KREDIT",
+          "jumlah": 18200000.0,
+          "deskripsi": "Salary May 2026 - Hubert Jo Sumarno"
+        }
+      ]
+    },
+    {
+      "no_voucher": "SALARY 2026/05/003",
+      "tanggal": "2026-05-27T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Basic Salary",
+      "entries": [
+        {
+          "account_no": "620101",
+          "tipe": "DEBIT",
+          "jumlah": 8000000.0,
+          "deskripsi": "Basic Salary"
+        },
+        {
+          "account_no": "620101",
+          "tipe": "DEBIT",
+          "jumlah": 2000000.0,
+          "deskripsi": "Tunjangan Transportasi"
+        },
+        {
+          "account_no": "2100003",
+          "tipe": "KREDIT",
+          "jumlah": 150000.0,
+          "deskripsi": "PPh 21"
+        },
+        {
+          "account_no": "2400009",
+          "tipe": "KREDIT",
+          "jumlah": 9850000.0,
+          "deskripsi": "Salary May 2026 - Bayu Nurcahyono"
+        }
+      ]
+    },
+    {
+      "no_voucher": "SALARY 2026/05/004",
+      "tanggal": "2026-05-27T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Basic Salary",
+      "entries": [
+        {
+          "account_no": "620101",
+          "tipe": "DEBIT",
+          "jumlah": 5000000.0,
+          "deskripsi": "Basic Salary"
+        },
+        {
+          "account_no": "620101",
+          "tipe": "DEBIT",
+          "jumlah": 1000000.0,
+          "deskripsi": "Tunjangan Transportasi"
+        },
+        {
+          "account_no": "620101",
+          "tipe": "DEBIT",
+          "jumlah": 684500.0,
+          "deskripsi": "Biaya Operasional"
+        },
+        {
+          "account_no": "2400009",
+          "tipe": "KREDIT",
+          "jumlah": 6684500.0,
+          "deskripsi": "Salary May 2026 - Afif Puji Prabowo"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/069",
+      "tanggal": "2026-05-28T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penarikan Uang Tunai",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/070",
+      "tanggal": "2026-05-28T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penarikan Uang Tunai",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/071",
+      "tanggal": "2026-05-28T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penarikan Uang Tunai",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/072",
+      "tanggal": "2026-05-28T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penarikan Uang Tunai",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/073",
+      "tanggal": "2026-05-29T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembayaran Gaji bulan Mei 2026 - Bayu Nurcahyono",
+      "entries": [
+        {
+          "account_no": "2400009",
+          "tipe": "DEBIT",
+          "jumlah": 9850000.0,
+          "deskripsi": "Pembayaran Gaji bulan Mei 2026 - Bayu Nurcahyono"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 9850000.0,
+          "deskripsi": "Pembayaran Gaji bulan Mei 2026 - Bayu Nurcahyono"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/074",
+      "tanggal": "2026-05-29T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Admin Bank Transfer",
+      "entries": [
+        {
+          "account_no": "720002",
+          "tipe": "DEBIT",
+          "jumlah": 2500.0,
+          "deskripsi": "Admin Bank Transfer"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500.0,
+          "deskripsi": "Admin Bank Transfer"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/075",
+      "tanggal": "2026-05-29T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembayaran Gaji bulan Mei 2026 - Afif Puji Prabowo",
+      "entries": [
+        {
+          "account_no": "2400009",
+          "tipe": "DEBIT",
+          "jumlah": 6684500.0,
+          "deskripsi": "Pembayaran Gaji bulan Mei 2026 - Afif Puji Prabowo"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 6684500.0,
+          "deskripsi": "Pembayaran Gaji bulan Mei 2026 - Afif Puji Prabowo"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/076",
+      "tanggal": "2026-05-29T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Admin Bank Transfer",
+      "entries": [
+        {
+          "account_no": "720002",
+          "tipe": "DEBIT",
+          "jumlah": 2500.0,
+          "deskripsi": "Admin Bank Transfer"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500.0,
+          "deskripsi": "Admin Bank Transfer"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/077",
+      "tanggal": "2026-05-29T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembayaran Gaji bulan Mei 2026 - Lo Fredrick",
+      "entries": [
+        {
+          "account_no": "2400009",
+          "tipe": "DEBIT",
+          "jumlah": 34000000.0,
+          "deskripsi": "Pembayaran Gaji bulan Mei 2026 - Lo Fredrick"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 34000000.0,
+          "deskripsi": "Pembayaran Gaji bulan Mei 2026 - Lo Fredrick"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/078",
+      "tanggal": "2026-05-29T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembayaran Gaji bulan Mei 2026 - Hubert Jo Sumarno",
+      "entries": [
+        {
+          "account_no": "2400009",
+          "tipe": "DEBIT",
+          "jumlah": 18200000.0,
+          "deskripsi": "Pembayaran Gaji bulan Mei 2026 - Hubert Jo Sumarno"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 18200000.0,
+          "deskripsi": "Pembayaran Gaji bulan Mei 2026 - Hubert Jo Sumarno"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/079",
+      "tanggal": "2026-05-30T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penarikan Uang Tunai",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/080",
+      "tanggal": "2026-05-30T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Admin Penarikan Tunai",
+      "entries": [
+        {
+          "account_no": "720002",
+          "tipe": "DEBIT",
+          "jumlah": 7500.0,
+          "deskripsi": "Admin Penarikan Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 7500.0,
+          "deskripsi": "Admin Penarikan Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/081",
+      "tanggal": "2026-05-30T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penarikan Uang Tunai",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/082",
+      "tanggal": "2026-05-30T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Admin Penarikan Tunai",
+      "entries": [
+        {
+          "account_no": "720002",
+          "tipe": "DEBIT",
+          "jumlah": 7500.0,
+          "deskripsi": "Admin Penarikan Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 7500.0,
+          "deskripsi": "Admin Penarikan Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/083",
+      "tanggal": "2026-05-30T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penarikan Uang Tunai",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/084",
+      "tanggal": "2026-05-30T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Admin Penarikan Tunai",
+      "entries": [
+        {
+          "account_no": "720002",
+          "tipe": "DEBIT",
+          "jumlah": 7500.0,
+          "deskripsi": "Admin Penarikan Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 7500.0,
+          "deskripsi": "Admin Penarikan Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/085",
+      "tanggal": "2026-05-30T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penarikan Uang Tunai",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/086",
+      "tanggal": "2026-05-30T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Admin Penarikan Tunai",
+      "entries": [
+        {
+          "account_no": "720002",
+          "tipe": "DEBIT",
+          "jumlah": 7500.0,
+          "deskripsi": "Admin Penarikan Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 7500.0,
+          "deskripsi": "Admin Penarikan Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/087",
+      "tanggal": "2026-05-31T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Transfer melalui ATM",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 20000000.0,
+          "deskripsi": "Transfer melalui ATM"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 20000000.0,
+          "deskripsi": "Transfer melalui ATM"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/088",
+      "tanggal": "2026-05-31T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Biaya Admin Bulanan",
+      "entries": [
+        {
+          "account_no": "720002",
+          "tipe": "DEBIT",
+          "jumlah": 13000.0,
+          "deskripsi": "Biaya Admin Bulanan"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 13000.0,
+          "deskripsi": "Biaya Admin Bulanan"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/089",
+      "tanggal": "2026-05-31T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penadapatan Bunga",
+      "entries": [
+        {
+          "account_no": "1000002",
+          "tipe": "DEBIT",
+          "jumlah": 84455.62,
+          "deskripsi": "Penadapatan Bunga"
+        },
+        {
+          "account_no": "710001",
+          "tipe": "KREDIT",
+          "jumlah": 84455.62,
+          "deskripsi": "Penadapatan Bunga"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/05/090",
+      "tanggal": "2026-05-31T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pajak atas Pendapatan Bunga",
+      "entries": [
+        {
+          "account_no": "720003",
+          "tipe": "DEBIT",
+          "jumlah": 16891.12,
+          "deskripsi": "Pajak atas Pendapatan Bunga"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 16891.12,
+          "deskripsi": "Pajak atas Pendapatan Bunga"
+        }
+      ]
+    },
+    {
+      "no_voucher": "EXPENSE 2026/05/001",
+      "tanggal": "2026-05-31T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Premium plan Core - Mei 2026",
+      "entries": [
+        {
+          "account_no": "620314",
+          "tipe": "DEBIT",
+          "jumlah": 232678.25,
+          "deskripsi": "Premium plan Core - Mei 2026"
+        },
+        {
+          "account_no": "1400003",
+          "tipe": "KREDIT",
+          "jumlah": 232678.25,
+          "deskripsi": "Premium plan Core - Mei 2026"
+        }
+      ]
+    },
+    {
+      "no_voucher": "EXPENSE 2026/05/002",
+      "tanggal": "2026-05-31T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Google Workspace Subs - Mei 2026",
+      "entries": [
+        {
+          "account_no": "620314",
+          "tipe": "DEBIT",
+          "jumlah": 711916.67,
+          "deskripsi": "Google Workspace Subs - Mei 2026"
+        },
+        {
+          "account_no": "1400003",
+          "tipe": "KREDIT",
+          "jumlah": 711916.67,
+          "deskripsi": "Google Workspace Subs - Mei 2026"
+        }
+      ]
+    },
+    {
+      "no_voucher": "PP 2026/03/003",
+      "tanggal": "2026-05-31T00:00:00.000Z",
+      "sumber_aplikasi": "Purchase Payment",
+      "deskripsi": "Purchase Payment : PP 2026/03/003",
+      "entries": [
+        {
+          "account_no": "210102",
+          "tipe": "DEBIT",
+          "jumlah": 15000000.0,
+          "deskripsi": "Purchase Payment : PP 2026/03/003"
+        },
+        {
+          "account_no": "2400002",
+          "tipe": "KREDIT",
+          "jumlah": 15000000.0,
+          "deskripsi": "Purchase Payment : PP 2026/03/003"
+        }
+      ]
+    },
+    {
+      "no_voucher": "PP 2026/03/004",
+      "tanggal": "2026-05-31T00:00:00.000Z",
+      "sumber_aplikasi": "Purchase Payment",
+      "deskripsi": "Purchase Payment : PP 2026/03/004",
+      "entries": [
+        {
+          "account_no": "210102",
+          "tipe": "DEBIT",
+          "jumlah": 10000000.0,
+          "deskripsi": "Purchase Payment : PP 2026/03/004"
+        },
+        {
+          "account_no": "2400002",
+          "tipe": "KREDIT",
+          "jumlah": 10000000.0,
+          "deskripsi": "Purchase Payment : PP 2026/03/004"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/06/001",
+      "tanggal": "2026-06-01T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien BC",
+      "entries": [
+        {
+          "account_no": "6104",
+          "tipe": "DEBIT",
+          "jumlah": 223850.0,
+          "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien BC"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 223850.0,
+          "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien BC"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/06/002",
+      "tanggal": "2026-06-01T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembayaran SUbcontrcator JAS - Penarikan Uang Tunai",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Pembayaran SUbcontrcator JAS - Penarikan Uang Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Pembayaran SUbcontrcator JAS - Penarikan Uang Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/06/003",
+      "tanggal": "2026-06-01T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembayaran Subcontractor JAS - Penarikan Uang Tunai",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Pembayaran Subcontractor JAS - Penarikan Uang Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Pembayaran Subcontractor JAS - Penarikan Uang Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/06/004",
+      "tanggal": "2026-06-01T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembayaran Subcontractor JAS - Penarikan Uang Tunai",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Pembayaran Subcontractor JAS - Penarikan Uang Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Pembayaran Subcontractor JAS - Penarikan Uang Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/06/005",
+      "tanggal": "2026-06-01T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembayaran Subcontractor JAS - Penarikan Uang Tunai",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Pembayaran Subcontractor JAS - Penarikan Uang Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Pembayaran Subcontractor JAS - Penarikan Uang Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "1010",
+      "tanggal": "2026-06-01T00:00:00.000Z",
+      "sumber_aplikasi": "Purchase Invoice",
+      "deskripsi": " Entertainment - CBC(TECS)",
+      "entries": [
+        {
+          "account_no": "6104",
+          "tipe": "DEBIT",
+          "jumlah": 50000000.0,
+          "deskripsi": " Entertainment - CBC(TECS)"
+        },
+        {
+          "account_no": "210102",
+          "tipe": "KREDIT",
+          "jumlah": 50000000.0,
+          "deskripsi": " Entertainment - CBC(TECS)"
+        }
+      ]
+    },
+    {
+      "no_voucher": "PP 2026/06/001",
+      "tanggal": "2026-06-01T00:00:00.000Z",
+      "sumber_aplikasi": "Purchase Payment",
+      "deskripsi": "Purchase Payment : PP 2026/06/001",
+      "entries": [
+        {
+          "account_no": "210102",
+          "tipe": "DEBIT",
+          "jumlah": 50000000.0,
+          "deskripsi": "Purchase Payment : PP 2026/06/001"
+        },
+        {
+          "account_no": "2400002",
+          "tipe": "KREDIT",
+          "jumlah": 50000000.0,
+          "deskripsi": "Purchase Payment : PP 2026/06/001"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/06/006",
+      "tanggal": "2026-06-02T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Biaya Admin Kartu",
+      "entries": [
+        {
+          "account_no": "720002",
+          "tipe": "DEBIT",
+          "jumlah": 10500.0,
+          "deskripsi": "Biaya Admin Kartu"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 10500.0,
+          "deskripsi": "Biaya Admin Kartu"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/06/007",
+      "tanggal": "2026-06-02T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembyaaran Subcontractor JAS - Penarikan Uang Tunai",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Pembyaaran Subcontractor JAS - Penarikan Uang Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Pembyaaran Subcontractor JAS - Penarikan Uang Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/06/008",
+      "tanggal": "2026-06-02T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembayaran Subcontractor JAS - Penarikan Uang Tunai",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Pembayaran Subcontractor JAS - Penarikan Uang Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Pembayaran Subcontractor JAS - Penarikan Uang Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/06/009",
+      "tanggal": "2026-06-02T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembayaran Subcontarctor JAS - Penarikan Uang Tunai",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Pembayaran Subcontarctor JAS - Penarikan Uang Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Pembayaran Subcontarctor JAS - Penarikan Uang Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/06/010",
+      "tanggal": "2026-06-02T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembayaran Subcontractor JAS - Penarikan Uang Tunai",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Pembayaran Subcontractor JAS - Penarikan Uang Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Pembayaran Subcontractor JAS - Penarikan Uang Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/06/011",
+      "tanggal": "2026-06-03T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penarikan Uang Tunai",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/06/012",
+      "tanggal": "2026-06-03T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penarikan Uang Tunai",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 2500000.0,
+          "deskripsi": "Penarikan Uang Tunai"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/06/013",
+      "tanggal": "2026-06-03T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembayaran Google",
+      "entries": [
+        {
+          "account_no": "620314",
+          "tipe": "DEBIT",
+          "jumlah": 10000.0,
+          "deskripsi": "Pembayaran Google"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 10000.0,
+          "deskripsi": "Pembayaran Google"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/06/014",
+      "tanggal": "2026-06-03T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Refund Dana Pembayaran Google",
+      "entries": [
+        {
+          "account_no": "1000002",
+          "tipe": "DEBIT",
+          "jumlah": 10000.0,
+          "deskripsi": "Refund Dana Pembayaran Google"
+        },
+        {
+          "account_no": "620314",
+          "tipe": "KREDIT",
+          "jumlah": 10000.0,
+          "deskripsi": "Refund Dana Pembayaran Google"
+        }
+      ]
+    },
+    {
+      "no_voucher": "1011",
+      "tanggal": "2026-06-03T00:00:00.000Z",
+      "sumber_aplikasi": "Purchase Invoice",
+      "deskripsi": " Entertainment - CBC(YUD)",
+      "entries": [
+        {
+          "account_no": "6104",
+          "tipe": "DEBIT",
+          "jumlah": 15000000.0,
+          "deskripsi": " Entertainment - CBC(YUD)"
+        },
+        {
+          "account_no": "210102",
+          "tipe": "KREDIT",
+          "jumlah": 15000000.0,
+          "deskripsi": " Entertainment - CBC(YUD)"
+        }
+      ]
+    },
+    {
+      "no_voucher": "PP 2026/06/002",
+      "tanggal": "2026-06-03T00:00:00.000Z",
+      "sumber_aplikasi": "Purchase Payment",
+      "deskripsi": "Purchase Payment : PP 2026/06/002",
+      "entries": [
+        {
+          "account_no": "210102",
+          "tipe": "DEBIT",
+          "jumlah": 15000000.0,
+          "deskripsi": "Purchase Payment : PP 2026/06/002"
+        },
+        {
+          "account_no": "2400002",
+          "tipe": "KREDIT",
+          "jumlah": 15000000.0,
+          "deskripsi": "Purchase Payment : PP 2026/06/002"
+        }
+      ]
+    },
+    {
+      "no_voucher": "EXPENSE 2026/06/003",
+      "tanggal": "2026-06-05T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Subcontractor cost - JAS",
+      "entries": [
+        {
+          "account_no": "110002",
+          "tipe": "DEBIT",
+          "jumlah": 20000000.0,
+          "deskripsi": "Subcontractor cost - JAS"
+        },
+        {
+          "account_no": "2400002",
+          "tipe": "KREDIT",
+          "jumlah": 20000000.0,
+          "deskripsi": "Subcontractor cost - JAS"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/06/015",
+      "tanggal": "2026-06-08T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien NODEFLUX",
+      "entries": [
+        {
+          "account_no": "6104",
+          "tipe": "DEBIT",
+          "jumlah": 289713.0,
+          "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien NODEFLUX"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 289713.0,
+          "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien NODEFLUX"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/06/016",
+      "tanggal": "2026-06-08T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien POC JAS",
+      "entries": [
+        {
+          "account_no": "6104",
+          "tipe": "DEBIT",
+          "jumlah": 542300.0,
+          "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien POC JAS"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 542300.0,
+          "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien POC JAS"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/06/017",
+      "tanggal": "2026-06-09T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien POC JAS",
+      "entries": [
+        {
+          "account_no": "6104",
+          "tipe": "DEBIT",
+          "jumlah": 623150.0,
+          "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien POC JAS"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 623150.0,
+          "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien POC JAS"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/06/018",
+      "tanggal": "2026-06-09T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembelian Makana untuk Pertemuan dengan Klien UNEX",
+      "entries": [
+        {
+          "account_no": "6104",
+          "tipe": "DEBIT",
+          "jumlah": 349429.0,
+          "deskripsi": "Pembelian Makana untuk Pertemuan dengan Klien UNEX"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 349429.0,
+          "deskripsi": "Pembelian Makana untuk Pertemuan dengan Klien UNEX"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/06/019",
+      "tanggal": "2026-06-13T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembayaran Google + PPn 33.990",
+      "entries": [
+        {
+          "account_no": "620314",
+          "tipe": "DEBIT",
+          "jumlah": 342990.0,
+          "deskripsi": "Pembayaran Google + PPn 33.990"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 342990.0,
+          "deskripsi": "Pembayaran Google"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/06/020",
+      "tanggal": "2026-06-24T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien ",
+      "entries": [
+        {
+          "account_no": "6104",
+          "tipe": "DEBIT",
+          "jumlah": 279400.0,
+          "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien "
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 279400.0,
+          "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien "
+        }
+      ]
+    },
+    {
+      "no_voucher": "SALARY 2026/06/001",
+      "tanggal": "2026-06-27T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Basic Salary",
+      "entries": [
+        {
+          "account_no": "620101",
+          "tipe": "DEBIT",
+          "jumlah": 36000000.0,
+          "deskripsi": "Basic Salary"
+        },
+        {
+          "account_no": "620101",
+          "tipe": "DEBIT",
+          "jumlah": 4000000.0,
+          "deskripsi": "Tunjangan Transportasi"
+        },
+        {
+          "account_no": "2100003",
+          "tipe": "KREDIT",
+          "jumlah": 6000000.0,
+          "deskripsi": "PPh2 1"
+        },
+        {
+          "account_no": "2400009",
+          "tipe": "KREDIT",
+          "jumlah": 34000000.0,
+          "deskripsi": "Salary June 2026 - Fredrich Lo"
+        }
+      ]
+    },
+    {
+      "no_voucher": "SALARY 2026/06/002",
+      "tanggal": "2026-06-27T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Basic Salary",
+      "entries": [
+        {
+          "account_no": "620101",
+          "tipe": "DEBIT",
+          "jumlah": 17000000.0,
+          "deskripsi": "Basic Salary"
+        },
+        {
+          "account_no": "620101",
+          "tipe": "DEBIT",
+          "jumlah": 3000000.0,
+          "deskripsi": "Tunjangan Transprotasi"
+        },
+        {
+          "account_no": "2100003",
+          "tipe": "KREDIT",
+          "jumlah": 1800000.0,
+          "deskripsi": "PPh 21"
+        },
+        {
+          "account_no": "2400009",
+          "tipe": "KREDIT",
+          "jumlah": 18200000.0,
+          "deskripsi": "Salary June 2026 - Hubert Jo Sumarno"
+        }
+      ]
+    },
+    {
+      "no_voucher": "SALARY 2026/06/003",
+      "tanggal": "2026-06-27T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Basic Salary",
+      "entries": [
+        {
+          "account_no": "620101",
+          "tipe": "DEBIT",
+          "jumlah": 8000000.0,
+          "deskripsi": "Basic Salary"
+        },
+        {
+          "account_no": "620101",
+          "tipe": "DEBIT",
+          "jumlah": 2000000.0,
+          "deskripsi": "Tunjangan Transportasi"
+        },
+        {
+          "account_no": "2100003",
+          "tipe": "KREDIT",
+          "jumlah": 150000.0,
+          "deskripsi": "PPh 21"
+        },
+        {
+          "account_no": "2400009",
+          "tipe": "KREDIT",
+          "jumlah": 9850000.0,
+          "deskripsi": "Salary June 2026 - Bauy Nurcahyono"
+        }
+      ]
+    },
+    {
+      "no_voucher": "SALARY 2026/06/004",
+      "tanggal": "2026-06-27T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Basic Salary",
+      "entries": [
+        {
+          "account_no": "620101",
+          "tipe": "DEBIT",
+          "jumlah": 5000000.0,
+          "deskripsi": "Basic Salary"
+        },
+        {
+          "account_no": "620101",
+          "tipe": "DEBIT",
+          "jumlah": 1000000.0,
+          "deskripsi": "Tunjangan Transportasi"
+        },
+        {
+          "account_no": "620101",
+          "tipe": "DEBIT",
+          "jumlah": 578000.0,
+          "deskripsi": "Biaya Operasional"
+        },
+        {
+          "account_no": "2400009",
+          "tipe": "KREDIT",
+          "jumlah": 6578000.0,
+          "deskripsi": "Salary June 2026 - Afif Puji Prabowo"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/06/021",
+      "tanggal": "2026-06-28T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Penerimaan Uang - Hubert Jo Sumarno",
+      "entries": [
+        {
+          "account_no": "1000002",
+          "tipe": "DEBIT",
+          "jumlah": 100000000.0,
+          "deskripsi": "Penerimaan Uang - Hubert Jo Sumarno"
+        },
+        {
+          "account_no": "1600006",
+          "tipe": "KREDIT",
+          "jumlah": 100000000.0,
+          "deskripsi": "Penerimaan Uang - Hubert Jo Sumarno"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/06/022",
+      "tanggal": "2026-06-29T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Bank Admin",
+      "entries": [
+        {
+          "account_no": "720002",
+          "tipe": "DEBIT",
+          "jumlah": 5000.0,
+          "deskripsi": "Bank Admin"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 5000.0,
+          "deskripsi": "Bank Admin"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/06/023",
+      "tanggal": "2026-06-29T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembayaran Gaji Juni 2026",
+      "entries": [
+        {
+          "account_no": "2400009",
+          "tipe": "DEBIT",
+          "jumlah": 68628000.0,
+          "deskripsi": "Pembayaran Gaji Juni 2026"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 68632000.0,
+          "deskripsi": "Pembayaran Gaji Juni 2026"
+        },
+        {
+          "account_no": "720002",
+          "tipe": "DEBIT",
+          "jumlah": 4000.0,
+          "deskripsi": "Pembayaran Gaji Juni 2026"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/06/024",
+      "tanggal": "2026-06-30T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Biaya Admin Bulanan",
+      "entries": [
+        {
+          "account_no": "720002",
+          "tipe": "DEBIT",
+          "jumlah": 13000.0,
+          "deskripsi": "Biaya Admin Bulanan"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 13000.0,
+          "deskripsi": "Biaya Admin Bulanan"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/06/025",
+      "tanggal": "2026-06-30T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pendapatan Bunga",
+      "entries": [
+        {
+          "account_no": "1000002",
+          "tipe": "DEBIT",
+          "jumlah": 3828.9,
+          "deskripsi": "Pendapatan Bunga"
+        },
+        {
+          "account_no": "710001",
+          "tipe": "KREDIT",
+          "jumlah": 3828.9,
+          "deskripsi": "Pendapatan Bunga"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/06/026",
+      "tanggal": "2026-06-30T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pajak atas Pendapatan Bunga",
+      "entries": [
+        {
+          "account_no": "720003",
+          "tipe": "DEBIT",
+          "jumlah": 765.78,
+          "deskripsi": "Pajak atas Pendapatan Bunga"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 765.78,
+          "deskripsi": "Pajak atas Pendapatan Bunga"
+        }
+      ]
+    },
+    {
+      "no_voucher": "EXPENSE 2026/06/001",
+      "tanggal": "2026-06-30T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Premium plan Core - Juni 2026",
+      "entries": [
+        {
+          "account_no": "620314",
+          "tipe": "DEBIT",
+          "jumlah": 232678.25,
+          "deskripsi": "Premium plan Core - Juni 2026"
+        },
+        {
+          "account_no": "1400003",
+          "tipe": "KREDIT",
+          "jumlah": 232678.25,
+          "deskripsi": "Premium plan Core - Juni 2026"
+        }
+      ]
+    },
+    {
+      "no_voucher": "EXPENSE 2026/06/002",
+      "tanggal": "2026-06-30T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Google Workspace Subs - Juni 2026",
+      "entries": [
+        {
+          "account_no": "620314",
+          "tipe": "DEBIT",
+          "jumlah": 711916.67,
+          "deskripsi": "Google Workspace Subs - Juni 2026"
+        },
+        {
+          "account_no": "1400003",
+          "tipe": "KREDIT",
+          "jumlah": 711916.67,
+          "deskripsi": "Google Workspace Subs - Juni 2026"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/07/001",
+      "tanggal": "2026-07-02T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Biaya Admin Kartu",
+      "entries": [
+        {
+          "account_no": "720002",
+          "tipe": "DEBIT",
+          "jumlah": 10500.0,
+          "deskripsi": "Biaya Admin Kartu"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 10500.0,
+          "deskripsi": "Biaya Admin Kartu"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/07/002",
+      "tanggal": "2026-07-08T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien BC",
+      "entries": [
+        {
+          "account_no": "6104",
+          "tipe": "DEBIT",
+          "jumlah": 275523.0,
+          "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien BC"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 275523.0,
+          "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien BC"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/07/003",
+      "tanggal": "2026-07-12T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembayaran Google",
+      "entries": [
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 342990.0,
+          "deskripsi": "Pembayaran Google"
+        },
+        {
+          "account_no": "620314",
+          "tipe": "DEBIT",
+          "jumlah": 342990.0,
+          "deskripsi": "Pembayaran Google + PPn 33.990"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/07/004",
+      "tanggal": "2026-07-16T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien JAS",
+      "entries": [
+        {
+          "account_no": "6104",
+          "tipe": "DEBIT",
+          "jumlah": 1022450.0,
+          "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien JAS"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 1022450.0,
+          "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien JAS"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/07/005",
+      "tanggal": "2026-07-17T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien BDL",
+      "entries": [
+        {
+          "account_no": "6104",
+          "tipe": "DEBIT",
+          "jumlah": 173828.0,
+          "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien BDL"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 173828.0,
+          "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien BDL"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/07/006",
+      "tanggal": "2026-07-17T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien WDI, API",
+      "entries": [
+        {
+          "account_no": "6104",
+          "tipe": "DEBIT",
+          "jumlah": 269500.0,
+          "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien WDI, API"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 269500.0,
+          "deskripsi": "Pembelian Makanan untuk Pertemuan dengan Klien WDI, API"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/07/007",
+      "tanggal": "2026-07-18T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pembayaran Entertainment - CBC(KAB)",
+      "entries": [
+        {
+          "account_no": "1600005",
+          "tipe": "DEBIT",
+          "jumlah": 30000000.0,
+          "deskripsi": "Pembayaran Entertainment - CBC(KAB)"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 30000000.0,
+          "deskripsi": "Transfer melalui ATM"
+        }
+      ]
+    },
+    {
+      "no_voucher": "1012",
+      "tanggal": "2026-07-18T00:00:00.000Z",
+      "sumber_aplikasi": "Purchase Invoice",
+      "deskripsi": " Entertainment - CBC(UPP)",
+      "entries": [
+        {
+          "account_no": "6104",
+          "tipe": "DEBIT",
+          "jumlah": 30000000.0,
+          "deskripsi": " Entertainment - CBC(UPP)"
+        },
+        {
+          "account_no": "210102",
+          "tipe": "KREDIT",
+          "jumlah": 30000000.0,
+          "deskripsi": " Entertainment - CBC(UPP)"
+        }
+      ]
+    },
+    {
+      "no_voucher": "PP 2026/07/001",
+      "tanggal": "2026-07-18T00:00:00.000Z",
+      "sumber_aplikasi": "Purchase Payment",
+      "deskripsi": "Purchase Payment : PP 2026/07/001",
+      "entries": [
+        {
+          "account_no": "210102",
+          "tipe": "DEBIT",
+          "jumlah": 30000000.0,
+          "deskripsi": "Purchase Payment : PP 2026/07/001"
+        },
+        {
+          "account_no": "2400002",
+          "tipe": "KREDIT",
+          "jumlah": 30000000.0,
+          "deskripsi": "Purchase Payment : PP 2026/07/001"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/07/008",
+      "tanggal": "2026-07-19T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Transfer melalui ATM",
+      "entries": [
+        {
+          "account_no": "2400002",
+          "tipe": "DEBIT",
+          "jumlah": 10000000.0,
+          "deskripsi": "Transfer melalui ATM"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 10000000.0,
+          "deskripsi": "Transfer melalui ATM"
+        }
+      ]
+    },
+    {
+      "no_voucher": "1013",
+      "tanggal": "2026-07-20T00:00:00.000Z",
+      "sumber_aplikasi": "Purchase Invoice",
+      "deskripsi": " Entertainment - CBC(MOV)",
+      "entries": [
+        {
+          "account_no": "6104",
+          "tipe": "DEBIT",
+          "jumlah": 20000000.0,
+          "deskripsi": " Entertainment - CBC(MOV)"
+        },
+        {
+          "account_no": "210102",
+          "tipe": "KREDIT",
+          "jumlah": 20000000.0,
+          "deskripsi": " Entertainment - CBC(MOV)"
+        }
+      ]
+    },
+    {
+      "no_voucher": "PP 2026/07/002",
+      "tanggal": "2026-07-20T00:00:00.000Z",
+      "sumber_aplikasi": "Purchase Payment",
+      "deskripsi": "Purchase Payment : PP 2026/07/002",
+      "entries": [
+        {
+          "account_no": "210102",
+          "tipe": "DEBIT",
+          "jumlah": 20000000.0,
+          "deskripsi": "Purchase Payment : PP 2026/07/002"
+        },
+        {
+          "account_no": "2400002",
+          "tipe": "KREDIT",
+          "jumlah": 20000000.0,
+          "deskripsi": "Purchase Payment : PP 2026/07/002"
+        }
+      ]
+    },
+    {
+      "no_voucher": "SALARY 2026/07/001",
+      "tanggal": "2026-07-27T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Basic Salary",
+      "entries": [
+        {
+          "account_no": "620101",
+          "tipe": "DEBIT",
+          "jumlah": 36000000.0,
+          "deskripsi": "Basic Salary"
+        },
+        {
+          "account_no": "620101",
+          "tipe": "DEBIT",
+          "jumlah": 4000000.0,
+          "deskripsi": "Tunjangan Transportasi"
+        },
+        {
+          "account_no": "2100003",
+          "tipe": "KREDIT",
+          "jumlah": 6400000.0,
+          "deskripsi": "PPh 21"
+        },
+        {
+          "account_no": "2400009",
+          "tipe": "KREDIT",
+          "jumlah": 33600000.0,
+          "deskripsi": "Salary July 2026 - Fredrich Lo"
+        }
+      ]
+    },
+    {
+      "no_voucher": "SALARY 2026/07/002",
+      "tanggal": "2026-07-27T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Basic Salary",
+      "entries": [
+        {
+          "account_no": "620101",
+          "tipe": "DEBIT",
+          "jumlah": 17000000.0,
+          "deskripsi": "Basic Salary"
+        },
+        {
+          "account_no": "620101",
+          "tipe": "DEBIT",
+          "jumlah": 3000000.0,
+          "deskripsi": "Tunjangan Transportasi"
+        },
+        {
+          "account_no": "2100003",
+          "tipe": "KREDIT",
+          "jumlah": 1800000.0,
+          "deskripsi": "PPh 21"
+        },
+        {
+          "account_no": "2400009",
+          "tipe": "KREDIT",
+          "jumlah": 18200000.0,
+          "deskripsi": "Salary July 2026 - Hubert Jo Sumarno"
+        }
+      ]
+    },
+    {
+      "no_voucher": "SALARY 2026/07/003",
+      "tanggal": "2026-07-27T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Basic Salary",
+      "entries": [
+        {
+          "account_no": "620101",
+          "tipe": "DEBIT",
+          "jumlah": 3809524.0,
+          "deskripsi": "Basic Salary"
+        },
+        {
+          "account_no": "2400009",
+          "tipe": "KREDIT",
+          "jumlah": 3809524.0,
+          "deskripsi": "Salary July 2026 - Darren Lo"
+        }
+      ]
+    },
+    {
+      "no_voucher": "SALARY 2026/07/004",
+      "tanggal": "2026-07-27T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Basic Salary",
+      "entries": [
+        {
+          "account_no": "620101",
+          "tipe": "DEBIT",
+          "jumlah": 8000000.0,
+          "deskripsi": "Basic Salary"
+        },
+        {
+          "account_no": "620101",
+          "tipe": "DEBIT",
+          "jumlah": 2000000.0,
+          "deskripsi": "Tunjangan Transportasi"
+        },
+        {
+          "account_no": "2100003",
+          "tipe": "KREDIT",
+          "jumlah": 150000.0,
+          "deskripsi": "PPh 21"
+        },
+        {
+          "account_no": "2400009",
+          "tipe": "KREDIT",
+          "jumlah": 9850000.0,
+          "deskripsi": "Salary July 2026 - Bayu Nurcahyono"
+        }
+      ]
+    },
+    {
+      "no_voucher": "SALARY 2026/07/005",
+      "tanggal": "2026-07-27T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Basic Salary",
+      "entries": [
+        {
+          "account_no": "620101",
+          "tipe": "DEBIT",
+          "jumlah": 5000000.0,
+          "deskripsi": "Basic Salary"
+        },
+        {
+          "account_no": "620101",
+          "tipe": "DEBIT",
+          "jumlah": 1000000.0,
+          "deskripsi": "Tunjangan Transportasi"
+        },
+        {
+          "account_no": "620101",
+          "tipe": "DEBIT",
+          "jumlah": 1404693.0,
+          "deskripsi": "Biaya Operasional"
+        },
+        {
+          "account_no": "2400009",
+          "tipe": "KREDIT",
+          "jumlah": 7404693.0,
+          "deskripsi": "Salary July 2026 - Afif Puji Prabowo"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/07/009",
+      "tanggal": "2026-07-31T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Biaya Admin Bulanan ",
+      "entries": [
+        {
+          "account_no": "720002",
+          "tipe": "DEBIT",
+          "jumlah": 13000.0,
+          "deskripsi": "Biaya Admin Bulanan "
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 13000.0,
+          "deskripsi": "Biaya Admin Bulanan "
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/07/010",
+      "tanggal": "2026-07-31T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Biaya Saldo Minimum",
+      "entries": [
+        {
+          "account_no": "720002",
+          "tipe": "DEBIT",
+          "jumlah": 25000.0,
+          "deskripsi": "Biaya Saldo Minimum"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 25000.0,
+          "deskripsi": "Biaya Saldo Minimum"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/07/011",
+      "tanggal": "2026-07-31T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pendapatan Bunga",
+      "entries": [
+        {
+          "account_no": "1000002",
+          "tipe": "DEBIT",
+          "jumlah": 4257.61,
+          "deskripsi": "Pendapatan Bunga"
+        },
+        {
+          "account_no": "710001",
+          "tipe": "KREDIT",
+          "jumlah": 4257.61,
+          "deskripsi": "Pendapatan Bunga"
+        }
+      ]
+    },
+    {
+      "no_voucher": "MANDIRI 2026/07/012",
+      "tanggal": "2026-07-31T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Pajak ata Pendapatan Bunga",
+      "entries": [
+        {
+          "account_no": "720003",
+          "tipe": "DEBIT",
+          "jumlah": 851.52,
+          "deskripsi": "Pajak ata Pendapatan Bunga"
+        },
+        {
+          "account_no": "1000002",
+          "tipe": "KREDIT",
+          "jumlah": 851.52,
+          "deskripsi": "Pajak ata Pendapatan Bunga"
+        }
+      ]
+    },
+    {
+      "no_voucher": "EXPENSE 2026/07/001",
+      "tanggal": "2026-07-31T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Premium plan Core - Juli 2026",
+      "entries": [
+        {
+          "account_no": "620314",
+          "tipe": "DEBIT",
+          "jumlah": 232678.25,
+          "deskripsi": "Premium plan Core - Juli 2026"
+        },
+        {
+          "account_no": "1400003",
+          "tipe": "KREDIT",
+          "jumlah": 232678.25,
+          "deskripsi": "Premium plan Core - Juli 2026"
+        }
+      ]
+    },
+    {
+      "no_voucher": "EXPENSE 2026/07/002",
+      "tanggal": "2026-07-31T00:00:00.000Z",
+      "sumber_aplikasi": "Journal Voucher",
+      "deskripsi": "Google Workspace Subs - Juli 2026",
+      "entries": [
+        {
+          "account_no": "620314",
+          "tipe": "DEBIT",
+          "jumlah": 711916.67,
+          "deskripsi": "Google Workspace Subs - Juli 2026"
+        },
+        {
+          "account_no": "1400003",
+          "tipe": "KREDIT",
+          "jumlah": 711916.67,
+          "deskripsi": "Google Workspace Subs - Juli 2026"
+        }
+      ]
+    }
+  ]
+}

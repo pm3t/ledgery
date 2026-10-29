@@ -399,7 +399,7 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
       </div>
 
       {/* Filter & Toolbar Pencarian + Saldo Selector */}
-      <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 space-y-3.5 backdrop-blur-sm">
+      <div className="relative z-30 bg-slate-900/90 border border-slate-800 rounded-2xl p-4 space-y-3.5 backdrop-blur-md">
         {/* Row 1: Kategori Tabs & Search */}
         <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
           {/* Filter Kategori Tabs */}
@@ -538,7 +538,7 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
                     className="fixed inset-0 z-40"
                     onClick={() => setShowColumnPicker(false)}
                   />
-                  <div className="absolute right-0 top-full mt-2 w-56 bg-slate-900 border border-slate-800 rounded-xl shadow-2xl z-50 p-3 space-y-2.5 animate-in fade-in zoom-in-95 duration-150">
+                  <div className="absolute right-0 top-full mt-2 w-56 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl shadow-black z-50 p-3 space-y-2.5 animate-in fade-in zoom-in-95 duration-150">
                     <div className="flex items-center justify-between border-b border-slate-800 pb-2">
                       <span className="text-xs font-semibold text-white flex items-center gap-1.5">
                         <Columns3 className="w-3.5 h-3.5 text-indigo-400" />
@@ -586,7 +586,7 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
       </div>
 
       {/* Tabel Data Akun */}
-      <div className="bg-slate-900/60 border border-slate-800 rounded-2xl overflow-hidden backdrop-blur-sm">
+      <div className="relative z-10 bg-slate-900/60 border border-slate-800 rounded-2xl overflow-hidden backdrop-blur-sm">
         {loading ? (
           <div className="p-12 text-center text-slate-400 text-sm">Memuat data Chart of Accounts...</div>
         ) : accounts.length === 0 ? (
