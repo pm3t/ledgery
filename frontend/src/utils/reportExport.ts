@@ -197,6 +197,68 @@ export function exportCashFlowToExcel(
 }
 
 // =====================================================
+// EXPORT EXCEL — Analisa Per Dimensi (Matrix Pivot)
+// =====================================================
+export function exportDimensionAnalysisToExcel(
+  data: any,
+  namaPerusahaan: string,
+  tipeSaldo: string,
+  startDate: string,
+  endDate: string,
+  dimensionName: string
+) {
+  const wb = XLSX.utils.book_new();
+  const periode = tipeSaldo === 'AS_OF' 
+    ? `As Of: ${new Date(endDate).toLocaleDateString('id-ID')}`
+    : `Mutasi: ${new Date(startDate).toLocaleDateString('id-ID')} s/d ${new Date(endDate).toLocaleDateString('id-ID')}`;
+
+  const headerColumns = [
+    'Kode Akun',
+    'Nama Akun',
+    'Kategori',
+    ...data.columns.map((c: any) => `${c.kode} - ${c.nama}`),
+    ...(data.hasUnassigned ? ['Tanpa Dimensi'] : []),
+    'Total',
+  ];
+
+  const rows: any[][] = [
+    ...createHeaderRows(`ANALISA PER DIMENSI (${dimensionName.toUpperCase()})`, namaPerusahaan, periode),
+    headerColumns,
+  ];
+
+  for (const item of data.rows || []) {
+    const rowValues = [
+      item.coa.kode_akun,
+      item.coa.nama_akun,
+      item.coa.kategori,
+      ...data.columns.map((c: any) => formatCurrency(item.values[c.id] || 0)),
+      ...(data.hasUnassigned ? [formatCurrency(item.values['UNASSIGNED'] || 0)] : []),
+      formatCurrency(item.total || 0),
+    ];
+    rows.push(rowValues);
+  }
+
+  // Baris Total
+  const totalRow = [
+    'TOTAL',
+    '',
+    '',
+    ...data.columns.map((c: any) => formatCurrency(data.columnTotals[c.id] || 0)),
+    ...(data.hasUnassigned ? [formatCurrency(data.columnTotals['UNASSIGNED'] || 0)] : []),
+    formatCurrency(data.grandTotal || 0),
+  ];
+  rows.push(totalRow);
+
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  XLSX.utils.book_append_sheet(wb, ws, 'Analisa Dimensi');
+  const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+  saveAs(
+    new Blob([wbout], { type: 'application/octet-stream' }),
+    `Analisa_Dimensi_${dimensionName.replace(/\s+/g, '_')}_${endDate}.xlsx`
+  );
+}
+
+// =====================================================
 // EXPORT PDF — Menggunakan browser print dialog
 // Meng-clone section laporan ke iframe tersembunyi, lalu trigger print
 // =====================================================

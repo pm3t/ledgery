@@ -24,4 +24,8 @@ export class UpdateAccountDto {
   @IsOptional()
   @IsBoolean({ message: 'isActive harus berupa nilai boolean' })
   isActive?: boolean;
+
+  @IsOptional()
+  @IsBoolean({ message: 'isControlAccount harus berupa nilai boolean' })
+  isControlAccount?: boolean;
 }

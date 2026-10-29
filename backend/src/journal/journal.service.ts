@@ -339,6 +339,20 @@ export class JournalService {
 
       const validAccountMap = new Map(validAccounts.map((acc) => [acc.kode_akun, acc.id]));
       
+      // Proteksi Akun Kontrol: Blokir jurnal manual langsung pada akun kontrol subledger
+      for (const acc of validAccounts) {
+        if (acc.isControlAccount) {
+          throw new BadRequestException({
+            errorCode: 'CONTROL_ACCOUNT_MANUAL_POSTING_BLOCKED',
+            message: `Akun '${acc.kode_akun} - ${acc.nama_akun}' adalah Akun Kontrol (Subledger). Jurnal manual langsung pada akun ini tidak diperbolehkan.`,
+            details: {
+              kode_akun: acc.kode_akun,
+              nama_akun: acc.nama_akun,
+            },
+          });
+        }
+      }
+      
       // Validasi Dimensi
       const dimMap = await this.getValidDimensionMap(tx, tenantId, createDto.entries);
       

@@ -1,9 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { api, Tenant, ChartOfAccount, Dimension, Currency } from '../services/api';
-import { Plus, Trash2, Save, AlertCircle } from 'lucide-react';
+import { Plus, Trash2, Save, AlertCircle, ShieldAlert } from 'lucide-react';
 
 interface Props {
   currentTenant: Tenant | null;
+}
+
+interface RowEntry {
+  kode_akun: string;
+  tipe: 'DEBIT' | 'KREDIT';
+  jumlah: number;
+  selectedDims: Record<string, string>; // { [dimensionId]: dimValueId }
 }
 
 export const ManualJournalPage: React.FC<Props> = ({ currentTenant }) => {
@@ -17,9 +24,9 @@ export const ManualJournalPage: React.FC<Props> = ({ currentTenant }) => {
   const [currencies, setCurrencies] = useState<Currency[]>([]);
   const [selectedCurrencyIso, setSelectedCurrencyIso] = useState<string>('');
   const [dimensions, setDimensions] = useState<Dimension[]>([]);
-  const [entries, setEntries] = useState<{ kode_akun: string; tipe: 'DEBIT' | 'KREDIT'; jumlah: number; dimValueId: string }[]>([
-    { kode_akun: '', tipe: 'DEBIT', jumlah: 0, dimValueId: '' },
-    { kode_akun: '', tipe: 'KREDIT', jumlah: 0, dimValueId: '' },
+  const [entries, setEntries] = useState<RowEntry[]>([
+    { kode_akun: '', tipe: 'DEBIT', jumlah: 0, selectedDims: {} },
+    { kode_akun: '', tipe: 'KREDIT', jumlah: 0, selectedDims: {} },
   ]);
 
   useEffect(() => {
@@ -44,7 +51,7 @@ export const ManualJournalPage: React.FC<Props> = ({ currentTenant }) => {
   const isFormValid = isBalanced && deskripsi && tanggal && entries.every(e => e.kode_akun !== '');
 
   const handleAddRow = () => {
-    setEntries([...entries, { kode_akun: '', tipe: 'DEBIT', jumlah: 0, dimValueId: '' }]);
+    setEntries([...entries, { kode_akun: '', tipe: 'DEBIT', jumlah: 0, selectedDims: {} }]);
   };
 
   const handleRemoveRow = (index: number) => {
@@ -59,6 +66,18 @@ export const ManualJournalPage: React.FC<Props> = ({ currentTenant }) => {
     setEntries(newEntries);
   };
 
+  const handleDimensionChange = (index: number, dimensionId: string, dimValueId: string) => {
+    const newEntries = [...entries];
+    newEntries[index] = {
+      ...newEntries[index],
+      selectedDims: {
+        ...newEntries[index].selectedDims,
+        [dimensionId]: dimValueId,
+      },
+    };
+    setEntries(newEntries);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentTenant) return;
@@ -68,6 +87,16 @@ export const ManualJournalPage: React.FC<Props> = ({ currentTenant }) => {
       setLoading(true);
       setError(null);
       setSuccess(null);
+
+      // Validasi Frontend: Cegah penggunaan Akun Kontrol pada jurnal manual
+      for (const entry of entries) {
+        const found = coas.find((c) => c.kode_akun === entry.kode_akun);
+        if (found?.isControlAccount) {
+          setError(`Akun '${found.kode_akun} - ${found.nama_akun}' adalah Akun Kontrol (Subledger). Jurnal manual langsung pada akun ini dilarang untuk mencegah selisih rekonsiliasi.`);
+          setLoading(false);
+          return;
+        }
+      }
       
       const payload = {
         tenantId: currentTenant.id,
@@ -76,13 +105,14 @@ export const ManualJournalPage: React.FC<Props> = ({ currentTenant }) => {
         sumber_aplikasi: 'Dashboard Manual',
         mata_uang: selectedCurrencyIso,
         entries: entries.map(e => {
-          let dims = undefined;
-          if (e.dimValueId) {
-            for (const d of dimensions) {
-              const val = d.values.find(v => v.id === e.dimValueId);
-              if (val) {
-                dims = [{ nama_dimension: d.nama_dimension, kode_value: val.kode }];
-                break;
+          const dims: { nama_dimension: string; kode_value: string }[] = [];
+          if (e.selectedDims) {
+            for (const [dimId, valId] of Object.entries(e.selectedDims)) {
+              if (!valId) continue;
+              const dim = dimensions.find(d => d.id === dimId);
+              const val = dim?.values.find(v => v.id === valId);
+              if (dim && val) {
+                dims.push({ nama_dimension: dim.nama_dimension, kode_value: val.kode });
               }
             }
           }
@@ -90,7 +120,7 @@ export const ManualJournalPage: React.FC<Props> = ({ currentTenant }) => {
             kode_akun: e.kode_akun,
             tipe: e.tipe,
             jumlah: Number(e.jumlah),
-            dimensions: dims
+            dimensions: dims.length > 0 ? dims : undefined
           };
         })
       };
@@ -101,8 +131,8 @@ export const ManualJournalPage: React.FC<Props> = ({ currentTenant }) => {
       // Reset form
       setDeskripsi('');
       setEntries([
-        { kode_akun: '', tipe: 'DEBIT', jumlah: 0, dimValueId: '' },
-        { kode_akun: '', tipe: 'KREDIT', jumlah: 0, dimValueId: '' },
+        { kode_akun: '', tipe: 'DEBIT', jumlah: 0, selectedDims: {} },
+        { kode_akun: '', tipe: 'KREDIT', jumlah: 0, selectedDims: {} },
       ]);
     } catch (err: any) {
       setError(err.message || 'Terjadi kesalahan saat menyimpan jurnal');
@@ -186,10 +216,25 @@ export const ManualJournalPage: React.FC<Props> = ({ currentTenant }) => {
               </button>
             </div>
 
-            <div className="space-y-3">
+            {/* Header Kolom Baris Jurnal */}
+            {dimensions.length > 0 && (
+              <div className="flex items-center gap-3 px-3 pb-1 text-xs font-semibold text-slate-400 overflow-x-auto min-w-fit">
+                <div className="flex-1 min-w-[220px]">Kode & Nama Akun</div>
+                <div className="w-28">Posisi</div>
+                <div className="w-40">Jumlah ({selectedCurrencyIso})</div>
+                {dimensions.map((d) => (
+                  <div key={d.id} className="w-40 text-indigo-400 truncate" title={`Dimensi ${d.nama_dimension}`}>
+                    {d.nama_dimension}
+                  </div>
+                ))}
+                <div className="w-9"></div>
+              </div>
+            )}
+
+            <div className="space-y-3 overflow-x-auto pb-2">
               {entries.map((entry, index) => (
-                <div key={index} className="flex items-center gap-3 bg-slate-950/50 p-3 rounded-xl border border-slate-800/50">
-                  <div className="flex-1">
+                <div key={index} className="flex items-center gap-3 bg-slate-950/50 p-3 rounded-xl border border-slate-800/50 min-w-fit">
+                  <div className="flex-1 min-w-[220px]">
                     <select
                       required
                       value={entry.kode_akun}
@@ -198,12 +243,19 @@ export const ManualJournalPage: React.FC<Props> = ({ currentTenant }) => {
                     >
                       <option value="" disabled>-- Pilih Akun --</option>
                       {coas.map(c => (
-                        <option key={c.id} value={c.kode_akun}>{c.kode_akun} - {c.nama_akun}</option>
+                        <option
+                          key={c.id}
+                          value={c.kode_akun}
+                          disabled={c.isControlAccount}
+                          className={c.isControlAccount ? 'text-slate-500 bg-slate-950 italic' : ''}
+                        >
+                          {c.kode_akun} - {c.nama_akun} {c.isControlAccount ? '(🔒 Akun Kontrol / Subledger)' : ''}
+                        </option>
                       ))}
                     </select>
                   </div>
                   
-                  <div className="w-32">
+                  <div className="w-28">
                     <select
                       value={entry.tipe}
                       onChange={(e) => handleRowChange(index, 'tipe', e.target.value)}
@@ -214,7 +266,7 @@ export const ManualJournalPage: React.FC<Props> = ({ currentTenant }) => {
                     </select>
                   </div>
                   
-                  <div className="w-48">
+                  <div className="w-40">
                     <input
                       type="number"
                       required
@@ -227,22 +279,24 @@ export const ManualJournalPage: React.FC<Props> = ({ currentTenant }) => {
                     />
                   </div>
                   
-                  <div className="w-48">
-                    <select
-                      value={entry.dimValueId}
-                      onChange={(e) => handleRowChange(index, 'dimValueId', e.target.value)}
-                      className="w-full bg-slate-900 border border-slate-700 text-slate-200 text-sm rounded-lg px-3 py-2"
-                    >
-                      <option value="">-- Dimensi --</option>
-                      {dimensions.map(d => (
-                        <optgroup key={d.id} label={d.nama_dimension}>
-                          {d.values.map(v => (
-                            <option key={v.id} value={v.id}>{v.kode} - {v.nama}</option>
-                          ))}
-                        </optgroup>
-                      ))}
-                    </select>
-                  </div>
+                  {/* Dropdown Dinamis untuk Setiap Dimensi (Cost Center, Area, Project, dll) */}
+                  {dimensions.map((d) => (
+                    <div key={d.id} className="w-40">
+                      <select
+                        value={entry.selectedDims[d.id] || ''}
+                        onChange={(e) => handleDimensionChange(index, d.id, e.target.value)}
+                        className="w-full bg-slate-900 border border-slate-700 text-slate-200 text-xs rounded-lg px-2.5 py-2 focus:border-indigo-500"
+                        title={d.nama_dimension}
+                      >
+                        <option value="">-- {d.nama_dimension} --</option>
+                        {d.values.map((v) => (
+                          <option key={v.id} value={v.id}>
+                            {v.kode} - {v.nama}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  ))}
 
                   <button
                     type="button"

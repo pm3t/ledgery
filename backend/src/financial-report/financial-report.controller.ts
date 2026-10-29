@@ -89,4 +89,27 @@ export class FinancialReportController {
       data,
     };
   }
+
+  @Get('dimension-analysis/:tenantId')
+  async getDimensionAnalysis(
+    @Param('tenantId') tenantId: string,
+    @Query('dimensionId') dimensionId: string,
+    @Query('tipeSaldo') tipeSaldo?: 'AS_OF' | 'MUTASI',
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+    @Query('kategori') kategori?: string,
+  ) {
+    const data = await this.reportService.getDimensionAnalysisMatrix(tenantId, {
+      dimensionId,
+      tipeSaldo: tipeSaldo || 'MUTASI',
+      startDate,
+      endDate: endDate || new Date().toISOString().split('T')[0],
+      kategori,
+    });
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Analisa per dimensi berhasil diambil',
+      data,
+    };
+  }
 }

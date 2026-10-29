@@ -8,6 +8,7 @@ import {
   CheckCircle2,
   XCircle,
   AlertCircle,
+  ShieldAlert,
   X,
 } from 'lucide-react';
 import { api, ChartOfAccount, Tenant } from '../services/api';
@@ -31,6 +32,7 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
     kategori: 'ASET',
     parentId: '',
     isActive: true,
+    isControlAccount: false,
   });
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState<boolean>(false);
@@ -61,6 +63,7 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
       kategori: 'ASET',
       parentId: '',
       isActive: true,
+      isControlAccount: false,
     });
     setFormError(null);
     setIsModalOpen(true);
@@ -75,6 +78,7 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
       kategori: acc.kategori,
       parentId: acc.parentId || '',
       isActive: acc.isActive,
+      isControlAccount: !!acc.isControlAccount,
     });
     setFormError(null);
     setIsModalOpen(true);
@@ -106,6 +110,7 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
           kategori: formData.kategori,
           parentId: formData.parentId || null,
           isActive: formData.isActive,
+          isControlAccount: formData.isControlAccount,
         });
       } else {
         // Mode Create
@@ -116,6 +121,7 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
           kategori: formData.kategori,
           parentId: formData.parentId || null,
           isActive: formData.isActive,
+          isControlAccount: formData.isControlAccount,
         });
       }
       setIsModalOpen(false);
@@ -247,9 +253,19 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
                         </span>
                       </td>
                       <td className="py-3 px-4 font-medium text-slate-200">
-                        <span className={isChild ? 'pl-2 text-slate-300' : 'font-semibold text-white'}>
-                          {acc.nama_akun}
-                        </span>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className={isChild ? 'pl-2 text-slate-300' : 'font-semibold text-white'}>
+                            {acc.nama_akun}
+                          </span>
+                          {acc.isControlAccount && (
+                            <span
+                              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30"
+                              title="Akun Kontrol: Jurnal manual langsung diblokir"
+                            >
+                              <ShieldAlert className="w-3 h-3 text-amber-400" /> Akun Kontrol
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className="py-3 px-4">
                         <span
@@ -404,8 +420,30 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
                   onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
                   className="rounded border-slate-700 bg-slate-950 text-indigo-600 focus:ring-indigo-500 w-4 h-4"
                 />
-                <label htmlFor="isActiveToggle" className="text-slate-300 font-medium cursor-pointer">
+                <label htmlFor="isActiveToggle" className="text-slate-300 font-medium cursor-pointer text-xs">
                   Akun Aktif (Dapat digunakan dalam entri jurnal)
+                </label>
+              </div>
+
+              {/* Checkbox Akun Kontrol */}
+              <div className="p-3 bg-slate-950/80 border border-slate-800 rounded-xl">
+                <label htmlFor="isControlAccountToggle" className="flex items-start gap-2.5 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    id="isControlAccountToggle"
+                    checked={formData.isControlAccount}
+                    onChange={(e) => setFormData({ ...formData, isControlAccount: e.target.checked })}
+                    className="rounded border-slate-700 bg-slate-900 text-amber-500 focus:ring-amber-500 w-4 h-4 mt-0.5"
+                  />
+                  <div>
+                    <span className="text-xs font-semibold text-white flex items-center gap-1.5">
+                      <ShieldAlert className="w-3.5 h-3.5 text-amber-400" />
+                      Akun Kontrol (Subledger Only — Blokir Jurnal Manual)
+                    </span>
+                    <p className="text-[11px] text-slate-400 mt-0.5 leading-relaxed">
+                      Centang untuk akun Aset Tetap, Akumulasi Penyusutan, dsb. Staf akuntansi <strong>tidak dapat</strong> menginput jurnal manual langsung ke akun ini untuk mencegah selisih rekonsiliasi. Hanya sistem subledger (seperti EAM) yang dapat memposting ke akun ini via API.
+                    </p>
+                  </div>
                 </label>
               </div>
 

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { KategoriAkun } from '@prisma/client';
 
@@ -319,5 +319,164 @@ export class FinancialReportService {
     });
 
     return result;
+  }
+
+  // 6. Analisa Per Dimensi (Pivot Matrix: Row COA, Column Dimensi, Cell Saldo)
+  async getDimensionAnalysisMatrix(
+    tenantId: string,
+    query: {
+      dimensionId: string;
+      tipeSaldo?: 'AS_OF' | 'MUTASI';
+      startDate?: string;
+      endDate: string;
+      kategori?: string;
+    },
+  ) {
+    const { dimensionId, tipeSaldo = 'MUTASI', startDate, endDate, kategori } = query;
+
+    if (!dimensionId) {
+      throw new BadRequestException('Parameter dimensionId wajib diisi');
+    }
+
+    const dimension = await this.prisma.dimension.findFirst({
+      where: { id: dimensionId, tenantId },
+      include: {
+        values: {
+          where: { isActive: true },
+          orderBy: { kode: 'asc' },
+        },
+      },
+    });
+
+    if (!dimension) {
+      throw new NotFoundException('Dimensi tidak ditemukan');
+    }
+
+    const coaWhere: any = { tenantId, isActive: true };
+    if (kategori && kategori !== 'ALL' && kategori !== 'SEMUA') {
+      coaWhere.kategori = kategori as KategoriAkun;
+    }
+
+    const coas = await this.prisma.chartOfAccount.findMany({
+      where: coaWhere,
+      orderBy: { kode_akun: 'asc' },
+    });
+
+    const coaMap = new Map<string, any>();
+    coas.forEach((c) => coaMap.set(c.id, c));
+
+    // Filter tanggal
+    const dateFilter: any = {};
+    if (tipeSaldo === 'MUTASI') {
+      if (startDate) {
+        dateFilter.gte = new Date(`${startDate}T00:00:00.000Z`);
+      }
+      if (endDate) {
+        dateFilter.lte = new Date(`${endDate}T23:59:59.999Z`);
+      }
+    } else {
+      // AS_OF: kumulatif s.d endDate
+      if (endDate) {
+        dateFilter.lte = new Date(`${endDate}T23:59:59.999Z`);
+      }
+    }
+
+    const entries = await this.prisma.journalEntry.findMany({
+      where: {
+        chartOfAccountId: { in: coas.map((c) => c.id) },
+        journal: {
+          tenantId,
+          status: { in: ['POSTED', 'APPROVED'] },
+          tanggal: Object.keys(dateFilter).length > 0 ? dateFilter : undefined,
+        },
+      },
+      select: {
+        chartOfAccountId: true,
+        tipe: true,
+        jumlah: true,
+        dimensions: {
+          where: { dimensionId },
+          select: { dimensionValueId: true },
+        },
+      },
+    });
+
+    // Inisialisasi struktur matriks baris COA
+    const matrixRows = new Map<
+      string,
+      {
+        coa: any;
+        values: Record<string, number>;
+        total: number;
+      }
+    >();
+
+    coas.forEach((c) => {
+      const initialValues: Record<string, number> = { UNASSIGNED: 0 };
+      dimension.values.forEach((dv) => {
+        initialValues[dv.id] = 0;
+      });
+      matrixRows.set(c.id, {
+        coa: {
+          id: c.id,
+          kode_akun: c.kode_akun,
+          nama_akun: c.nama_akun,
+          kategori: c.kategori,
+          isControlAccount: c.isControlAccount,
+        },
+        values: initialValues,
+        total: 0,
+      });
+    });
+
+    // Inisialisasi Column Totals
+    const columnTotals: Record<string, number> = { UNASSIGNED: 0 };
+    dimension.values.forEach((dv) => {
+      columnTotals[dv.id] = 0;
+    });
+    let grandTotal = 0;
+
+    // Hitung kontribusi saldo setiap entri
+    for (const entry of entries) {
+      const coa = coaMap.get(entry.chartOfAccountId);
+      if (!coa) continue;
+
+      const isNormalDebit =
+        coa.kategori === KategoriAkun.ASET || coa.kategori === KategoriAkun.BEBAN;
+      const amt = Number(entry.jumlah);
+      const signedAmt =
+        entry.tipe === 'DEBIT'
+          ? isNormalDebit ? amt : -amt
+          : isNormalDebit ? -amt : amt;
+
+      const dimValId = entry.dimensions[0]?.dimensionValueId || 'UNASSIGNED';
+
+      const row = matrixRows.get(entry.chartOfAccountId);
+      if (row) {
+        row.values[dimValId] = (row.values[dimValId] || 0) + signedAmt;
+        row.total += signedAmt;
+      }
+
+      columnTotals[dimValId] = (columnTotals[dimValId] || 0) + signedAmt;
+      grandTotal += signedAmt;
+    }
+
+    const rows = Array.from(matrixRows.values());
+
+    return {
+      dimension: {
+        id: dimension.id,
+        nama_dimension: dimension.nama_dimension,
+      },
+      columns: dimension.values.map((v) => ({
+        id: v.id,
+        kode: v.kode,
+        nama: v.nama,
+      })),
+      hasUnassigned: rows.some((r) => r.values['UNASSIGNED'] !== 0),
+      rows,
+      columnTotals,
+      grandTotal,
+    };
   }
 }

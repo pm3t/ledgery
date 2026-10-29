@@ -63,6 +63,7 @@ export class ChartOfAccountService {
         kategori: createAccountDto.kategori,
         parentId: parentId || null,
         isActive: createAccountDto.isActive ?? true,
+        isControlAccount: createAccountDto.isControlAccount ?? false,
       },
       include: {
         parent: true,
@@ -167,6 +168,9 @@ export class ChartOfAccountService {
         }),
         ...(updateAccountDto.isActive !== undefined && {
           isActive: updateAccountDto.isActive,
+        }),
+        ...(updateAccountDto.isControlAccount !== undefined && {
+          isControlAccount: updateAccountDto.isControlAccount,
         }),
       },
       include: {

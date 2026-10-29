@@ -15,6 +15,7 @@ import { UserManagementPage } from './pages/UserManagementPage';
 import { LoginPage } from './pages/LoginPage';
 import { DimensionsPage } from './pages/DimensionsPage';
 import { AccountingPeriodsPage } from './pages/AccountingPeriodsPage';
+import { DimensionAnalysisPage } from './pages/DimensionAnalysisPage';
 
 // Admin Pages
 import { AdminLayout } from './layouts/AdminLayout';
@@ -26,7 +27,7 @@ import { AdminBillingPage } from './pages/admin/AdminBillingPage';
 import { useAuth } from './context/AuthContext';
 import { Loader2 } from 'lucide-react';
 
-type TenantTab = 'coa' | 'settings' | 'journals' | 'journals-manual' | 'ledger' | 'journal-approval' | 'approval-history' | 'reports' | 'tax' | 'integration-log' | 'user-management' | 'dimensions' | 'accounting-periods';
+type TenantTab = 'coa' | 'settings' | 'journals' | 'journals-manual' | 'ledger' | 'journal-approval' | 'approval-history' | 'reports' | 'dimension-analysis' | 'tax' | 'integration-log' | 'user-management' | 'dimensions' | 'accounting-periods';
 type AdminTab = 'tenants' | 'billing' | 'audit' | 'api-keys' | 'user-management';
 
 export function App() {
@@ -161,6 +162,7 @@ export function App() {
       {activeTab === 'journal-approval' && <JournalApprovalPage currentTenant={currentTenant} />}
       {activeTab === 'approval-history' && <JournalApprovalHistoryPage currentTenant={currentTenant} />}
       {activeTab === 'reports' && <FinancialReportsPage currentTenant={currentTenant} />}
+      {activeTab === 'dimension-analysis' && <DimensionAnalysisPage currentTenant={currentTenant} />}
       {activeTab === 'tax' && <TaxPage currentTenant={currentTenant} />}
       {activeTab === 'integration-log' && <IntegrationLogPage currentTenant={currentTenant} />}
       {activeTab === 'user-management' && <UserManagementPage />}

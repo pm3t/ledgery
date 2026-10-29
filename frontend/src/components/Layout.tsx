@@ -16,14 +16,15 @@ import {
   LogOut,
   Calendar,
   ChevronRight,
+  SlidersHorizontal,
 } from 'lucide-react';
 import { Tenant, api, AppNotification } from '../services/api';
 import { AuthUser } from '../context/AuthContext';
 
 interface LayoutProps {
   children: React.ReactNode;
-  activeTab: 'coa' | 'settings' | 'journals' | 'journals-manual' | 'ledger' | 'journal-approval' | 'approval-history' | 'reports' | 'tax' | 'integration-log' | 'user-management' | 'dimensions' | 'accounting-periods';
-  setActiveTab: (tab: 'coa' | 'settings' | 'journals' | 'journals-manual' | 'ledger' | 'journal-approval' | 'approval-history' | 'reports' | 'tax' | 'integration-log' | 'user-management' | 'dimensions' | 'accounting-periods') => void;
+  activeTab: 'coa' | 'settings' | 'journals' | 'journals-manual' | 'ledger' | 'journal-approval' | 'approval-history' | 'reports' | 'dimension-analysis' | 'tax' | 'integration-log' | 'user-management' | 'dimensions' | 'accounting-periods';
+  setActiveTab: (tab: 'coa' | 'settings' | 'journals' | 'journals-manual' | 'ledger' | 'journal-approval' | 'approval-history' | 'reports' | 'dimension-analysis' | 'tax' | 'integration-log' | 'user-management' | 'dimensions' | 'accounting-periods') => void;
   tenants: Tenant[];
   currentTenant: Tenant | null;
   onSelectTenant: (tenant: Tenant) => void;
@@ -307,6 +308,17 @@ export const Layout: React.FC<LayoutProps> = ({
                   >
                     <BarChart3 className="w-5 h-5" />
                     Laporan Keuangan
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('dimension-analysis')}
+                    className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                      activeTab === 'dimension-analysis'
+                        ? 'bg-purple-600/15 text-purple-400 border border-purple-500/30 shadow-sm'
+                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 border border-transparent'
+                    }`}
+                  >
+                    <SlidersHorizontal className="w-5 h-5" />
+                    Analisa Dimensi
                   </button>
                   <button
                     onClick={() => setActiveTab('tax')}

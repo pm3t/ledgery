@@ -80,10 +80,11 @@ model ChartOfAccount {
   kode_akun String
   nama_akun String
   kategori  KategoriAkun
-  parentId  String?
-  isActive  Boolean      @default(true)
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
+  parentId         String?
+  isActive         Boolean      @default(true)
+  isControlAccount Boolean      @default(false)
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
 
   // Relasi Tenant
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)

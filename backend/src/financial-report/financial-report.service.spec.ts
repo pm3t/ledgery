@@ -15,6 +15,9 @@ describe('FinancialReportService', () => {
         {
           provide: PrismaService,
           useValue: {
+            dimension: {
+              findFirst: jest.fn(),
+            },
             chartOfAccount: {
               findMany: jest.fn(),
             },
@@ -82,6 +85,86 @@ describe('FinancialReportService', () => {
       // Basic Accounting Equation
       expect(result.totalAset).toEqual(result.totalLiabilitas + result.totalEkuitas);
       expect(result.isBalanced).toBe(true);
+    });
+  });
+
+  describe('getDimensionAnalysisMatrix', () => {
+    it('should generate pivot matrix with COA rows, dimension columns, and values', async () => {
+      const mockDimension = {
+        id: 'dim-cc',
+        tenantId: 't1',
+        nama_dimension: 'Cost Center',
+        values: [
+          { id: 'v-acc', kode: 'ACC', nama: 'Accounting' },
+          { id: 'v-hr', kode: 'HR', nama: 'Human Resources' },
+        ],
+      };
+
+      const mockCoas = [
+        { id: 'c1', tenantId: 't1', kode_akun: '5101', nama_akun: 'Beban Gaji', kategori: KategoriAkun.BEBAN, isActive: true },
+        { id: 'c2', tenantId: 't1', kode_akun: '5102', nama_akun: 'Beban Sewa', kategori: KategoriAkun.BEBAN, isActive: true },
+      ];
+
+      const mockEntries = [
+        // Beban Gaji untuk Accounting: Rp 5.000.000
+        {
+          chartOfAccountId: 'c1',
+          tipe: 'DEBIT',
+          jumlah: 5000000,
+          dimensions: [{ dimensionValueId: 'v-acc' }],
+        },
+        // Beban Gaji untuk HR: Rp 3.000.000
+        {
+          chartOfAccountId: 'c1',
+          tipe: 'DEBIT',
+          jumlah: 3000000,
+          dimensions: [{ dimensionValueId: 'v-hr' }],
+        },
+        // Beban Sewa tanpa dimensi: Rp 2.000.000
+        {
+          chartOfAccountId: 'c2',
+          tipe: 'DEBIT',
+          jumlah: 2000000,
+          dimensions: [],
+        },
+      ];
+
+      jest.spyOn(prisma.dimension, 'findFirst').mockResolvedValue(mockDimension as any);
+      jest.spyOn(prisma.chartOfAccount, 'findMany').mockResolvedValue(mockCoas as any);
+      jest.spyOn(prisma.journalEntry, 'findMany').mockResolvedValue(mockEntries as any);
+
+      const matrix = await service.getDimensionAnalysisMatrix('t1', {
+        dimensionId: 'dim-cc',
+        tipeSaldo: 'MUTASI',
+        startDate: '2026-01-01',
+        endDate: '2026-01-31',
+      });
+
+      expect(matrix.dimension.nama_dimension).toBe('Cost Center');
+      expect(matrix.columns).toHaveLength(2);
+      expect(matrix.columns[0].kode).toBe('ACC');
+      expect(matrix.columns[1].kode).toBe('HR');
+      expect(matrix.hasUnassigned).toBe(true);
+
+      // Verify Beban Gaji (c1)
+      const gajiRow = matrix.rows.find((r) => r.coa.id === 'c1');
+      expect(gajiRow).toBeDefined();
+      expect(gajiRow!.values['v-acc']).toBe(5000000);
+      expect(gajiRow!.values['v-hr']).toBe(3000000);
+      expect(gajiRow!.values['UNASSIGNED']).toBe(0);
+      expect(gajiRow!.total).toBe(8000000);
+
+      // Verify Beban Sewa (c2)
+      const sewaRow = matrix.rows.find((r) => r.coa.id === 'c2');
+      expect(sewaRow).toBeDefined();
+      expect(sewaRow!.values['UNASSIGNED']).toBe(2000000);
+      expect(sewaRow!.total).toBe(2000000);
+
+      // Verify Column Totals & Grand Total
+      expect(matrix.columnTotals['v-acc']).toBe(5000000);
+      expect(matrix.columnTotals['v-hr']).toBe(3000000);
+      expect(matrix.columnTotals['UNASSIGNED']).toBe(2000000);
+      expect(matrix.grandTotal).toBe(10000000);
     });
   });
 });

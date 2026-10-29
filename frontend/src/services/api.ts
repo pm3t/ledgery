@@ -30,6 +30,7 @@ export interface ChartOfAccount {
   kategori: 'ASET' | 'LIABILITAS' | 'EKUITAS' | 'PENDAPATAN' | 'BEBAN';
   parentId?: string | null;
   isActive: boolean;
+  isControlAccount?: boolean;
   createdAt: string;
   updatedAt: string;
   parent?: {
@@ -182,6 +183,36 @@ export interface CashFlowReport {
   netKenaikanKas: number;
 }
 
+export interface DimensionAnalysisColumn {
+  id: string;
+  kode: string;
+  nama: string;
+}
+
+export interface DimensionAnalysisRow {
+  coa: {
+    id: string;
+    kode_akun: string;
+    nama_akun: string;
+    kategori: string;
+    isControlAccount?: boolean;
+  };
+  values: Record<string, number>;
+  total: number;
+}
+
+export interface DimensionAnalysisReport {
+  dimension: {
+    id: string;
+    nama_dimension: string;
+  };
+  columns: DimensionAnalysisColumn[];
+  hasUnassigned: boolean;
+  rows: DimensionAnalysisRow[];
+  columnTotals: Record<string, number>;
+  grandTotal: number;
+}
+
 // --- TAX MODELS ---
 export interface TaxSetting {
   id: string;
@@ -325,9 +356,10 @@ export const api = {
     kategori: string;
     parentId?: string | null;
     isActive?: boolean;
+    isControlAccount?: boolean;
   }) => request<ChartOfAccount>('/chart-of-accounts', { method: 'POST', body: JSON.stringify(payload) }),
 
-  updateCoa: (id: string, payload: Partial<{ kode_akun: string; nama_akun: string; kategori: string; parentId: string | null; isActive: boolean }>) =>
+  updateCoa: (id: string, payload: Partial<{ kode_akun: string; nama_akun: string; kategori: string; parentId: string | null; isActive: boolean; isControlAccount: boolean }>) =>
     request<ChartOfAccount>(`/chart-of-accounts/${id}`, { method: 'PATCH', body: JSON.stringify(payload) }),
 
   deleteCoa: (id: string) => request<void>(`/chart-of-accounts/${id}`, { method: 'DELETE' }),
@@ -362,7 +394,13 @@ export const api = {
     tanggal: string;
     deskripsi: string;
     sumber_aplikasi: string;
-    entries: { kode_akun: string; tipe: 'DEBIT' | 'KREDIT'; jumlah: number }[];
+    mata_uang?: string;
+    entries: {
+      kode_akun: string;
+      tipe: 'DEBIT' | 'KREDIT';
+      jumlah: number;
+      dimensions?: { nama_dimension: string; kode_value: string }[];
+    }[];
   }) => request<Journal>('/journals/manual', { method: 'POST', body: JSON.stringify(payload) }),
   reverseJournal: (journalId: string, payload: { tenantId: string; tanggal?: string; alasan?: string }) =>
     request<Journal>(`/journals/${journalId}/reverse`, {
@@ -423,6 +461,23 @@ export const api = {
     if (startDate) q.append('startDate', startDate);
     if (endDate) q.append('endDate', endDate);
     return request<any[]>(`/reports/laba-rugi-by-dimension/${tenantId}?${q.toString()}`);
+  },
+  getDimensionAnalysis: (
+    tenantId: string,
+    params: {
+      dimensionId: string;
+      tipeSaldo?: 'AS_OF' | 'MUTASI';
+      startDate?: string;
+      endDate?: string;
+      kategori?: string;
+    },
+  ) => {
+    const q = new URLSearchParams({ dimensionId: params.dimensionId });
+    if (params.tipeSaldo) q.append('tipeSaldo', params.tipeSaldo);
+    if (params.startDate) q.append('startDate', params.startDate);
+    if (params.endDate) q.append('endDate', params.endDate);
+    if (params.kategori) q.append('kategori', params.kategori);
+    return request<DimensionAnalysisReport>(`/reports/dimension-analysis/${tenantId}?${q.toString()}`);
   },
 
   // --- TAX API ---
