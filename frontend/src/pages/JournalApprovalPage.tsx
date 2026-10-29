@@ -23,6 +23,7 @@ export const JournalApprovalPage: React.FC<Props> = ({ currentTenant }) => {
       setError(null);
       const data = await api.getPendingJournals(currentTenant.id);
       setPendingJournals(data);
+      window.dispatchEvent(new Event('journal-approval-updated'));
     } catch (err: any) {
       setError(err.message || 'Gagal memuat jurnal PENDING');
     } finally {
@@ -42,7 +43,8 @@ export const JournalApprovalPage: React.FC<Props> = ({ currentTenant }) => {
     try {
       setActionLoading(true);
       await api.approveJournal(journal.id, currentTenant.id);
-      fetchPendingJournals();
+      await fetchPendingJournals();
+      window.dispatchEvent(new Event('journal-approval-updated'));
     } catch (err: any) {
       alert(err.message || 'Gagal menyetujui jurnal');
     } finally {
@@ -68,7 +70,8 @@ export const JournalApprovalPage: React.FC<Props> = ({ currentTenant }) => {
       setActionLoading(true);
       await api.rejectJournal(selectedJournal.id, currentTenant.id, rejectReason);
       setRejectModalOpen(false);
-      fetchPendingJournals();
+      await fetchPendingJournals();
+      window.dispatchEvent(new Event('journal-approval-updated'));
     } catch (err: any) {
       alert(err.message || 'Gagal menolak jurnal');
     } finally {

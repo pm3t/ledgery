@@ -38,4 +38,12 @@ export class NotificationService {
       data: { isRead: true },
     });
   }
+
+  // Menandai semua notifikasi tenant sebagai telah dibaca
+  async markAllAsRead(tenantId: string) {
+    return this.prisma.notification.updateMany({
+      where: { tenantId, isRead: false },
+      data: { isRead: true },
+    });
+  }
 }

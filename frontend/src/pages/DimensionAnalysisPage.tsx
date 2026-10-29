@@ -387,51 +387,6 @@ export const DimensionAnalysisPage: React.FC<Props> = ({ currentTenant }) => {
         </div>
       </div>
 
-      {/* Info / Quick Stats */}
-      {reportData && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-slate-900/50 border border-slate-800/80 rounded-2xl p-4">
-            <span className="text-xs text-slate-400 font-medium">Dimensi Aktif</span>
-            <div className="text-base font-semibold text-white mt-1">
-              {reportData.dimension.nama_dimension}
-            </div>
-            <span className="text-[11px] text-slate-500">
-              {reportData.columns.length} kolom segmen
-            </span>
-          </div>
-
-          <div className="bg-slate-900/50 border border-slate-800/80 rounded-2xl p-4">
-            <span className="text-xs text-slate-400 font-medium">Akun Ditampilkan</span>
-            <div className="text-base font-semibold text-white mt-1">
-              {filteredRows.length} <span className="text-xs text-slate-400 font-normal">/ {reportData.rows.length} total</span>
-            </div>
-            <span className="text-[11px] text-slate-500">
-              {hideZeroBalances ? 'Saldo nol disembunyikan' : 'Semua akun COA'}
-            </span>
-          </div>
-
-          <div className="bg-slate-900/50 border border-slate-800/80 rounded-2xl p-4">
-            <span className="text-xs text-slate-400 font-medium">Tipe Perhitungan</span>
-            <div className="text-base font-semibold text-indigo-400 mt-1">
-              {tipeSaldo === 'MUTASI' ? 'Mutasi Periode' : 'As Of Kumulatif'}
-            </div>
-            <span className="text-[11px] text-slate-500">
-              {tipeSaldo === 'MUTASI' ? `${startDate} s/d ${endDate}` : `s/d ${endDate}`}
-            </span>
-          </div>
-
-          <div className="bg-slate-900/50 border border-slate-800/80 rounded-2xl p-4">
-            <span className="text-xs text-slate-400 font-medium">Grand Total Matriks</span>
-            <div className={`text-base font-bold mt-1 ${reportData.grandTotal < 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
-              {formatRupiah(reportData.grandTotal)}
-            </div>
-            <span className="text-[11px] text-slate-500">
-              Net balance seluruh segmen
-            </span>
-          </div>
-        </div>
-      )}
-
       {/* Error Banner */}
       {error && (
         <div className="bg-rose-500/10 border border-rose-500/30 rounded-2xl p-4 text-rose-400 text-sm flex items-center gap-3">

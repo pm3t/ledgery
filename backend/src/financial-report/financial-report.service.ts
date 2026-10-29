@@ -14,8 +14,8 @@ export class FinancialReportService {
     });
 
     const dateFilter: any = {};
-    if (startDate) dateFilter.gte = new Date(startDate);
-    if (endDate) dateFilter.lte = new Date(endDate);
+    if (startDate) dateFilter.gte = new Date(startDate.includes('T') ? startDate : `${startDate}T00:00:00.000Z`);
+    if (endDate) dateFilter.lte = new Date(endDate.includes('T') ? endDate : `${endDate}T23:59:59.999Z`);
 
     const whereClause: any = {
       journal: {
@@ -231,8 +231,8 @@ export class FinancialReportService {
     });
 
     const dateFilter: any = {};
-    if (startDate) dateFilter.gte = new Date(startDate);
-    if (endDate) dateFilter.lte = new Date(endDate);
+    if (startDate) dateFilter.gte = new Date(startDate.includes('T') ? startDate : `${startDate}T00:00:00.000Z`);
+    if (endDate) dateFilter.lte = new Date(endDate.includes('T') ? endDate : `${endDate}T23:59:59.999Z`);
 
     const dimensionValues = await this.prisma.dimensionValue.findMany({
       where: { dimensionId, isActive: true },

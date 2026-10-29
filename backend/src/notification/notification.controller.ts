@@ -28,4 +28,13 @@ export class NotificationController {
       data: notification,
     };
   }
+
+  @Patch('tenant/:tenantId/read-all')
+  async markAllAsRead(@Param('tenantId') tenantId: string) {
+    await this.notificationService.markAllAsRead(tenantId);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Semua notifikasi berhasil ditandai sudah dibaca',
+    };
+  }
 }

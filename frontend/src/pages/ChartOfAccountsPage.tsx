@@ -19,6 +19,7 @@ import {
   FileText,
   Building2,
   ArrowRightLeft,
+  Columns3,
 } from 'lucide-react';
 import {
   api,
@@ -32,11 +33,126 @@ interface ChartOfAccountsPageProps {
   currentTenant: Tenant | null;
 }
 
+interface ColumnVisibility {
+  kode_akun: boolean;
+  nama_akun: boolean;
+  kategori: boolean;
+  parent: boolean;
+  saldo: boolean;
+  status: boolean;
+  aksi: boolean;
+}
+
+const DEFAULT_COLUMNS: ColumnVisibility = {
+  kode_akun: true,
+  nama_akun: true,
+  kategori: true,
+  parent: true,
+  saldo: true,
+  status: true,
+  aksi: true,
+};
+
+const COLUMN_DEFINITIONS: { key: keyof ColumnVisibility; label: string }[] = [
+  { key: 'kode_akun', label: 'Kode Akun' },
+  { key: 'nama_akun', label: 'Nama Akun' },
+  { key: 'kategori', label: 'Kategori' },
+  { key: 'parent', label: 'Akun Induk' },
+  { key: 'saldo', label: 'Saldo' },
+  { key: 'status', label: 'Status' },
+  { key: 'aksi', label: 'Aksi' },
+];
+
 export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ currentTenant }) => {
   const [accounts, setAccounts] = useState<ChartOfAccount[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedKategori, setSelectedKategori] = useState<string>('ALL');
+
+  // State Pilihan Kolom (Column Visibility)
+  const [showColumnPicker, setShowColumnPicker] = useState<boolean>(false);
+  const [visibleColumns, setVisibleColumns] = useState<ColumnVisibility>(() => {
+    try {
+      const saved = localStorage.getItem('ledgery_coa_columns');
+      if (saved) return { ...DEFAULT_COLUMNS, ...JSON.parse(saved) };
+    } catch (e) {}
+    return DEFAULT_COLUMNS;
+  });
+
+  const toggleColumn = (key: keyof ColumnVisibility) => {
+    setVisibleColumns((prev) => {
+      const updated = { ...prev, [key]: !prev[key] };
+      const hasVisible = Object.values(updated).some((v) => v);
+      if (!hasVisible) return prev;
+      try {
+        localStorage.setItem('ledgery_coa_columns', JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
+  };
+
+  const resetColumns = () => {
+    setVisibleColumns(DEFAULT_COLUMNS);
+    try {
+      localStorage.setItem('ledgery_coa_columns', JSON.stringify(DEFAULT_COLUMNS));
+    } catch (e) {}
+  };
+
+  // State Filter Saldo COA (As of vs Mutasi)
+  const [tipeSaldo, setTipeSaldo] = useState<'AS_OF' | 'MUTASI'>('AS_OF');
+  const [asOfDate, setAsOfDate] = useState<string>(
+    new Date().toISOString().slice(0, 10),
+  );
+  const [mutasiStartDate, setMutasiStartDate] = useState<string>(
+    new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+      .toISOString()
+      .slice(0, 10),
+  );
+  const [mutasiEndDate, setMutasiEndDate] = useState<string>(
+    new Date().toISOString().slice(0, 10),
+  );
+  const [balanceMap, setBalanceMap] = useState<Record<string, number>>({});
+  const [balanceLoading, setBalanceLoading] = useState<boolean>(false);
+
+  const fetchBalances = async () => {
+    if (!currentTenant) return;
+    setBalanceLoading(true);
+    try {
+      const res = await api.getTrialBalance(
+        currentTenant.id,
+        tipeSaldo === 'MUTASI' ? mutasiStartDate : undefined,
+        tipeSaldo === 'MUTASI' ? mutasiEndDate : asOfDate,
+      );
+      const map: Record<string, number> = {};
+      res.items.forEach((item) => {
+        map[item.coa.id] = item.saldo;
+      });
+      setBalanceMap(map);
+    } catch (err) {
+      console.error('Gagal mengambil saldo COA:', err);
+    } finally {
+      setBalanceLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchBalances();
+  }, [currentTenant, tipeSaldo, asOfDate, mutasiStartDate, mutasiEndDate]);
+
+  useEffect(() => {
+    window.addEventListener('journal-approval-updated', fetchBalances);
+    return () => {
+      window.removeEventListener('journal-approval-updated', fetchBalances);
+    };
+  }, []);
+
+  const formatSaldo = (val: number | undefined) => {
+    if (val === undefined || val === null) return '-';
+    if (val === 0) return '0';
+    const isNegative = val < 0;
+    const formatted = Math.abs(val).toLocaleString('id-ID');
+    return isNegative ? `(${formatted})` : formatted;
+  };
 
   // State Modal Form
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -282,35 +398,190 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
         </button>
       </div>
 
-      {/* Filter & Toolbar Pencarian */}
-      <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 flex flex-col md:flex-row gap-4 justify-between items-center backdrop-blur-sm">
-        {/* Filter Kategori Tabs */}
-        <div className="flex flex-wrap gap-1.5 w-full md:w-auto">
-          {['ALL', 'ASET', 'LIABILITAS', 'EKUITAS', 'PENDAPATAN', 'BEBAN'].map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setSelectedKategori(cat)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                selectedKategori === cat
-                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
-                  : 'bg-slate-800/80 text-slate-400 hover:text-white hover:bg-slate-800'
-              }`}
-            >
-              {cat === 'ALL' ? 'Semua Kategori' : cat}
-            </button>
-          ))}
+      {/* Filter & Toolbar Pencarian + Saldo Selector */}
+      <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 space-y-3.5 backdrop-blur-sm">
+        {/* Row 1: Kategori Tabs & Search */}
+        <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
+          {/* Filter Kategori Tabs */}
+          <div className="flex flex-wrap gap-1.5 w-full md:w-auto">
+            {['ALL', 'ASET', 'LIABILITAS', 'EKUITAS', 'PENDAPATAN', 'BEBAN'].map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setSelectedKategori(cat)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                  selectedKategori === cat
+                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
+                    : 'bg-slate-800/80 text-slate-400 hover:text-white hover:bg-slate-800'
+                }`}
+              >
+                {cat === 'ALL' ? 'Semua Kategori' : cat}
+              </button>
+            ))}
+          </div>
+
+          {/* Input Pencarian */}
+          <div className="relative w-full md:w-72">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              placeholder="Cari kode atau nama akun..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-slate-950 border border-slate-800 text-slate-200 text-xs rounded-xl pl-9 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
         </div>
 
-        {/* Input Pencarian */}
-        <div className="relative w-full md:w-72">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            placeholder="Cari kode atau nama akun..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-slate-950 border border-slate-800 text-slate-200 text-xs rounded-xl pl-9 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
+        {/* Row 2: Konfigurasi Perhitungan Kolom Saldo (As of vs Mutasi) */}
+        <div className="pt-3 border-t border-slate-800/70 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-xs">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <span className="text-slate-400 font-medium flex items-center gap-1.5">
+              <ArrowRightLeft className="w-3.5 h-3.5 text-indigo-400" />
+              Pilihan Saldo:
+            </span>
+            <div className="inline-flex p-0.5 bg-slate-950 rounded-xl border border-slate-800">
+              <button
+                type="button"
+                onClick={() => setTipeSaldo('AS_OF')}
+                className={`px-3 py-1.5 rounded-lg font-semibold transition-all ${
+                  tipeSaldo === 'AS_OF'
+                    ? 'bg-indigo-600 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                As of (Default)
+              </button>
+              <button
+                type="button"
+                onClick={() => setTipeSaldo('MUTASI')}
+                className={`px-3 py-1.5 rounded-lg font-semibold transition-all ${
+                  tipeSaldo === 'MUTASI'
+                    ? 'bg-indigo-600 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                Mutasi
+              </button>
+            </div>
+
+            {/* Date Filters according to Tipe Saldo */}
+            {tipeSaldo === 'AS_OF' ? (
+              <div className="flex items-center gap-1.5 ml-1">
+                <span className="text-slate-400 text-[11px]">Per Tanggal:</span>
+                <input
+                  type="date"
+                  value={asOfDate}
+                  onChange={(e) => setAsOfDate(e.target.value)}
+                  className="bg-slate-950 border border-slate-800 text-slate-200 text-xs rounded-xl px-2.5 py-1 focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+            ) : (
+              <div className="flex flex-wrap items-center gap-1.5 ml-1">
+                <span className="text-slate-400 text-[11px]">Dari:</span>
+                <input
+                  type="date"
+                  value={mutasiStartDate}
+                  onChange={(e) => setMutasiStartDate(e.target.value)}
+                  className="bg-slate-950 border border-slate-800 text-slate-200 text-xs rounded-xl px-2.5 py-1 focus:outline-none focus:border-indigo-500"
+                />
+                <span className="text-slate-400 text-[11px]">s/d:</span>
+                <input
+                  type="date"
+                  value={mutasiEndDate}
+                  onChange={(e) => setMutasiEndDate(e.target.value)}
+                  className="bg-slate-950 border border-slate-800 text-slate-200 text-xs rounded-xl px-2.5 py-1 focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center gap-3 self-end md:self-auto">
+            <span className="text-[11px] text-slate-500">
+              {tipeSaldo === 'AS_OF'
+                ? 'Saldo kumulatif s.d tanggal as of'
+                : 'Pergerakan mutasi dalam rentang tanggal'}
+            </span>
+            <button
+              type="button"
+              onClick={fetchBalances}
+              disabled={balanceLoading}
+              className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition-colors flex items-center gap-1 text-[11px]"
+              title="Refresh Nilai Saldo Akun"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${balanceLoading ? 'animate-spin text-indigo-400' : ''}`} />
+              <span className="hidden sm:inline">Refresh</span>
+            </button>
+
+            {/* Tombol & Popover Pilihan Kolom */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setShowColumnPicker(!showColumnPicker)}
+                className={`px-2.5 py-1.5 rounded-lg border text-[11px] font-medium transition-colors flex items-center gap-1.5 ${
+                  showColumnPicker
+                    ? 'bg-indigo-600 text-white border-indigo-500 shadow-sm'
+                    : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700'
+                }`}
+                title="Pilih kolom mana yang ingin ditampilkan/disembunyikan"
+              >
+                <Columns3 className="w-3.5 h-3.5 text-indigo-400" />
+                <span>Pilih Kolom</span>
+                <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-900/80 text-indigo-300 font-mono">
+                  {Object.values(visibleColumns).filter(Boolean).length}/{COLUMN_DEFINITIONS.length}
+                </span>
+              </button>
+
+              {/* Popover Pilihan Kolom */}
+              {showColumnPicker && (
+                <>
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setShowColumnPicker(false)}
+                  />
+                  <div className="absolute right-0 top-full mt-2 w-56 bg-slate-900 border border-slate-800 rounded-xl shadow-2xl z-50 p-3 space-y-2.5 animate-in fade-in zoom-in-95 duration-150">
+                    <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                      <span className="text-xs font-semibold text-white flex items-center gap-1.5">
+                        <Columns3 className="w-3.5 h-3.5 text-indigo-400" />
+                        Pilihan Kolom
+                      </span>
+                      <button
+                        type="button"
+                        onClick={resetColumns}
+                        className="text-[10px] text-indigo-400 hover:text-indigo-300 hover:underline"
+                      >
+                        Reset Semua
+                      </button>
+                    </div>
+
+                    <div className="space-y-1 max-h-60 overflow-y-auto">
+                      {COLUMN_DEFINITIONS.map((col) => (
+                        <label
+                          key={col.key}
+                          className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-800/60 cursor-pointer text-xs select-none transition-colors"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={visibleColumns[col.key]}
+                            onChange={() => toggleColumn(col.key)}
+                            className="w-3.5 h-3.5 rounded bg-slate-950 border-slate-700 text-indigo-600 focus:ring-0"
+                          />
+                          <span
+                            className={
+                              visibleColumns[col.key]
+                                ? 'text-slate-200 font-medium'
+                                : 'text-slate-500 line-through'
+                            }
+                          >
+                            {col.label}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -327,12 +598,34 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
             <table className="w-full text-left text-sm text-slate-300">
               <thead className="bg-slate-950/70 text-slate-400 text-xs uppercase tracking-wider border-b border-slate-800">
                 <tr>
-                  <th className="py-3.5 px-4 font-semibold">Kode Akun</th>
-                  <th className="py-3.5 px-4 font-semibold">Nama Akun</th>
-                  <th className="py-3.5 px-4 font-semibold">Kategori</th>
-                  <th className="py-3.5 px-4 font-semibold">Akun Induk</th>
-                  <th className="py-3.5 px-4 font-semibold">Status</th>
-                  <th className="py-3.5 px-4 font-semibold text-right">Aksi</th>
+                  {visibleColumns.kode_akun && (
+                    <th className="py-3.5 px-4 font-semibold">Kode Akun</th>
+                  )}
+                  {visibleColumns.nama_akun && (
+                    <th className="py-3.5 px-4 font-semibold">Nama Akun</th>
+                  )}
+                  {visibleColumns.kategori && (
+                    <th className="py-3.5 px-4 font-semibold">Kategori</th>
+                  )}
+                  {visibleColumns.parent && (
+                    <th className="py-3.5 px-4 font-semibold">Akun Induk</th>
+                  )}
+                  {visibleColumns.saldo && (
+                    <th className="py-3.5 px-4 font-semibold text-right min-w-[150px]">
+                      <div>Saldo ({currentTenant?.mata_uang || 'IDR'})</div>
+                      <div className="text-[10px] text-indigo-400 font-normal tracking-normal lowercase">
+                        {tipeSaldo === 'AS_OF'
+                          ? `as of ${asOfDate}`
+                          : `mutasi ${mutasiStartDate} s/d ${mutasiEndDate}`}
+                      </div>
+                    </th>
+                  )}
+                  {visibleColumns.status && (
+                    <th className="py-3.5 px-4 font-semibold">Status</th>
+                  )}
+                  {visibleColumns.aksi && (
+                    <th className="py-3.5 px-4 font-semibold text-right">Aksi</th>
+                  )}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60">
@@ -340,94 +633,172 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
                   const isChild = !!acc.parentId;
                   return (
                     <tr key={acc.id} className="hover:bg-slate-800/40 transition-colors">
-                      <td className="py-3 px-4 font-mono font-bold text-white">
-                        <button
-                          type="button"
-                          onClick={() => handleOpenMutationModal(acc)}
-                          className={`hover:underline flex items-center gap-1.5 text-left transition-colors ${
-                            isChild ? 'pl-4 text-indigo-300 hover:text-indigo-200' : 'text-white hover:text-indigo-300'
-                          }`}
-                          title="Klik untuk melihat kartu mutasi akun ini"
-                        >
-                          {isChild && '↳ '}
-                          {acc.kode_akun}
-                        </button>
-                      </td>
-                      <td className="py-3 px-4 font-medium text-slate-200">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className={isChild ? 'pl-2 text-slate-300' : 'font-semibold text-white'}>
-                            {acc.nama_akun}
+                      {visibleColumns.kode_akun && (
+                        <td className="py-3 px-4 font-mono font-bold text-white">
+                          <button
+                            type="button"
+                            onClick={() => handleOpenMutationModal(acc)}
+                            className={`hover:underline flex items-center gap-1.5 text-left transition-colors ${
+                              isChild ? 'pl-4 text-indigo-300 hover:text-indigo-200' : 'text-white hover:text-indigo-300'
+                            }`}
+                            title="Klik untuk melihat kartu mutasi akun ini"
+                          >
+                            {isChild && '↳ '}
+                            {acc.kode_akun}
+                          </button>
+                        </td>
+                      )}
+                      {visibleColumns.nama_akun && (
+                        <td className="py-3 px-4 font-medium text-slate-200">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className={isChild ? 'pl-2 text-slate-300' : 'font-semibold text-white'}>
+                              {acc.nama_akun}
+                            </span>
+                            {acc.isControlAccount && (
+                              <span
+                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30"
+                                title="Akun Kontrol: Jurnal manual langsung diblokir"
+                              >
+                                <ShieldAlert className="w-3 h-3 text-amber-400" /> Akun Kontrol
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                      )}
+                      {visibleColumns.kategori && (
+                        <td className="py-3 px-4">
+                          <span
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${getCategoryBadge(
+                              acc.kategori
+                            )}`}
+                          >
+                            {acc.kategori}
                           </span>
-                          {acc.isControlAccount && (
-                            <span
-                              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30"
-                              title="Akun Kontrol: Jurnal manual langsung diblokir"
+                        </td>
+                      )}
+                      {visibleColumns.parent && (
+                        <td className="py-3 px-4 text-xs text-slate-400">
+                          {acc.parent ? (
+                            <span className="font-mono bg-slate-800/80 px-2 py-1 rounded text-slate-300">
+                              {acc.parent.kode_akun} - {acc.parent.nama_akun}
+                            </span>
+                          ) : (
+                            <span className="text-slate-600 italic">Utama (Induk)</span>
+                          )}
+                        </td>
+                      )}
+
+                      {/* Kolom Saldo */}
+                      {visibleColumns.saldo && (
+                        <td className="py-3 px-4 text-right font-mono font-medium">
+                          {balanceLoading ? (
+                            <span className="text-slate-600 animate-pulse text-xs">...</span>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => handleOpenMutationModal(acc)}
+                              className={`hover:underline transition-colors ${
+                                (balanceMap[acc.id] || 0) === 0
+                                  ? 'text-slate-500'
+                                  : (balanceMap[acc.id] || 0) < 0
+                                  ? 'text-rose-400 font-semibold'
+                                  : 'text-slate-100 font-semibold'
+                              }`}
+                              title="Klik untuk melihat rincian mutasi akun ini"
                             >
-                              <ShieldAlert className="w-3 h-3 text-amber-400" /> Akun Kontrol
+                              {formatSaldo(balanceMap[acc.id])}
+                            </button>
+                          )}
+                        </td>
+                      )}
+
+                      {visibleColumns.status && (
+                        <td className="py-3 px-4">
+                          {acc.isActive ? (
+                            <span className="inline-flex items-center gap-1 text-xs text-emerald-400 font-medium">
+                              <CheckCircle2 className="w-3.5 h-3.5" /> Aktif
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 text-xs text-slate-500 font-medium">
+                              <XCircle className="w-3.5 h-3.5" /> Nonaktif
                             </span>
                           )}
-                        </div>
-                      </td>
-                      <td className="py-3 px-4">
-                        <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${getCategoryBadge(
-                            acc.kategori
-                          )}`}
-                        >
-                          {acc.kategori}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4 text-xs text-slate-400">
-                        {acc.parent ? (
-                          <span className="font-mono bg-slate-800/80 px-2 py-1 rounded text-slate-300">
-                            {acc.parent.kode_akun} - {acc.parent.nama_akun}
-                          </span>
-                        ) : (
-                          <span className="text-slate-600 italic">Utama (Induk)</span>
-                        )}
-                      </td>
-                      <td className="py-3 px-4">
-                        {acc.isActive ? (
-                          <span className="inline-flex items-center gap-1 text-xs text-emerald-400 font-medium">
-                            <CheckCircle2 className="w-3.5 h-3.5" /> Aktif
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 text-xs text-slate-500 font-medium">
-                            <XCircle className="w-3.5 h-3.5" /> Nonaktif
-                          </span>
-                        )}
-                      </td>
-                      <td className="py-3 px-4 text-right space-x-1.5 whitespace-nowrap">
-                        <button
-                          type="button"
-                          onClick={() => handleOpenMutationModal(acc)}
-                          className="px-2 py-1.5 text-xs text-slate-300 hover:text-emerald-300 bg-slate-800/80 hover:bg-emerald-950/40 border border-slate-700/80 hover:border-emerald-500/40 rounded-lg transition-colors inline-flex items-center gap-1.5"
-                          title="Lihat Mutasi Akun (Buku Besar)"
-                        >
-                          <History className="w-3.5 h-3.5 text-emerald-400" />
-                          <span>Mutasi</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleOpenEditModal(acc)}
-                          className="p-1.5 text-slate-400 hover:text-indigo-400 hover:bg-indigo-950/50 rounded-lg transition-colors inline-flex items-center"
-                          title="Edit Akun"
-                        >
-                          <Edit2 className="w-4 h-4" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleDelete(acc.id, acc.nama_akun)}
-                          className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-rose-950/50 rounded-lg transition-colors inline-flex items-center"
-                          title="Hapus Akun"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </td>
+                        </td>
+                      )}
+
+                      {visibleColumns.aksi && (
+                        <td className="py-3 px-4 text-right space-x-1.5 whitespace-nowrap">
+                          <button
+                            type="button"
+                            onClick={() => handleOpenMutationModal(acc)}
+                            className="px-2 py-1.5 text-xs text-slate-300 hover:text-emerald-300 bg-slate-800/80 hover:bg-emerald-950/40 border border-slate-700/80 hover:border-emerald-500/40 rounded-lg transition-colors inline-flex items-center gap-1.5"
+                            title="Lihat Mutasi Akun (Buku Besar)"
+                          >
+                            <History className="w-3.5 h-3.5 text-emerald-400" />
+                            <span>Mutasi</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleOpenEditModal(acc)}
+                            className="p-1.5 text-slate-400 hover:text-indigo-400 hover:bg-indigo-950/50 rounded-lg transition-colors inline-flex items-center"
+                            title="Edit Akun"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDelete(acc.id, acc.nama_akun)}
+                            className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-rose-950/50 rounded-lg transition-colors inline-flex items-center"
+                            title="Hapus Akun"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </td>
+                      )}
                     </tr>
                   );
                 })}
               </tbody>
+              {/* Footer Total Saldo */}
+              {accounts.length > 0 && visibleColumns.saldo && (
+                <tfoot className="bg-slate-950/80 border-t-2 border-slate-800 font-semibold text-xs">
+                  <tr>
+                    {['kode_akun', 'nama_akun', 'kategori', 'parent'].filter(
+                      (k) => visibleColumns[k as keyof ColumnVisibility],
+                    ).length > 0 && (
+                      <td
+                        colSpan={
+                          ['kode_akun', 'nama_akun', 'kategori', 'parent'].filter(
+                            (k) => visibleColumns[k as keyof ColumnVisibility],
+                          ).length
+                        }
+                        className="py-3 px-4 text-slate-400"
+                      >
+                        Total ({accounts.length} Akun Ditampilkan)
+                      </td>
+                    )}
+                    <td className="py-3 px-4 text-right font-mono text-white font-bold text-sm">
+                      {formatSaldo(
+                        accounts.reduce(
+                          (sum, a) => sum + (balanceMap[a.id] || 0),
+                          0,
+                        ),
+                      )}
+                    </td>
+                    {['status', 'aksi'].filter(
+                      (k) => visibleColumns[k as keyof ColumnVisibility],
+                    ).length > 0 && (
+                      <td
+                        colSpan={
+                          ['status', 'aksi'].filter(
+                            (k) => visibleColumns[k as keyof ColumnVisibility],
+                          ).length
+                        }
+                      ></td>
+                    )}
+                  </tr>
+                </tfoot>
+              )}
             </table>
           </div>
         )}

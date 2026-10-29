@@ -467,6 +467,7 @@ export const api = {
   getNotifications: (tenantId: string, unreadOnly: boolean = false) => 
     request<AppNotification[]>(`/notifications/tenant/${tenantId}?unreadOnly=${unreadOnly}`),
   markNotificationAsRead: (id: string) => request<AppNotification>(`/notifications/${id}/read`, { method: 'PATCH' }),
+  markAllNotificationsAsRead: (tenantId: string) => request<void>(`/notifications/tenant/${tenantId}/read-all`, { method: 'PATCH' }),
 
   // --- FINANCIAL REPORTS API ---
   getTrialBalance: (tenantId: string, startDate?: string, endDate?: string, dimensionValues?: string) => {

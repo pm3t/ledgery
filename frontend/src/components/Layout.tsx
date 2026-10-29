@@ -43,6 +43,7 @@ export const Layout: React.FC<LayoutProps> = ({
   currentUser,
 }) => {
   const [notifications, setNotifications] = React.useState<AppNotification[]>([]);
+  const [pendingApprovalCount, setPendingApprovalCount] = React.useState<number>(0);
   const [showNotifPanel, setShowNotifPanel] = React.useState(false);
   
   const [expandedMenus, setExpandedMenus] = React.useState<Record<string, boolean>>({
@@ -56,27 +57,44 @@ export const Layout: React.FC<LayoutProps> = ({
     setExpandedMenus(prev => ({ ...prev, [menu]: !prev[menu] }));
   };
 
-  const fetchNotifications = React.useCallback(async () => {
+  const fetchNotificationsAndApprovals = React.useCallback(async () => {
     if (currentTenant) {
       try {
-        const data = await api.getNotifications(currentTenant.id, true);
-        setNotifications(data);
+        const notifData = await api.getNotifications(currentTenant.id, true);
+        setNotifications(notifData);
+
+        const pendingJournals = await api.getPendingJournals(currentTenant.id);
+        setPendingApprovalCount(pendingJournals.length);
       } catch (err) {
-        console.error('Failed to load notifications', err);
+        console.error('Failed to load notifications or pending approvals', err);
       }
     }
   }, [currentTenant]);
 
   React.useEffect(() => {
-    fetchNotifications();
-    const interval = setInterval(fetchNotifications, 10000); // poll every 10s
-    return () => clearInterval(interval);
-  }, [fetchNotifications]);
+    fetchNotificationsAndApprovals();
+    const interval = setInterval(fetchNotificationsAndApprovals, 10000); // poll every 10s
+    window.addEventListener('journal-approval-updated', fetchNotificationsAndApprovals);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('journal-approval-updated', fetchNotificationsAndApprovals);
+    };
+  }, [fetchNotificationsAndApprovals]);
 
   const handleMarkAsRead = async (id: string) => {
     try {
       await api.markNotificationAsRead(id);
-      fetchNotifications();
+      fetchNotificationsAndApprovals();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleMarkAllAsRead = async () => {
+    if (!currentTenant) return;
+    try {
+      await api.markAllNotificationsAsRead(currentTenant.id);
+      fetchNotificationsAndApprovals();
     } catch (err) {
       console.error(err);
     }
@@ -114,7 +132,18 @@ export const Layout: React.FC<LayoutProps> = ({
                 <div className="absolute top-full mt-2 -right-4 w-72 bg-slate-900 border border-slate-800 rounded-xl shadow-2xl z-50 p-3">
                   <div className="flex justify-between items-center mb-3 px-1">
                     <h3 className="text-sm font-semibold text-white">Notifikasi In-App</h3>
-                    <span className="text-xs text-slate-400">{notifications.length} Unread</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-slate-400">{notifications.length} Unread</span>
+                      {notifications.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={handleMarkAllAsRead}
+                          className="text-[10px] text-indigo-400 hover:text-indigo-300 underline font-medium"
+                        >
+                          Tandai Semua Dibaca
+                        </button>
+                      )}
+                    </div>
                   </div>
                   <div className="space-y-2 max-h-64 overflow-y-auto">
                     {notifications.length === 0 ? (
@@ -254,9 +283,9 @@ export const Layout: React.FC<LayoutProps> = ({
                   >
                     <CheckCircle2 className="w-5 h-5" />
                     Persetujuan Jurnal
-                    {notifications.length > 0 && (
+                    {pendingApprovalCount > 0 && (
                       <span className="ml-auto bg-amber-500 text-slate-950 text-[10px] font-bold px-2 py-0.5 rounded-full">
-                        {notifications.length}
+                        {pendingApprovalCount}
                       </span>
                     )}
                   </button>
