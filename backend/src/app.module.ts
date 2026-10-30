@@ -25,6 +25,7 @@ import { SelisihKursModule } from './selisih-kurs/selisih-kurs.module';
 import { AccountingPeriodModule } from './accounting-period/accounting-period.module';
 import { SubledgerModule } from './subledger/subledger.module';
 import { BusinessPartnerModule } from './business-partner/business-partner.module';
+import { AccountsReceivableModule } from './accounts-receivable/accounts-receivable.module';
 
 // Modul Utama Aplikasi Backend Ledgery
 @Module({
@@ -55,6 +56,7 @@ import { BusinessPartnerModule } from './business-partner/business-partner.modul
     AccountingPeriodModule,
     SubledgerModule,
     BusinessPartnerModule,
+    AccountsReceivableModule,
   ],
 })
 export class AppModule {}

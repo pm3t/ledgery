@@ -83,6 +83,9 @@ model Tenant {
   postingSetups    PostingSetup[]
   businessPartners BusinessPartner[]
   documentNumberings DocumentNumbering[]
+  salesInvoices      SalesInvoice[]
+  creditNotes        CreditNote[]
+  customerReceipts   CustomerReceipt[]
 }
 
 // Model Chart of Accounts (Daftar Kode Akun)
@@ -109,6 +112,9 @@ model ChartOfAccount {
   // Relasi Jurnal
   journalEntries JournalEntry[]
   postingSetups  PostingSetup[]
+  salesInvoiceLines SalesInvoiceLine[]
+  creditNoteLines   CreditNoteLine[]
+  customerReceipts  CustomerReceipt[]
 
   @@unique([tenantId, kode_akun])
 }
@@ -174,6 +180,12 @@ model Journal {
   tenant       Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   entries      JournalEntry[]
   approvalLogs JournalApprovalLog[]
+  salesInvoices        SalesInvoice[]        @relation("InvoiceJournal")
+  voidSalesInvoices    SalesInvoice[]        @relation("InvoiceVoidJournal")
+  creditNotes          CreditNote[]          @relation("CreditNoteJournal")
+  voidCreditNotes      CreditNote[]          @relation("CreditNoteVoidJournal")
+  customerReceipts     CustomerReceipt[]     @relation("ReceiptJournal")
+  voidCustomerReceipts CustomerReceipt[]     @relation("ReceiptVoidJournal")
 
   // Constraint
   @@unique([tenantId, no_voucher])
@@ -510,6 +522,9 @@ model BusinessPartner {
   updatedAt          DateTime @updatedAt
 
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  salesInvoices    SalesInvoice[]
+  creditNotes      CreditNote[]
+  customerReceipts CustomerReceipt[]
 
   @@unique([tenantId, kode])
   @@unique([tenantId, externalRef])
@@ -532,5 +547,233 @@ model DocumentNumbering {
 
   @@unique([tenantId, docType, year])
 }
+
+// ==========================================
+// MODUL 13: SUB LEDGER ACCOUNTS RECEIVABLE (AR)
+// ==========================================
+
+enum SalesInvoiceStatus {
+  DRAFT
+  POSTED
+  PARTIAL
+  PAID
+  VOID
+}
+
+enum CreditNoteStatus {
+  DRAFT
+  POSTED
+  VOID
+}
+
+enum CustomerReceiptStatus {
+  DRAFT
+  POSTED
+  VOID
+}
+
+enum SourceLineType {
+  SO_LINE
+  DO_LINE
+}
+
+model SalesInvoice {
+  id                     String             @id @default(uuid())
+  tenantId               String
+  noDokumen              String
+  tanggal                DateTime
+  jatuhTempo             DateTime
+  partnerId              String
+  mata_uang              String
+  kurs                   Decimal            @default(1.0) @db.Decimal(19, 6)
+  status                 SalesInvoiceStatus @default(DRAFT)
+  subtotal               Decimal            @default(0) @db.Decimal(19, 4)
+  totalDiskon            Decimal            @default(0) @db.Decimal(19, 4)
+  totalPpn               Decimal            @default(0) @db.Decimal(19, 4)
+  total                  Decimal            @default(0) @db.Decimal(19, 4)
+  totalDialokasikan      Decimal            @default(0) @db.Decimal(19, 4)
+  saldo                  Decimal            @default(0) @db.Decimal(19, 4)
+  subtotalFungsional     Decimal            @default(0) @db.Decimal(19, 4)
+  totalDiskonFungsional  Decimal            @default(0) @db.Decimal(19, 4)
+  totalPpnFungsional     Decimal            @default(0) @db.Decimal(19, 4)
+  totalFungsional        Decimal            @default(0) @db.Decimal(19, 4)
+  saldoFungsional        Decimal            @default(0) @db.Decimal(19, 4)
+  journalId              String?
+  voidJournalId          String?
+  externalRef            String?
+  sumberAplikasi         String             @default("MANUAL")
+  idempotencyKey         String?
+  catatan                String?
+  createdBy              String?
+  postedAt               DateTime?
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
+
+  tenant      Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  partner     BusinessPartner     @relation(fields: [partnerId], references: [id], onDelete: Restrict)
+  journal     Journal?            @relation("InvoiceJournal", fields: [journalId], references: [id], onDelete: SetNull)
+  voidJournal Journal?            @relation("InvoiceVoidJournal", fields: [voidJournalId], references: [id], onDelete: SetNull)
+  lines       SalesInvoiceLine[]
+  allocations ReceiptAllocation[]
+  creditNotes CreditNote[]
+
+  @@unique([tenantId, noDokumen])
+  @@unique([tenantId, idempotencyKey])
+  @@index([tenantId, partnerId, status])
+  @@index([tenantId, tanggal])
+}
+
+model SalesInvoiceLine {
+  id               String          @id @default(uuid())
+  invoiceId        String
+  itemId           String?
+  itemType         String?         @default("SERVICE") // "STOCK" | "SERVICE"
+  deskripsi        String
+  qty              Decimal         @default(1) @db.Decimal(19, 4)
+  hargaSatuan      Decimal         @default(0) @db.Decimal(19, 4)
+  diskon           Decimal         @default(0) @db.Decimal(19, 4)
+  ppnRate          Decimal         @default(0) @db.Decimal(19, 4)
+  jumlah           Decimal         @default(0) @db.Decimal(19, 4)
+  akunPendapatanId String?
+  dimensions       Json?
+  sourceLineType   SourceLineType?
+  sourceLineId     String?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  invoice        SalesInvoice    @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  akunPendapatan ChartOfAccount? @relation(fields: [akunPendapatanId], references: [id], onDelete: SetNull)
+
+  @@index([invoiceId])
+}
+
+model CreditNote {
+  id                     String             @id @default(uuid())
+  tenantId               String
+  noDokumen              String
+  tanggal                DateTime
+  partnerId              String
+  invoiceId              String?
+  returnStock            Boolean            @default(false)
+  mata_uang              String
+  kurs                   Decimal            @default(1.0) @db.Decimal(19, 6)
+  status                 CreditNoteStatus   @default(DRAFT)
+  subtotal               Decimal            @default(0) @db.Decimal(19, 4)
+  totalDiskon            Decimal            @default(0) @db.Decimal(19, 4)
+  totalPpn               Decimal            @default(0) @db.Decimal(19, 4)
+  total                  Decimal            @default(0) @db.Decimal(19, 4)
+  totalDialokasikan      Decimal            @default(0) @db.Decimal(19, 4)
+  saldo                  Decimal            @default(0) @db.Decimal(19, 4)
+  subtotalFungsional     Decimal            @default(0) @db.Decimal(19, 4)
+  totalDiskonFungsional  Decimal            @default(0) @db.Decimal(19, 4)
+  totalPpnFungsional     Decimal            @default(0) @db.Decimal(19, 4)
+  totalFungsional        Decimal            @default(0) @db.Decimal(19, 4)
+  saldoFungsional        Decimal            @default(0) @db.Decimal(19, 4)
+  journalId              String?
+  voidJournalId          String?
+  externalRef            String?
+  sumberAplikasi         String             @default("MANUAL")
+  idempotencyKey         String?
+  catatan                String?
+  createdBy              String?
+  postedAt               DateTime?
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
+
+  tenant      Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  partner     BusinessPartner     @relation(fields: [partnerId], references: [id], onDelete: Restrict)
+  invoice     SalesInvoice?       @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  journal     Journal?            @relation("CreditNoteJournal", fields: [journalId], references: [id], onDelete: SetNull)
+  voidJournal Journal?            @relation("CreditNoteVoidJournal", fields: [voidJournalId], references: [id], onDelete: SetNull)
+  lines       CreditNoteLine[]
+  allocations ReceiptAllocation[]
+
+  @@unique([tenantId, noDokumen])
+  @@unique([tenantId, idempotencyKey])
+  @@index([tenantId, partnerId, status])
+}
+
+model CreditNoteLine {
+  id               String          @id @default(uuid())
+  creditNoteId     String
+  itemId           String?
+  itemType         String?         @default("SERVICE")
+  deskripsi        String
+  qty              Decimal         @default(1) @db.Decimal(19, 4)
+  hargaSatuan      Decimal         @default(0) @db.Decimal(19, 4)
+  diskon           Decimal         @default(0) @db.Decimal(19, 4)
+  ppnRate          Decimal         @default(0) @db.Decimal(19, 4)
+  jumlah           Decimal         @default(0) @db.Decimal(19, 4)
+  akunPendapatanId String?
+  dimensions       Json?
+  sourceLineType   SourceLineType?
+  sourceLineId     String?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  creditNote     CreditNote      @relation(fields: [creditNoteId], references: [id], onDelete: Cascade)
+  akunPendapatan ChartOfAccount? @relation(fields: [akunPendapatanId], references: [id], onDelete: SetNull)
+
+  @@index([creditNoteId])
+}
+
+model CustomerReceipt {
+  id                String                @id @default(uuid())
+  tenantId          String
+  noDokumen         String
+  tanggal           DateTime
+  partnerId         String
+  akunKasBankId     String
+  jumlah            Decimal               @db.Decimal(19, 4)
+  jumlahFungsional  Decimal               @default(0) @db.Decimal(19, 4)
+  mata_uang         String
+  kurs              Decimal               @default(1.0) @db.Decimal(19, 6)
+  status            CustomerReceiptStatus @default(DRAFT)
+  totalDialokasikan Decimal               @default(0) @db.Decimal(19, 4)
+  belumDialokasikan Decimal               @default(0) @db.Decimal(19, 4)
+  journalId         String?
+  voidJournalId     String?
+  externalRef       String?
+  sumberAplikasi    String                @default("MANUAL")
+  idempotencyKey    String?
+  catatan           String?
+  createdBy         String?
+  postedAt          DateTime?
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+
+  tenant      Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  partner     BusinessPartner     @relation(fields: [partnerId], references: [id], onDelete: Restrict)
+  akunKasBank ChartOfAccount      @relation(fields: [akunKasBankId], references: [id], onDelete: Restrict)
+  journal     Journal?            @relation("ReceiptJournal", fields: [journalId], references: [id], onDelete: SetNull)
+  voidJournal Journal?            @relation("ReceiptVoidJournal", fields: [voidJournalId], references: [id], onDelete: SetNull)
+  allocations ReceiptAllocation[]
+
+  @@unique([tenantId, noDokumen])
+  @@unique([tenantId, idempotencyKey])
+  @@index([tenantId, partnerId, status])
+}
+
+model ReceiptAllocation {
+  id             String          @id @default(uuid())
+  receiptId      String
+  invoiceId      String?
+  creditNoteId   String?
+  jumlahAlokasi  Decimal         @db.Decimal(19, 4)
+  kursAlokasi    Decimal         @default(1.0) @db.Decimal(19, 6)
+  selisihKurs    Decimal         @default(0) @db.Decimal(19, 4)
+  tanggalAlokasi DateTime        @default(now())
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  receipt    CustomerReceipt @relation(fields: [receiptId], references: [id], onDelete: Cascade)
+  invoice    SalesInvoice?   @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  creditNote CreditNote?     @relation(fields: [creditNoteId], references: [id], onDelete: SetNull)
+
+  @@index([receiptId])
+  @@index([invoiceId])
+  @@index([creditNoteId])
+}
+
 
 

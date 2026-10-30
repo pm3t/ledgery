@@ -714,7 +714,282 @@ export const api = {
     request<{ message: string; softDeleted: boolean }>(`/business-partners/${tenantId}/${id}`, { method: 'DELETE' }),
   importBusinessPartners: (tenantId: string, partners: any[]) =>
     request<{ created: number; updated: number; errors: any[] }>(`/business-partners/${tenantId}/import`, { method: 'POST', body: JSON.stringify({ partners }) }),
+
+  // --- ACCOUNTS RECEIVABLE (AR) API ---
+  getArInvoices: (tenantId: string, params?: { status?: string; partnerId?: string; startDate?: string; endDate?: string; search?: string; externalRef?: string }) => {
+    const q = new URLSearchParams();
+    if (params?.status) q.append('status', params.status);
+    if (params?.partnerId) q.append('partnerId', params.partnerId);
+    if (params?.startDate) q.append('startDate', params.startDate);
+    if (params?.endDate) q.append('endDate', params.endDate);
+    if (params?.search) q.append('search', params.search);
+    if (params?.externalRef) q.append('externalRef', params.externalRef);
+    const qs = q.toString() ? `?${q.toString()}` : '';
+    return request<any>(`/ar/invoices/${tenantId}${qs}`).then((res: any) => res.data || res);
+  },
+  getOutstandingInvoices: (tenantId: string, partnerId?: string) => {
+    const qs = partnerId ? `?partnerId=${partnerId}` : '';
+    return request<any>(`/ar/invoices/${tenantId}/outstanding${qs}`).then((res: any) => res.data || res);
+  },
+  getArInvoice: (tenantId: string, id: string) =>
+    request<any>(`/ar/invoices/${tenantId}/${id}`).then((res: any) => res.data || res),
+  createDraftInvoice: (tenantId: string, data: any) =>
+    request<any>(`/ar/invoices/${tenantId}`, { method: 'POST', body: JSON.stringify(data) }).then((res: any) => res.data || res),
+  updateDraftInvoice: (tenantId: string, id: string, data: any) =>
+    request<any>(`/ar/invoices/${tenantId}/${id}`, { method: 'PUT', body: JSON.stringify(data) }).then((res: any) => res.data || res),
+  deleteDraftInvoice: (tenantId: string, id: string) =>
+    request<any>(`/ar/invoices/${tenantId}/${id}`, { method: 'DELETE' }),
+  postArInvoice: (tenantId: string, id: string) =>
+    request<any>(`/ar/invoices/${tenantId}/${id}/post`, { method: 'POST' }).then((res: any) => res.data || res),
+  voidArInvoice: (tenantId: string, id: string, alasan?: string) =>
+    request<any>(`/ar/invoices/${tenantId}/${id}/void`, { method: 'POST', body: JSON.stringify({ alasan }) }).then((res: any) => res.data || res),
+
+  getCustomerReceipts: (tenantId: string, params?: { partnerId?: string; startDate?: string; endDate?: string; search?: string }) => {
+    const q = new URLSearchParams();
+    if (params?.partnerId) q.append('partnerId', params.partnerId);
+    if (params?.startDate) q.append('startDate', params.startDate);
+    if (params?.endDate) q.append('endDate', params.endDate);
+    if (params?.search) q.append('search', params.search);
+    const qs = q.toString() ? `?${q.toString()}` : '';
+    return request<any>(`/ar/receipts/${tenantId}${qs}`).then((res: any) => res.data || res);
+  },
+  getCustomerReceipt: (tenantId: string, id: string) =>
+    request<any>(`/ar/receipts/${tenantId}/${id}`).then((res: any) => res.data || res),
+  createCustomerReceipt: (tenantId: string, data: any) =>
+    request<any>(`/ar/receipts/${tenantId}`, { method: 'POST', body: JSON.stringify(data) }).then((res: any) => res.data || res),
+  voidCustomerReceipt: (tenantId: string, id: string, alasan?: string) =>
+    request<any>(`/ar/receipts/${tenantId}/${id}/void`, { method: 'POST', body: JSON.stringify({ alasan }) }).then((res: any) => res.data || res),
+
+  getArCreditNotes: (tenantId: string, partnerId?: string) => {
+    const qs = partnerId ? `?partnerId=${partnerId}` : '';
+    return request<any>(`/ar/credit-notes/${tenantId}${qs}`).then((res: any) => res.data || res);
+  },
+  createArCreditNote: (tenantId: string, data: any) =>
+    request<any>(`/ar/credit-notes/${tenantId}`, { method: 'POST', body: JSON.stringify(data) }).then((res: any) => res.data || res),
+  voidArCreditNote: (tenantId: string, id: string, alasan?: string) =>
+    request<any>(`/ar/credit-notes/${tenantId}/${id}/void`, { method: 'POST', body: JSON.stringify({ alasan }) }).then((res: any) => res.data || res),
+
+  getArAgingReport: (tenantId: string, asOfDate?: string) => {
+    const qs = asOfDate ? `?asOfDate=${asOfDate}` : '';
+    return request<any>(`/ar/reports/aging/${tenantId}${qs}`).then((res: any) => res.data || res);
+  },
+  getCustomerLedger: (tenantId: string, partnerId: string, startDate?: string, endDate?: string) => {
+    const q = new URLSearchParams();
+    if (startDate) q.append('startDate', startDate);
+    if (endDate) q.append('endDate', endDate);
+    const qs = q.toString() ? `?${q.toString()}` : '';
+    return request<any>(`/ar/reports/customer-ledger/${tenantId}/${partnerId}${qs}`).then((res: any) => res.data || res);
+  },
+
+  importArOpeningBalance: (tenantId: string, data: any) =>
+    request<any>(`/ar/opening-balance/${tenantId}/import`, { method: 'POST', body: JSON.stringify(data) }).then((res: any) => res.data || res),
 };
+
+export type SalesInvoiceStatus = 'DRAFT' | 'POSTED' | 'PARTIAL' | 'PAID' | 'VOID';
+export type CustomerReceiptStatus = 'DRAFT' | 'POSTED' | 'VOID';
+export type CreditNoteStatus = 'DRAFT' | 'POSTED' | 'VOID';
+
+export interface SalesInvoiceLine {
+  id?: string;
+  invoiceId?: string;
+  itemId?: string | null;
+  itemType?: 'STOCK' | 'SERVICE';
+  deskripsi: string;
+  qty: number;
+  hargaSatuan: number;
+  diskon?: number;
+  ppnRate?: number;
+  jumlah: number;
+  akunPendapatanId?: string | null;
+  dimensions?: any;
+  sourceLineType?: 'SO_LINE' | 'DO_LINE' | null;
+  sourceLineId?: string | null;
+  akunPendapatan?: ChartOfAccount;
+}
+
+export interface SalesInvoice {
+  id: string;
+  tenantId: string;
+  noDokumen: string;
+  tanggal: string;
+  jatuhTempo: string;
+  partnerId: string;
+  mata_uang: string;
+  kurs: number;
+  status: SalesInvoiceStatus;
+  subtotal: number;
+  totalDiskon: number;
+  totalPpn: number;
+  total: number;
+  totalDialokasikan: number;
+  saldo: number;
+  subtotalFungsional: number;
+  totalDiskonFungsional: number;
+  totalPpnFungsional: number;
+  totalFungsional: number;
+  saldoFungsional: number;
+  journalId?: string | null;
+  voidJournalId?: string | null;
+  externalRef?: string | null;
+  sumberAplikasi: string;
+  idempotencyKey?: string | null;
+  catatan?: string | null;
+  createdBy?: string | null;
+  postedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  partner?: BusinessPartner;
+  lines: SalesInvoiceLine[];
+  journal?: { id: string; no_voucher: string; status: string } | null;
+  allocations?: ReceiptAllocation[];
+}
+
+export interface ReceiptAllocation {
+  id: string;
+  receiptId: string;
+  invoiceId?: string | null;
+  creditNoteId?: string | null;
+  jumlahAlokasi: number;
+  kursAlokasi: number;
+  selisihKurs: number;
+  tanggalAlokasi: string;
+  invoice?: SalesInvoice;
+}
+
+export interface CustomerReceipt {
+  id: string;
+  tenantId: string;
+  noDokumen: string;
+  tanggal: string;
+  partnerId: string;
+  akunKasBankId: string;
+  jumlah: number;
+  jumlahFungsional: number;
+  mata_uang: string;
+  kurs: number;
+  status: CustomerReceiptStatus;
+  totalDialokasikan: number;
+  belumDialokasikan: number;
+  journalId?: string | null;
+  voidJournalId?: string | null;
+  externalRef?: string | null;
+  catatan?: string | null;
+  createdBy?: string | null;
+  postedAt?: string | null;
+  createdAt: string;
+  partner?: BusinessPartner;
+  akunKasBank?: ChartOfAccount;
+  allocations: ReceiptAllocation[];
+  journal?: any;
+}
+
+export interface CreditNoteLine {
+  id?: string;
+  creditNoteId?: string;
+  itemId?: string | null;
+  itemType?: 'STOCK' | 'SERVICE';
+  deskripsi: string;
+  qty: number;
+  hargaSatuan: number;
+  diskon?: number;
+  ppnRate?: number;
+  jumlah: number;
+  akunPendapatanId?: string | null;
+  dimensions?: any;
+}
+
+export interface CreditNote {
+  id: string;
+  tenantId: string;
+  noDokumen: string;
+  tanggal: string;
+  partnerId: string;
+  invoiceId?: string | null;
+  returnStock: boolean;
+  mata_uang: string;
+  kurs: number;
+  status: CreditNoteStatus;
+  subtotal: number;
+  totalDiskon: number;
+  totalPpn: number;
+  total: number;
+  totalDialokasikan: number;
+  saldo: number;
+  subtotalFungsional: number;
+  totalFungsional: number;
+  journalId?: string | null;
+  voidJournalId?: string | null;
+  externalRef?: string | null;
+  catatan?: string | null;
+  partner?: BusinessPartner;
+  lines: CreditNoteLine[];
+  journal?: any;
+}
+
+export interface AgingBucketCustomerSummary {
+  partnerId: string;
+  partnerKode: string;
+  partnerNama: string;
+  totalPiutang: number;
+  current: number;
+  bucket1: number;
+  bucket2: number;
+  bucket3: number;
+  older: number;
+  invoices: Array<{
+    id: string;
+    noDokumen: string;
+    tanggal: string;
+    jatuhTempo: string;
+    overdueDays: number;
+    bucketCategory: string;
+    mataUang: string;
+    kurs: number;
+    saldo: number;
+    saldoFungsional: number;
+    total: number;
+    externalRef?: string | null;
+  }>;
+}
+
+export interface ArAgingReportResponse {
+  asOfDate: string;
+  bucketDefinitions: {
+    current: string;
+    bucket1: string;
+    bucket2: string;
+    bucket3: string;
+    older: string;
+  };
+  grandTotal: {
+    totalPiutang: number;
+    current: number;
+    bucket1: number;
+    bucket2: number;
+    bucket3: number;
+    older: number;
+  };
+  customers: AgingBucketCustomerSummary[];
+}
+
+export interface CustomerLedgerResponse {
+  partner: BusinessPartner;
+  startDate: string;
+  endDate: string;
+  saldoAwal: number;
+  mutasi: Array<{
+    tanggal: string;
+    tipe: 'FAKTUR' | 'PENERIMAAN' | 'NOTA_KREDIT';
+    noDokumen: string;
+    deskripsi: string;
+    mataUang: string;
+    kurs: number;
+    debit: number;
+    kredit: number;
+    saldoBerjalan: number;
+  }>;
+  saldoAkhir: number;
+}
 
 export interface AccountingPeriod {
   id: string;

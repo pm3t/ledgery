@@ -17,14 +17,39 @@ import {
   Calendar,
   ChevronRight,
   SlidersHorizontal,
+  Receipt,
+  FileSpreadsheet,
+  CreditCard,
+  FileText,
+  UploadCloud,
 } from 'lucide-react';
 import { Tenant, api, AppNotification } from '../services/api';
 import { AuthUser } from '../context/AuthContext';
 
 interface LayoutProps {
   children: React.ReactNode;
-  activeTab: 'coa' | 'business-partners' | 'settings' | 'journals' | 'journals-manual' | 'ledger' | 'journal-approval' | 'approval-history' | 'reports' | 'dimension-analysis' | 'tax' | 'integration-log' | 'user-management' | 'dimensions' | 'accounting-periods';
-  setActiveTab: (tab: 'coa' | 'business-partners' | 'settings' | 'journals' | 'journals-manual' | 'ledger' | 'journal-approval' | 'approval-history' | 'reports' | 'dimension-analysis' | 'tax' | 'integration-log' | 'user-management' | 'dimensions' | 'accounting-periods') => void;
+  activeTab:
+    | 'coa'
+    | 'business-partners'
+    | 'settings'
+    | 'journals'
+    | 'journals-manual'
+    | 'ledger'
+    | 'journal-approval'
+    | 'approval-history'
+    | 'reports'
+    | 'dimension-analysis'
+    | 'tax'
+    | 'integration-log'
+    | 'user-management'
+    | 'dimensions'
+    | 'accounting-periods'
+    | 'ar-invoices'
+    | 'ar-receipts'
+    | 'ar-credit-notes'
+    | 'ar-reports'
+    | 'ar-opening-balance';
+  setActiveTab: (tab: any) => void;
   tenants: Tenant[];
   currentTenant: Tenant | null;
   onSelectTenant: (tenant: Tenant) => void;
@@ -311,6 +336,43 @@ export const Layout: React.FC<LayoutProps> = ({
                     <BookOpen className="w-5 h-5" />
                     Riwayat Approval
                   </button>
+
+                  <div className="pt-2 pb-1 px-3">
+                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Sub Ledger AR (Piutang)</span>
+                  </div>
+                  <button
+                    onClick={() => setActiveTab('ar-invoices')}
+                    className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                      activeTab === 'ar-invoices'
+                        ? 'bg-blue-600/15 text-blue-400 border border-blue-500/30 shadow-sm'
+                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 border border-transparent'
+                    }`}
+                  >
+                    <Receipt className="w-5 h-5" />
+                    Faktur Penjualan (AR)
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('ar-receipts')}
+                    className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                      activeTab === 'ar-receipts'
+                        ? 'bg-emerald-600/15 text-emerald-400 border border-emerald-500/30 shadow-sm'
+                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 border border-transparent'
+                    }`}
+                  >
+                    <CreditCard className="w-5 h-5" />
+                    Penerimaan Piutang
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('ar-credit-notes')}
+                    className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                      activeTab === 'ar-credit-notes'
+                        ? 'bg-rose-600/15 text-rose-400 border border-rose-500/30 shadow-sm'
+                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 border border-transparent'
+                    }`}
+                  >
+                    <FileText className="w-5 h-5" />
+                    Nota Kredit (AR)
+                  </button>
                 </div>
               )}
             </div>
@@ -371,6 +433,17 @@ export const Layout: React.FC<LayoutProps> = ({
                     <Calculator className="w-5 h-5" />
                     Perpajakan (Rekap)
                   </button>
+                  <button
+                    onClick={() => setActiveTab('ar-reports')}
+                    className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                      activeTab === 'ar-reports'
+                        ? 'bg-amber-600/15 text-amber-400 border border-amber-500/30 shadow-sm'
+                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 border border-transparent'
+                    }`}
+                  >
+                    <FileSpreadsheet className="w-5 h-5" />
+                    Umur & Kartu Piutang
+                  </button>
                 </div>
               )}
             </div>
@@ -408,6 +481,17 @@ export const Layout: React.FC<LayoutProps> = ({
                   >
                     <Activity className="w-5 h-5" />
                     Log Integrasi API
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('ar-opening-balance')}
+                    className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                      activeTab === 'ar-opening-balance'
+                        ? 'bg-emerald-600/15 text-emerald-400 border border-emerald-500/30 shadow-sm'
+                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 border border-transparent'
+                    }`}
+                  >
+                    <UploadCloud className="w-5 h-5" />
+                    Saldo Awal Piutang
                   </button>
                   {/* Menu User Management hanya tampil untuk ADMIN_TENANT */}
                   <button

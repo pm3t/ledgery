@@ -17,6 +17,11 @@ import { DimensionsPage } from './pages/DimensionsPage';
 import { AccountingPeriodsPage } from './pages/AccountingPeriodsPage';
 import { DimensionAnalysisPage } from './pages/DimensionAnalysisPage';
 import { BusinessPartnersPage } from './pages/BusinessPartnersPage';
+import { SalesInvoicesPage } from './pages/ar/SalesInvoicesPage';
+import { CustomerReceiptsPage } from './pages/ar/CustomerReceiptsPage';
+import { CreditNotesPage } from './pages/ar/CreditNotesPage';
+import { ArReportsPage } from './pages/ar/ArReportsPage';
+import { ArOpeningBalancePage } from './pages/ar/ArOpeningBalancePage';
 
 // Admin Pages
 import { AdminLayout } from './layouts/AdminLayout';
@@ -28,7 +33,27 @@ import { AdminBillingPage } from './pages/admin/AdminBillingPage';
 import { useAuth } from './context/AuthContext';
 import { Loader2 } from 'lucide-react';
 
-type TenantTab = 'coa' | 'business-partners' | 'settings' | 'journals' | 'journals-manual' | 'ledger' | 'journal-approval' | 'approval-history' | 'reports' | 'dimension-analysis' | 'tax' | 'integration-log' | 'user-management' | 'dimensions' | 'accounting-periods';
+type TenantTab =
+  | 'coa'
+  | 'business-partners'
+  | 'settings'
+  | 'journals'
+  | 'journals-manual'
+  | 'ledger'
+  | 'journal-approval'
+  | 'approval-history'
+  | 'reports'
+  | 'dimension-analysis'
+  | 'tax'
+  | 'integration-log'
+  | 'user-management'
+  | 'dimensions'
+  | 'accounting-periods'
+  | 'ar-invoices'
+  | 'ar-receipts'
+  | 'ar-credit-notes'
+  | 'ar-reports'
+  | 'ar-opening-balance';
 type AdminTab = 'tenants' | 'billing' | 'audit' | 'api-keys' | 'user-management';
 
 export function App() {
@@ -170,6 +195,17 @@ export function App() {
       {activeTab === 'user-management' && <UserManagementPage />}
       {activeTab === 'dimensions' && <DimensionsPage currentTenant={currentTenant} />}
       {activeTab === 'accounting-periods' && <AccountingPeriodsPage currentTenant={currentTenant} />}
+      {activeTab === 'ar-invoices' && <SalesInvoicesPage currentTenant={currentTenant} />}
+      {activeTab === 'ar-receipts' && <CustomerReceiptsPage currentTenant={currentTenant} />}
+      {activeTab === 'ar-credit-notes' && <CreditNotesPage currentTenant={currentTenant} />}
+      {activeTab === 'ar-reports' && <ArReportsPage currentTenant={currentTenant} />}
+      {activeTab === 'ar-opening-balance' && (
+        <ArOpeningBalancePage
+          currentTenant={currentTenant}
+          onNavigateToInvoices={() => setActiveTab('ar-invoices')}
+          onNavigateToReports={() => setActiveTab('ar-reports')}
+        />
+      )}
     </Layout>
   );
 }
