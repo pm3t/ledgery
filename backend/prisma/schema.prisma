@@ -19,6 +19,14 @@ enum KategoriAkun {
   BEBAN
 }
 
+// Enum Tipe Akun Kontrol Subledger
+enum ControlAccountType {
+  NONE
+  AR
+  AP
+  INVENTORY
+}
+
 // Enum untuk Kebijakan Posting Jurnal
 enum PostingPolicyMode {
   AUTO_POST
@@ -71,20 +79,25 @@ model Tenant {
   dimensions      Dimension[]
   exchangeRates   ExchangeRate[]
   fiscalYears     FiscalYear[]
+  subledgerSetting SubledgerSetting?
+  postingSetups    PostingSetup[]
+  businessPartners BusinessPartner[]
+  documentNumberings DocumentNumbering[]
 }
 
 // Model Chart of Accounts (Daftar Kode Akun)
 model ChartOfAccount {
-  id        String       @id @default(uuid())
-  tenantId  String
-  kode_akun String
-  nama_akun String
-  kategori  KategoriAkun
+  id               String             @id @default(uuid())
+  tenantId         String
+  kode_akun        String
+  nama_akun        String
+  kategori         KategoriAkun
   parentId         String?
-  isActive         Boolean      @default(true)
-  isControlAccount Boolean      @default(false)
-  createdAt        DateTime     @default(now())
-  updatedAt        DateTime     @updatedAt
+  isActive         Boolean            @default(true)
+  isControlAccount Boolean            @default(false)
+  controlType      ControlAccountType @default(NONE)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
 
   // Relasi Tenant
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
@@ -95,6 +108,7 @@ model ChartOfAccount {
 
   // Relasi Jurnal
   journalEntries JournalEntry[]
+  postingSetups  PostingSetup[]
 
   @@unique([tenantId, kode_akun])
 }
@@ -150,6 +164,8 @@ model Journal {
   status                  JournalStatus
   idempotency_key         String?
   idempotency_payload_hash String?
+  sourceDocType           String?
+  sourceDocId             String?
   mata_uang               String?
   createdAt               DateTime      @default(now())
   updatedAt               DateTime      @updatedAt
@@ -407,4 +423,114 @@ model AccountingPeriod {
 
   @@unique([fiscalYearId, nomor_periode])
 }
+
+// ==========================================
+// MODUL SUBLEDGER FONDASI (AR, AP, INVENTORY)
+// ==========================================
+
+enum InventoryValuationMethod {
+  MOVING_AVERAGE
+  FIFO
+}
+
+enum CreditLimitMode {
+  WARN
+  BLOCK
+}
+
+enum PostingSetupKey {
+  AR_CONTROL
+  SALES_REVENUE
+  SALES_DISCOUNT
+  PPN_KELUARAN
+  AP_CONTROL
+  PURCHASE_EXPENSE
+  PURCHASE_DISCOUNT
+  PPN_MASUKAN
+  INVENTORY
+  COGS
+  INVENTORY_ADJUSTMENT
+  GR_IR_CLEARING
+  PURCHASE_PRICE_VARIANCE
+  FX_GAIN_LOSS
+  CASH_DEFAULT
+}
+
+model SubledgerSetting {
+  id                       String                   @id @default(uuid())
+  tenantId                 String                   @unique
+  arEnabled                Boolean                  @default(false)
+  apEnabled                Boolean                  @default(false)
+  inventoryEnabled         Boolean                  @default(false)
+  orderManagementEnabled   Boolean                  @default(false)
+  defaultValuationMethod   InventoryValuationMethod @default(MOVING_AVERAGE)
+  overDeliveryTolerancePct Float                    @default(0)
+  allowNegativeStock       Boolean                  @default(false)
+  creditLimitMode          CreditLimitMode          @default(WARN)
+  agingBuckets             Json                     @default("[30, 60, 90]")
+  blockPeriodCloseOnRecon  Boolean                  @default(false)
+  createdAt                DateTime                 @default(now())
+  updatedAt                DateTime                 @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+}
+
+model PostingSetup {
+  id        String          @id @default(uuid())
+  tenantId  String
+  key       PostingSetupKey
+  accountId String
+  groupCode String?
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  tenant  Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  account ChartOfAccount @relation(fields: [accountId], references: [id], onDelete: Restrict)
+
+  @@index([tenantId, key])
+}
+
+model BusinessPartner {
+  id                 String   @id @default(uuid())
+  tenantId           String
+  kode               String
+  nama               String
+  npwp               String?
+  alamat             String?
+  kontak             String?
+  termPembayaranHari Int      @default(30)
+  creditLimit        Decimal? @db.Decimal(19, 4)
+  mata_uang          String
+  isCustomer         Boolean  @default(false)
+  isVendor           Boolean  @default(false)
+  groupCode          String?
+  externalRef        String?
+  isActive           Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, kode])
+  @@unique([tenantId, externalRef])
+  @@index([tenantId, isCustomer])
+  @@index([tenantId, isVendor])
+}
+
+model DocumentNumbering {
+  id            String   @id @default(uuid())
+  tenantId      String
+  docType       String
+  prefix        String
+  formatPattern String   @default("{PREFIX}-{YYYY}-{SEQ:5}")
+  lastSeq       Int      @default(0)
+  year          Int
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, docType, year])
+}
+
 

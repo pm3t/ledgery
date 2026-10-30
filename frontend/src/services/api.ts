@@ -16,11 +16,19 @@ export interface Tenant {
   postingPolicy?: {
     mode: 'AUTO_POST' | 'APPROVAL_MANUAL';
   };
+  subledgerSetting?: {
+    arEnabled: boolean;
+    apEnabled: boolean;
+    inventoryEnabled: boolean;
+    orderManagementEnabled: boolean;
+  };
   _count?: {
     chartOfAccounts: number;
     apiKeys: number;
   };
 }
+
+export type ControlAccountType = 'NONE' | 'AR' | 'AP' | 'INVENTORY';
 
 export interface ChartOfAccount {
   id: string;
@@ -31,6 +39,7 @@ export interface ChartOfAccount {
   parentId?: string | null;
   isActive: boolean;
   isControlAccount?: boolean;
+  controlType?: ControlAccountType;
   createdAt: string;
   updatedAt: string;
   parent?: {
@@ -38,6 +47,90 @@ export interface ChartOfAccount {
     kode_akun: string;
     nama_akun: string;
   } | null;
+}
+
+export type PostingSetupKey =
+  | 'AR_CONTROL'
+  | 'SALES_REVENUE'
+  | 'SALES_DISCOUNT'
+  | 'PPN_KELUARAN'
+  | 'AP_CONTROL'
+  | 'PURCHASE_EXPENSE'
+  | 'PURCHASE_DISCOUNT'
+  | 'PPN_MASUKAN'
+  | 'INVENTORY'
+  | 'COGS'
+  | 'INVENTORY_ADJUSTMENT'
+  | 'GR_IR_CLEARING'
+  | 'PURCHASE_PRICE_VARIANCE'
+  | 'FX_GAIN_LOSS'
+  | 'CASH_DEFAULT';
+
+export interface SubledgerSetting {
+  id?: string;
+  tenantId: string;
+  arEnabled: boolean;
+  apEnabled: boolean;
+  inventoryEnabled: boolean;
+  orderManagementEnabled: boolean;
+  defaultValuationMethod: 'MOVING_AVERAGE' | 'FIFO';
+  overDeliveryTolerancePct: number;
+  allowNegativeStock: boolean;
+  creditLimitMode: 'WARN' | 'BLOCK';
+  agingBuckets: number[];
+  blockPeriodCloseOnRecon: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface PostingSetupItem {
+  id: string;
+  tenantId: string;
+  key: PostingSetupKey;
+  accountId: string;
+  groupCode?: string | null;
+  account?: ChartOfAccount;
+}
+
+export interface BusinessPartner {
+  id: string;
+  tenantId: string;
+  kode: string;
+  nama: string;
+  npwp?: string | null;
+  alamat?: string | null;
+  kontak?: string | null;
+  termPembayaranHari: number;
+  creditLimit?: number | null;
+  mata_uang: string;
+  isCustomer: boolean;
+  isVendor: boolean;
+  groupCode?: string | null;
+  externalRef?: string | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ActivationCheckResult {
+  ar: {
+    enabled: boolean;
+    controlAccounts: Array<{ id: string; kode_akun: string; nama_akun: string; saldo: number }>;
+    warnings: string[];
+    reconciled: boolean;
+  };
+  ap: {
+    enabled: boolean;
+    controlAccounts: Array<{ id: string; kode_akun: string; nama_akun: string; saldo: number }>;
+    warnings: string[];
+    reconciled: boolean;
+  };
+  inventory: {
+    enabled: boolean;
+    controlAccounts: Array<{ id: string; kode_akun: string; nama_akun: string; saldo: number }>;
+    warnings: string[];
+    reconciled: boolean;
+  };
 }
 
 export interface ApiKeyItem {
@@ -383,9 +476,10 @@ export const api = {
     parentId?: string | null;
     isActive?: boolean;
     isControlAccount?: boolean;
+    controlType?: ControlAccountType;
   }) => request<ChartOfAccount>('/chart-of-accounts', { method: 'POST', body: JSON.stringify(payload) }),
 
-  updateCoa: (id: string, payload: Partial<{ kode_akun: string; nama_akun: string; kategori: string; parentId: string | null; isActive: boolean; isControlAccount: boolean }>) =>
+  updateCoa: (id: string, payload: Partial<{ kode_akun: string; nama_akun: string; kategori: string; parentId: string | null; isActive: boolean; isControlAccount: boolean; controlType: ControlAccountType }>) =>
     request<ChartOfAccount>(`/chart-of-accounts/${id}`, { method: 'PATCH', body: JSON.stringify(payload) }),
 
   deleteCoa: (id: string) => request<void>(`/chart-of-accounts/${id}`, { method: 'DELETE' }),
@@ -588,6 +682,38 @@ export const api = {
   createFiscalYear: (data: any) => request<FiscalYear>('/periods/fiscal-year', { method: 'POST', body: JSON.stringify(data) }),
   closePeriod: (id: string) => request<AccountingPeriod>(`/periods/${id}/close`, { method: 'POST' }),
   reopenPeriod: (id: string) => request<AccountingPeriod>(`/periods/${id}/reopen`, { method: 'POST' }),
+
+  // --- SUBLEDGER SETTING & POSTING SETUP API ---
+  getSubledgerSettings: (tenantId: string) => request<SubledgerSetting>(`/subledger/settings/${tenantId}`),
+  updateSubledgerSettings: (tenantId: string, data: Partial<SubledgerSetting>) =>
+    request<SubledgerSetting>(`/subledger/settings/${tenantId}`, { method: 'PUT', body: JSON.stringify(data) }),
+  getPostingSetups: (tenantId: string) => request<PostingSetupItem[]>(`/subledger/posting-setup/${tenantId}`),
+  upsertPostingSetup: (tenantId: string, data: { key: string; accountId: string; groupCode?: string }) =>
+    request<PostingSetupItem>(`/subledger/posting-setup/${tenantId}`, { method: 'POST', body: JSON.stringify(data) }),
+  batchUpsertPostingSetups: (tenantId: string, items: Array<{ key: string; accountId: string; groupCode?: string }>) =>
+    request<{ count: number }>(`/subledger/posting-setup/${tenantId}/batch`, { method: 'POST', body: JSON.stringify({ items }) }),
+  checkSubledgerActivation: (tenantId: string) => request<ActivationCheckResult>(`/subledger/activation-check/${tenantId}`),
+
+  // --- BUSINESS PARTNERS API ---
+  getBusinessPartners: (tenantId: string, params?: { search?: string; type?: 'customer' | 'vendor'; groupCode?: string; isActive?: boolean }) => {
+    const q = new URLSearchParams();
+    if (params?.search) q.append('search', params.search);
+    if (params?.type) q.append('type', params.type);
+    if (params?.groupCode) q.append('groupCode', params.groupCode);
+    if (params?.isActive !== undefined) q.append('isActive', String(params.isActive));
+    const qs = q.toString() ? `?${q.toString()}` : '';
+    return request<BusinessPartner[]>(`/business-partners/${tenantId}${qs}`);
+  },
+  getBusinessPartner: (tenantId: string, id: string) =>
+    request<BusinessPartner>(`/business-partners/${tenantId}/${id}`),
+  createBusinessPartner: (tenantId: string, data: Partial<BusinessPartner>) =>
+    request<BusinessPartner>(`/business-partners/${tenantId}`, { method: 'POST', body: JSON.stringify(data) }),
+  updateBusinessPartner: (tenantId: string, id: string, data: Partial<BusinessPartner>) =>
+    request<BusinessPartner>(`/business-partners/${tenantId}/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteBusinessPartner: (tenantId: string, id: string) =>
+    request<{ message: string; softDeleted: boolean }>(`/business-partners/${tenantId}/${id}`, { method: 'DELETE' }),
+  importBusinessPartners: (tenantId: string, partners: any[]) =>
+    request<{ created: number; updated: number; errors: any[] }>(`/business-partners/${tenantId}/import`, { method: 'POST', body: JSON.stringify({ partners }) }),
 };
 
 export interface AccountingPeriod {

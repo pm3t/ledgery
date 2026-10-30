@@ -16,6 +16,7 @@ import { LoginPage } from './pages/LoginPage';
 import { DimensionsPage } from './pages/DimensionsPage';
 import { AccountingPeriodsPage } from './pages/AccountingPeriodsPage';
 import { DimensionAnalysisPage } from './pages/DimensionAnalysisPage';
+import { BusinessPartnersPage } from './pages/BusinessPartnersPage';
 
 // Admin Pages
 import { AdminLayout } from './layouts/AdminLayout';
@@ -27,7 +28,7 @@ import { AdminBillingPage } from './pages/admin/AdminBillingPage';
 import { useAuth } from './context/AuthContext';
 import { Loader2 } from 'lucide-react';
 
-type TenantTab = 'coa' | 'settings' | 'journals' | 'journals-manual' | 'ledger' | 'journal-approval' | 'approval-history' | 'reports' | 'dimension-analysis' | 'tax' | 'integration-log' | 'user-management' | 'dimensions' | 'accounting-periods';
+type TenantTab = 'coa' | 'business-partners' | 'settings' | 'journals' | 'journals-manual' | 'ledger' | 'journal-approval' | 'approval-history' | 'reports' | 'dimension-analysis' | 'tax' | 'integration-log' | 'user-management' | 'dimensions' | 'accounting-periods';
 type AdminTab = 'tenants' | 'billing' | 'audit' | 'api-keys' | 'user-management';
 
 export function App() {
@@ -155,6 +156,7 @@ export function App() {
       currentUser={user}
     >
       {activeTab === 'coa' && <ChartOfAccountsPage currentTenant={currentTenant} />}
+      {activeTab === 'business-partners' && <BusinessPartnersPage currentTenant={currentTenant} />}
       {activeTab === 'settings' && <SettingsPage currentTenant={currentTenant} />}
       {activeTab === 'journals' && <JournalListPage currentTenant={currentTenant} />}
       {activeTab === 'journals-manual' && <ManualJournalPage currentTenant={currentTenant} />}

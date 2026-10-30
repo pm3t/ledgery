@@ -53,9 +53,19 @@ export class SuperAdminService {
     });
   }
 
-  // 2. Daftar Tenant (beserta status billing)
+  // 2. Daftar Tenant (beserta status billing & feature flag subledger)
   async getAllTenants() {
     return this.prisma.tenant.findMany({
+      include: {
+        subledgerSetting: {
+          select: {
+            arEnabled: true,
+            apEnabled: true,
+            inventoryEnabled: true,
+            orderManagementEnabled: true,
+          },
+        },
+      },
       orderBy: { createdAt: 'desc' }
     });
   }

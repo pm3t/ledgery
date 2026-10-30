@@ -1,5 +1,5 @@
 import { IsBoolean, IsEnum, IsOptional, IsString } from 'class-validator';
-import { KategoriAkun } from '@prisma/client';
+import { KategoriAkun, ControlAccountType } from '@prisma/client';
 
 // DTO untuk mengubah data kode akun
 export class UpdateAccountDto {
@@ -28,4 +28,10 @@ export class UpdateAccountDto {
   @IsOptional()
   @IsBoolean({ message: 'isControlAccount harus berupa nilai boolean' })
   isControlAccount?: boolean;
+
+  @IsOptional()
+  @IsEnum(ControlAccountType, {
+    message: 'Tipe akun kontrol harus NONE, AR, AP, atau INVENTORY',
+  })
+  controlType?: ControlAccountType;
 }

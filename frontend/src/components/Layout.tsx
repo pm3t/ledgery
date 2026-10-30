@@ -23,8 +23,8 @@ import { AuthUser } from '../context/AuthContext';
 
 interface LayoutProps {
   children: React.ReactNode;
-  activeTab: 'coa' | 'settings' | 'journals' | 'journals-manual' | 'ledger' | 'journal-approval' | 'approval-history' | 'reports' | 'dimension-analysis' | 'tax' | 'integration-log' | 'user-management' | 'dimensions' | 'accounting-periods';
-  setActiveTab: (tab: 'coa' | 'settings' | 'journals' | 'journals-manual' | 'ledger' | 'journal-approval' | 'approval-history' | 'reports' | 'dimension-analysis' | 'tax' | 'integration-log' | 'user-management' | 'dimensions' | 'accounting-periods') => void;
+  activeTab: 'coa' | 'business-partners' | 'settings' | 'journals' | 'journals-manual' | 'ledger' | 'journal-approval' | 'approval-history' | 'reports' | 'dimension-analysis' | 'tax' | 'integration-log' | 'user-management' | 'dimensions' | 'accounting-periods';
+  setActiveTab: (tab: 'coa' | 'business-partners' | 'settings' | 'journals' | 'journals-manual' | 'ledger' | 'journal-approval' | 'approval-history' | 'reports' | 'dimension-analysis' | 'tax' | 'integration-log' | 'user-management' | 'dimensions' | 'accounting-periods') => void;
   tenants: Tenant[];
   currentTenant: Tenant | null;
   onSelectTenant: (tenant: Tenant) => void;
@@ -212,6 +212,17 @@ export const Layout: React.FC<LayoutProps> = ({
                   >
                     <BookOpen className="w-5 h-5" />
                     Chart of Accounts (COA)
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('business-partners')}
+                    className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                      activeTab === 'business-partners'
+                        ? 'bg-blue-600/15 text-blue-400 border border-blue-500/30 shadow-sm'
+                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 border border-transparent'
+                    }`}
+                  >
+                    <Users className="w-5 h-5" />
+                    Mitra Bisnis
                   </button>
                   <button
                     onClick={() => setActiveTab('dimensions')}

@@ -89,6 +89,7 @@ export class V1ExceptionFilter implements ExceptionFilter {
       case 'ACCOUNT_NOT_FOUND':
         return ApiErrorCode.ACCOUNT_NOT_FOUND;
       case 'ACCOUNT_INACTIVE':
+      case 'CONTROL_ACCOUNT_MANUAL_POSTING_BLOCKED':
         return ApiErrorCode.ACCOUNT_INACTIVE;
       case 'DIMENSION_NOT_FOUND':
       case 'DIMENSION_VALUE_NOT_FOUND':

@@ -5,7 +5,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { KategoriAkun } from '@prisma/client';
+import { KategoriAkun, ControlAccountType } from '@prisma/client';
 
 // DTO untuk pendaftaran kode akun baru (Chart of Accounts)
 export class CreateAccountDto {
@@ -39,4 +39,10 @@ export class CreateAccountDto {
   @IsOptional()
   @IsBoolean({ message: 'isControlAccount harus berupa nilai boolean' })
   isControlAccount?: boolean;
+
+  @IsOptional()
+  @IsEnum(ControlAccountType, {
+    message: 'Tipe akun kontrol harus NONE, AR, AP, atau INVENTORY',
+  })
+  controlType?: ControlAccountType;
 }

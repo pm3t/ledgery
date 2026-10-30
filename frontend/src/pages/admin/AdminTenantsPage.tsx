@@ -133,14 +133,15 @@ export function AdminTenantsPage({ onSelectTenant }: { onSelectTenant: (tenant: 
               <th className="px-6 py-4 font-medium">Tenant ID & Nama</th>
               <th className="px-6 py-4 font-medium">Status Akun</th>
               <th className="px-6 py-4 font-medium">Tahun Buku</th>
+              <th className="px-6 py-4 font-medium">Modul Sub Ledger</th>
               <th className="px-6 py-4 font-medium text-right">Aksi</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-800/50">
             {loading ? (
-              <tr><td colSpan={4} className="p-6 text-center text-slate-500">Memuat...</td></tr>
+              <tr><td colSpan={5} className="p-6 text-center text-slate-500">Memuat...</td></tr>
             ) : tenants.length === 0 ? (
-              <tr><td colSpan={4} className="p-6 text-center text-slate-500">Belum ada tenant</td></tr>
+              <tr><td colSpan={5} className="p-6 text-center text-slate-500">Belum ada tenant</td></tr>
             ) : (
               tenants.map(t => (
                 <tr key={t.id} className="hover:bg-slate-800/20 transition-colors">
@@ -159,6 +160,36 @@ export function AdminTenantsPage({ onSelectTenant }: { onSelectTenant: (tenant: 
                   </td>
                   <td className="px-6 py-4 text-slate-300">
                     {t.tahun_buku_mulai} ({t.mata_uang})
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      {t.subledgerSetting?.arEnabled && (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                          AR
+                        </span>
+                      )}
+                      {t.subledgerSetting?.apEnabled && (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                          AP
+                        </span>
+                      )}
+                      {t.subledgerSetting?.inventoryEnabled && (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                          INV
+                        </span>
+                      )}
+                      {t.subledgerSetting?.orderManagementEnabled && (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                          ORDER
+                        </span>
+                      )}
+                      {!t.subledgerSetting?.arEnabled &&
+                        !t.subledgerSetting?.apEnabled &&
+                        !t.subledgerSetting?.inventoryEnabled &&
+                        !t.subledgerSetting?.orderManagementEnabled && (
+                          <span className="text-xs text-slate-500">-</span>
+                        )}
+                    </div>
                   </td>
                   <td className="px-6 py-4 text-right">
                     <button

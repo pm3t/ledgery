@@ -7,7 +7,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateAccountDto } from './dto/create-account.dto';
 import { UpdateAccountDto } from './dto/update-account.dto';
-import { KategoriAkun } from '@prisma/client';
+import { KategoriAkun, ControlAccountType } from '@prisma/client';
 
 // Service untuk mengelola Chart of Accounts (COA) per Tenant
 @Injectable()
@@ -54,6 +54,9 @@ export class ChartOfAccountService {
       }
     }
 
+    const controlType = createAccountDto.controlType ?? ControlAccountType.NONE;
+    const isControlAccount = controlType !== ControlAccountType.NONE ? true : (createAccountDto.isControlAccount ?? false);
+
     // 4. Menyimpan kode akun ke database
     return this.prisma.chartOfAccount.create({
       data: {
@@ -63,7 +66,8 @@ export class ChartOfAccountService {
         kategori: createAccountDto.kategori,
         parentId: parentId || null,
         isActive: createAccountDto.isActive ?? true,
-        isControlAccount: createAccountDto.isControlAccount ?? false,
+        isControlAccount,
+        controlType,
       },
       include: {
         parent: true,
@@ -169,9 +173,14 @@ export class ChartOfAccountService {
         ...(updateAccountDto.isActive !== undefined && {
           isActive: updateAccountDto.isActive,
         }),
-        ...(updateAccountDto.isControlAccount !== undefined && {
-          isControlAccount: updateAccountDto.isControlAccount,
+        ...(updateAccountDto.controlType !== undefined && {
+          controlType: updateAccountDto.controlType,
         }),
+        ...(updateAccountDto.controlType !== undefined && updateAccountDto.controlType !== ControlAccountType.NONE
+          ? { isControlAccount: true }
+          : updateAccountDto.isControlAccount !== undefined
+          ? { isControlAccount: updateAccountDto.isControlAccount }
+          : {}),
       },
       include: {
         parent: true,

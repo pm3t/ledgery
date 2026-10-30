@@ -23,6 +23,8 @@ import { DimensionModule } from './dimension/dimension.module';
 import { CurrencyModule } from './currency/currency.module';
 import { SelisihKursModule } from './selisih-kurs/selisih-kurs.module';
 import { AccountingPeriodModule } from './accounting-period/accounting-period.module';
+import { SubledgerModule } from './subledger/subledger.module';
+import { BusinessPartnerModule } from './business-partner/business-partner.module';
 
 // Modul Utama Aplikasi Backend Ledgery
 @Module({
@@ -51,6 +53,8 @@ import { AccountingPeriodModule } from './accounting-period/accounting-period.mo
     CurrencyModule,
     SelisihKursModule,
     AccountingPeriodModule,
+    SubledgerModule,
+    BusinessPartnerModule,
   ],
 })
 export class AppModule {}

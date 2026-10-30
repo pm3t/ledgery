@@ -11,6 +11,7 @@ import {
 import { api, PostingPolicySetting, Tenant } from '../services/api';
 import { ApiKeysPage } from './ApiKeysPage';
 import { ExchangeRateTab } from '../components/settings/ExchangeRateTab';
+import { SubledgerSettingsTab } from '../components/settings/SubledgerSettingsTab';
 
 interface SettingsPageProps {
   currentTenant: Tenant | null;
@@ -206,7 +207,7 @@ const PostingPolicyTab: React.FC<SettingsPageProps> = ({ currentTenant }) => {
 };
 
 export const SettingsPage: React.FC<SettingsPageProps> = ({ currentTenant }) => {
-  const [activeTab, setActiveTab] = useState<'api-keys' | 'posting-policy' | 'exchange-rate'>('api-keys');
+  const [activeTab, setActiveTab] = useState<'api-keys' | 'posting-policy' | 'exchange-rate' | 'subledger'>('api-keys');
 
   return (
     <div className="space-y-6">
@@ -242,6 +243,16 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ currentTenant }) => 
           >
             Kurs Mata Uang
           </button>
+          <button
+            onClick={() => setActiveTab('subledger')}
+            className={`py-3 px-4 text-sm font-medium border-b-2 transition-colors ${
+              activeTab === 'subledger'
+                ? 'border-indigo-500 text-indigo-400'
+                : 'border-transparent text-slate-400 hover:text-slate-300 hover:border-slate-700'
+            }`}
+          >
+            Sub Ledger
+          </button>
         </nav>
       </div>
 
@@ -249,6 +260,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ currentTenant }) => 
         {activeTab === 'api-keys' && <ApiKeysPage currentTenant={currentTenant} />}
         {activeTab === 'posting-policy' && <PostingPolicyTab currentTenant={currentTenant} />}
         {activeTab === 'exchange-rate' && <ExchangeRateTab currentTenant={currentTenant} />}
+        {activeTab === 'subledger' && <SubledgerSettingsTab currentTenant={currentTenant} />}
       </div>
     </div>
   );

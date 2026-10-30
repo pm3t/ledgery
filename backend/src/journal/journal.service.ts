@@ -270,11 +270,19 @@ export class JournalService {
               details: { kode_akun: entry.kode_akun },
             });
           }
-          if (!acc.isActive || acc.isControlAccount) {
+          if (!acc.isActive) {
             throw new BadRequestException({
               errorCode: 'ACCOUNT_INACTIVE',
-              message: `Akun '${acc.kode_akun} - ${acc.nama_akun}' sedang tidak aktif atau merupakan akun induk (control account).`,
-              details: { kode_akun: acc.kode_akun, isActive: acc.isActive, isControlAccount: acc.isControlAccount },
+              message: `Akun '${acc.kode_akun} - ${acc.nama_akun}' sedang tidak aktif.`,
+              details: { kode_akun: acc.kode_akun, isActive: acc.isActive },
+            });
+          }
+          if (acc.isControlAccount || (acc.controlType && acc.controlType !== 'NONE')) {
+            const tipe = acc.controlType && acc.controlType !== 'NONE' ? acc.controlType : 'Subledger';
+            throw new BadRequestException({
+              errorCode: 'CONTROL_ACCOUNT_MANUAL_POSTING_BLOCKED',
+              message: `Akun ${acc.kode_akun} adalah akun kontrol ${tipe}; posting hanya melalui dokumen sub ledger`,
+              details: { kode_akun: acc.kode_akun, nama_akun: acc.nama_akun, controlType: acc.controlType, isControlAccount: acc.isControlAccount },
             });
           }
         }
@@ -463,13 +471,16 @@ export class JournalService {
       
       // Proteksi Akun Kontrol: Blokir jurnal manual langsung pada akun kontrol subledger
       for (const acc of validAccounts) {
-        if (acc.isControlAccount) {
+        if (acc.isControlAccount || (acc.controlType && acc.controlType !== 'NONE')) {
+          const tipe = acc.controlType && acc.controlType !== 'NONE' ? acc.controlType : 'Subledger';
           throw new BadRequestException({
             errorCode: 'CONTROL_ACCOUNT_MANUAL_POSTING_BLOCKED',
-            message: `Akun '${acc.kode_akun} - ${acc.nama_akun}' adalah Akun Kontrol (Subledger). Jurnal manual langsung pada akun ini tidak diperbolehkan.`,
+            message: `Akun ${acc.kode_akun} adalah akun kontrol ${tipe}; posting hanya melalui dokumen sub ledger`,
             details: {
               kode_akun: acc.kode_akun,
               nama_akun: acc.nama_akun,
+              controlType: acc.controlType,
+              isControlAccount: acc.isControlAccount,
             },
           });
         }
@@ -750,6 +761,234 @@ export class JournalService {
       });
 
       return reversalJournal;
+    });
+  }
+
+  // Membuat Jurnal Khusus dari Dokumen Subledger (AR, AP, Inventory)
+  // Dikecualikan dari blokir akun kontrol dan langsung berstatus POSTED
+  async createFromSubledger(tenantId: string, dto: {
+    tanggal: string;
+    deskripsi: string;
+    sumber_aplikasi: string;
+    sourceDocType?: string;
+    sourceDocId?: string;
+    no_voucher?: string;
+    mata_uang?: string;
+    idempotency_key?: string;
+    entries: {
+      kode_akun: string;
+      tipe: EntryType;
+      jumlah: number;
+      dimensions?: { nama_dimension: string; kode_value: string }[];
+    }[];
+  }) {
+    // 1. Validasi Periode Akuntansi
+    await this.accountingPeriodService.validateJournalDate(tenantId, new Date(dto.tanggal));
+
+    // 2. Validasi Balance Debit & Kredit
+    this.validateBalance(dto.entries);
+
+    return this.prisma.$transaction(async (tx) => {
+      // 3. Validasi Akun (Aktif & Berada di Tenant yang Sama)
+      const kodeAkuns = dto.entries.map((e) => e.kode_akun);
+      const validAccounts = await tx.chartOfAccount.findMany({
+        where: {
+          tenantId,
+          kode_akun: { in: kodeAkuns },
+        },
+      });
+
+      const validAccountMap = new Map(validAccounts.map((acc) => [acc.kode_akun, acc]));
+
+      for (const entry of dto.entries) {
+        const acc = validAccountMap.get(entry.kode_akun);
+        if (!acc) {
+          throw new BadRequestException({
+            errorCode: 'ACCOUNT_NOT_FOUND',
+            message: `Kode akun '${entry.kode_akun}' tidak ditemukan di tenant ini.`,
+            details: { kode_akun: entry.kode_akun },
+          });
+        }
+        if (!acc.isActive) {
+          throw new BadRequestException({
+            errorCode: 'ACCOUNT_INACTIVE',
+            message: `Akun '${acc.kode_akun} - ${acc.nama_akun}' sedang tidak aktif.`,
+            details: { kode_akun: acc.kode_akun, isActive: acc.isActive },
+          });
+        }
+        // Catatan: Akun kontrol sengaja DIIZINKAN di sini karena diposting melalui dokumen subledger yang sah!
+      }
+
+      // 4. Validasi Dimensi
+      const dimMap = await this.getValidDimensionMap(tx, tenantId, dto.entries);
+
+      // 5. Validasi Multicurrency
+      const tenantData = await tx.tenant.findUnique({ where: { id: tenantId } });
+      const baseCurrency = tenantData?.mata_uang || 'IDR';
+      const docCurrency = dto.mata_uang || baseCurrency;
+      let exchangeRate = 1;
+
+      if (docCurrency !== baseCurrency) {
+        const rate = await tx.exchangeRate.findFirst({
+          where: {
+            tenantId,
+            currency: { kode_iso: docCurrency },
+            tanggal: new Date(dto.tanggal),
+          },
+          orderBy: { createdAt: 'desc' },
+        });
+
+        if (!rate) {
+          throw new BadRequestException({
+            errorCode: 'EXCHANGE_RATE_NOT_FOUND',
+            message: `Kurs ${docCurrency} ke ${baseCurrency} untuk tanggal ${dto.tanggal} belum diisi di Setting`,
+            details: { currency: docCurrency, baseCurrency, date: dto.tanggal },
+          });
+        }
+        exchangeRate = rate.kurs;
+      }
+
+      const entryData = [];
+      for (const entry of dto.entries) {
+        const acc = validAccountMap.get(entry.kode_akun)!;
+        const entryDimensions = [];
+        if (entry.dimensions) {
+          for (const d of entry.dimensions) {
+            const dimIds = dimMap.get(`${d.nama_dimension}|${d.kode_value}`);
+            if (dimIds) {
+              entryDimensions.push({ dimensionId: dimIds.dimensionId, dimensionValueId: dimIds.dimensionValueId });
+            }
+          }
+        }
+
+        const jumlahAsli = entry.jumlah;
+        const jumlahKonversi = jumlahAsli * exchangeRate;
+
+        entryData.push({
+          chartOfAccountId: acc.id,
+          tipe: entry.tipe,
+          jumlah: jumlahKonversi,
+          jumlah_asli: docCurrency !== baseCurrency ? jumlahAsli : null,
+          jumlah_konversi: jumlahKonversi,
+          dimensions: entryDimensions.length > 0 ? { create: entryDimensions } : undefined,
+        });
+      }
+
+      // 6. Generate No Voucher jika belum ada
+      const no_voucher = dto.no_voucher || (await this.generateVoucherNumber(tenantId, dto.tanggal));
+
+      // 7. Simpan Jurnal dengan status POSTED langsung
+      return await tx.journal.create({
+        data: {
+          tenantId,
+          no_voucher,
+          tanggal: new Date(dto.tanggal),
+          deskripsi: dto.deskripsi,
+          sumber_aplikasi: dto.sumber_aplikasi,
+          status: JournalStatus.POSTED,
+          sourceDocType: dto.sourceDocType || null,
+          sourceDocId: dto.sourceDocId || null,
+          idempotency_key: dto.idempotency_key || null,
+          mata_uang: docCurrency,
+          entries: {
+            create: entryData,
+          },
+        },
+        include: {
+          entries: {
+            include: {
+              chartOfAccount: {
+                select: { kode_akun: true, nama_akun: true },
+              },
+            },
+          },
+        },
+      });
+    });
+  }
+
+  // Membuat Jurnal Reversal dari Subledger dengan status POSTED langsung
+  async reverseFromSubledger(tenantId: string, journalIdOrIdentifier: string, tanggal?: string, alasan?: string) {
+    const original = await this.prisma.journal.findFirst({
+      where: {
+        tenantId,
+        OR: [
+          { id: journalIdOrIdentifier },
+          { no_voucher: journalIdOrIdentifier },
+        ],
+      },
+      include: {
+        entries: {
+          include: {
+            chartOfAccount: true,
+            dimensions: true,
+          },
+        },
+      },
+    });
+
+    if (!original) {
+      throw new NotFoundException({
+        errorCode: 'JOURNAL_NOT_FOUND',
+        message: `Jurnal dengan ID '${journalIdOrIdentifier}' tidak ditemukan.`,
+      });
+    }
+
+    const reversalDateStr = tanggal || new Date().toISOString().slice(0, 10);
+    const reversalDate = new Date(reversalDateStr);
+
+    // Validasi periode
+    await this.accountingPeriodService.validateJournalDate(tenantId, reversalDate);
+
+    return this.prisma.$transaction(async (tx) => {
+      const no_voucher = await this.generateVoucherNumber(tenantId, reversalDateStr);
+
+      const reversedEntries = original.entries.map((entry) => {
+        const reversedType = entry.tipe === EntryType.DEBIT ? EntryType.KREDIT : EntryType.DEBIT;
+        const dimensionCreates = entry.dimensions.map((d) => ({
+          dimensionId: d.dimensionId,
+          dimensionValueId: d.dimensionValueId,
+        }));
+
+        return {
+          chartOfAccountId: entry.chartOfAccountId,
+          tipe: reversedType,
+          jumlah: entry.jumlah,
+          jumlah_asli: entry.jumlah_asli,
+          jumlah_konversi: entry.jumlah_konversi,
+          dimensions: dimensionCreates.length > 0 ? { create: dimensionCreates } : undefined,
+        };
+      });
+
+      const deskripsi = alasan
+        ? `[REVERSAL] Reversal ${original.no_voucher}: ${alasan}`
+        : `[REVERSAL] Reversal voucher ${original.no_voucher}: ${original.deskripsi}`;
+
+      return await tx.journal.create({
+        data: {
+          tenantId,
+          no_voucher,
+          tanggal: reversalDate,
+          deskripsi,
+          sumber_aplikasi: 'SUBLEDGER-REVERSAL',
+          status: JournalStatus.POSTED,
+          sourceDocType: original.sourceDocType,
+          sourceDocId: original.sourceDocId,
+          mata_uang: original.mata_uang,
+          entries: {
+            create: reversedEntries,
+          },
+        },
+        include: {
+          entries: {
+            include: {
+              chartOfAccount: {
+                select: { kode_akun: true, nama_akun: true },
+              },
+            },
+          },
+        },
+      });
     });
   }
 }
