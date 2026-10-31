@@ -12,6 +12,7 @@ import {
   FileCheck,
 } from 'lucide-react';
 import { api, Tenant } from '../../services/api';
+import { readExcelFile, exportToExcel, formatExcelDate } from '../../utils/excelUtils';
 
 interface ApOpeningBalancePageProps {
   currentTenant: Tenant | null;
@@ -56,6 +57,7 @@ export const ApOpeningBalancePage: React.FC<ApOpeningBalancePageProps> = ({
     new Date().toISOString().slice(0, 10),
   );
   const [csvText, setCsvText] = useState<string>('');
+  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
   const [parsedRows, setParsedRows] = useState<ParsedBillRow[]>([]);
   const [parseErrors, setParseErrors] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -69,120 +71,172 @@ export const ApOpeningBalancePage: React.FC<ApOpeningBalancePageProps> = ({
     }).format(num);
   };
 
-  // Download template CSV
+  // Unduh template Excel (.xlsx)
   const handleDownloadTemplate = () => {
-    const header = 'noDokumen,noFakturVendor,tanggal,jatuhTempo,partnerKode,saldo,mata_uang,kurs,catatan,externalRef\n';
-    const sample = `BILL-LEG-001,VND-INV-9901,2026-01-10,2026-02-10,VND-001,7500000,${currentTenant?.mata_uang || 'IDR'},1,Saldo awal PT Sumber Makmur,PO-LEG-01\nBILL-LEG-002,INV-XYZ-552,2026-01-18,2026-02-18,VND-002,4200000,${currentTenant?.mata_uang || 'IDR'},1,Saldo awal CV Mitra Abadi,PO-LEG-02`;
-    const blob = new Blob([header + sample], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    const safeName = currentTenant?.nama_perusahaan ? currentTenant.nama_perusahaan.replace(/\s+/g, '_').toLowerCase() : 'tenant';
-    link.setAttribute('download', `template_saldo_awal_hutang_${safeName}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const headers = [
+      'noDokumen',
+      'noFakturVendor',
+      'tanggal',
+      'jatuhTempo',
+      'partnerKode',
+      'saldo',
+      'mata_uang',
+      'kurs',
+      'catatan',
+      'externalRef',
+    ];
+    const sampleRows = [
+      headers,
+      [
+        'BILL-LEG-001',
+        'VND-INV-9901',
+        '2026-01-10',
+        '2026-02-10',
+        'VND-001',
+        7500000,
+        currentTenant?.mata_uang || 'IDR',
+        1,
+        'Saldo awal PT Sumber Makmur',
+        'PO-LEG-01',
+      ],
+      [
+        'BILL-LEG-002',
+        'INV-XYZ-552',
+        '2026-01-18',
+        '2026-02-18',
+        'VND-002',
+        4200000,
+        currentTenant?.mata_uang || 'IDR',
+        1,
+        'Saldo awal CV Mitra Abadi',
+        'PO-LEG-02',
+      ],
+    ];
+
+    const safeName = currentTenant?.nama_perusahaan
+      ? currentTenant.nama_perusahaan.replace(/\s+/g, '_').toLowerCase()
+      : 'tenant';
+    exportToExcel(sampleRows, `template_saldo_awal_hutang_${safeName}.xlsx`, 'Saldo Awal Hutang');
   };
 
-  // Parse CSV
-  const parseCSV = (content: string) => {
-    const lines = content.trim().split(/\r?\n/).filter((l) => l.trim() !== '');
-    if (lines.length <= 1) {
+  // Proses data baris dari Excel (array of arrays)
+  const processRawRows = (rawRows: any[][]) => {
+    if (rawRows.length <= 1) {
       setParsedRows([]);
-      setParseErrors(['File CSV minimal memiliki baris header dan 1 baris data.']);
+      setParseErrors(['File Excel minimal memiliki baris header dan 1 baris data.']);
       return;
     }
 
     const errors: string[] = [];
     const rows: ParsedBillRow[] = [];
 
-    const headers = lines[0].split(',').map((h) => h.trim().toLowerCase());
+    const headers = rawRows[0].map((h: any) =>
+      String(h || '').trim().toLowerCase().replace(/[\s_\-]/g, '')
+    );
+
     const expectedHeaders = ['nodokumen', 'tanggal', 'jatuhtempo', 'partnerkode', 'saldo'];
-
-    for (const exp of expectedHeaders) {
-      if (!headers.includes(exp)) {
-        errors.push(`Header CSV wajib menyertakan kolom "${exp}".`);
-      }
-    }
-
-    if (errors.length > 0) {
+    const missingHeaders = expectedHeaders.filter((eh) => !headers.includes(eh));
+    if (missingHeaders.length > 0) {
+      errors.push(`Header kolom wajib belum ditemukan: ${missingHeaders.join(', ')}`);
       setParseErrors(errors);
       setParsedRows([]);
       return;
     }
 
-    const getColIndex = (col: string) => headers.indexOf(col.toLowerCase());
+    const idxNoDok = headers.indexOf('nodokumen');
+    const idxNoFakturVendor = headers.findIndex((h: string) => h === 'nofakturvendor' || h === 'fakturvendor');
+    const idxTgl = headers.indexOf('tanggal');
+    const idxJt = headers.indexOf('jatuhtempo');
+    const idxPartner = headers.indexOf('partnerkode');
+    const idxSaldo = headers.indexOf('saldo');
+    const idxMataUang = headers.findIndex((h: string) => h === 'matauang' || h === 'currency');
+    const idxKurs = headers.indexOf('kurs');
+    const idxCatatan = headers.findIndex((h: string) => h === 'catatan' || h === 'keterangan' || h === 'note');
+    const idxExtRef = headers.findIndex((h: string) => h === 'externalref' || h === 'refeksternal');
 
-    const idxNoDok = getColIndex('nodokumen');
-    const idxNoFakturVendor = getColIndex('nofakturvendor');
-    const idxTgl = getColIndex('tanggal');
-    const idxJt = getColIndex('jatuhtempo');
-    const idxPartner = getColIndex('partnerkode');
-    const idxSaldo = getColIndex('saldo');
-    const idxMataUang = getColIndex('mata_uang');
-    const idxKurs = getColIndex('kurs');
-    const idxCatatan = getColIndex('catatan');
-    const idxExtRef = getColIndex('externalref');
-
-    for (let i = 1; i < lines.length; i++) {
-      const lineNum = i + 1;
-      const cols = lines[i].split(',').map((c) => c.trim());
-
-      const noDokumen = cols[idxNoDok] || '';
-      const noFakturVendor = idxNoFakturVendor >= 0 ? cols[idxNoFakturVendor] : undefined;
-      const tanggal = cols[idxTgl] || '';
-      const jatuhTempo = cols[idxJt] || '';
-      const partnerKode = cols[idxPartner] || '';
-      const rawSaldo = cols[idxSaldo] || '0';
-      const saldo = parseFloat(rawSaldo);
-      const mata_uang = idxMataUang >= 0 && cols[idxMataUang] ? cols[idxMataUang].toUpperCase() : (currentTenant?.mata_uang || 'IDR');
-      const kurs = idxKurs >= 0 && cols[idxKurs] ? parseFloat(cols[idxKurs]) || 1 : 1;
-      const catatan = idxCatatan >= 0 ? cols[idxCatatan] : undefined;
-      const externalRef = idxExtRef >= 0 ? cols[idxExtRef] : undefined;
-
-      if (!noDokumen) errors.push(`Baris ${lineNum}: noDokumen tidak boleh kosong.`);
-      if (!tanggal || isNaN(Date.parse(tanggal))) errors.push(`Baris ${lineNum}: tanggal tidak valid (gunakan YYYY-MM-DD).`);
-      if (!jatuhTempo || isNaN(Date.parse(jatuhTempo))) errors.push(`Baris ${lineNum}: jatuhTempo tidak valid (gunakan YYYY-MM-DD).`);
-      if (!partnerKode) errors.push(`Baris ${lineNum}: partnerKode vendor tidak boleh kosong.`);
-      if (isNaN(saldo) || saldo <= 0) errors.push(`Baris ${lineNum}: saldo harus berupa angka positif lebih dari 0.`);
-
-      if (noDokumen && partnerKode && saldo > 0) {
-        rows.push({
-          noDokumen,
-          noFakturVendor: noFakturVendor || undefined,
-          tanggal,
-          jatuhTempo,
-          partnerKode,
-          saldo,
-          mata_uang,
-          kurs,
-          catatan,
-          externalRef,
-        });
+    for (let i = 1; i < rawRows.length; i++) {
+      const cols = rawRows[i];
+      if (!cols || cols.length === 0 || cols.every((c: any) => c === '' || c === undefined || c === null)) {
+        continue;
       }
+
+      const noDokumen = String(cols[idxNoDok] || '').trim();
+      const noFakturVendor = idxNoFakturVendor >= 0 && cols[idxNoFakturVendor] ? String(cols[idxNoFakturVendor]).trim() : undefined;
+      const rawTgl = cols[idxTgl];
+      const rawJt = cols[idxJt];
+      const tanggal = formatExcelDate(rawTgl);
+      const jatuhTempo = formatExcelDate(rawJt);
+      const partnerKode = String(cols[idxPartner] || '').trim();
+      const rawSaldo = typeof cols[idxSaldo] === 'number'
+        ? cols[idxSaldo]
+        : parseFloat(String(cols[idxSaldo] || '').replace(/[^0-9.-]/g, ''));
+      const saldo = Number(rawSaldo);
+
+      if (!noDokumen || !tanggal || !jatuhTempo || !partnerKode || isNaN(saldo) || saldo <= 0) {
+        errors.push(`Baris ${i + 1}: Data tidak valid atau saldo <= 0 (${noDokumen || 'Tanpa No Dokumen'}).`);
+        continue;
+      }
+
+      const mata_uang = idxMataUang >= 0 && cols[idxMataUang]
+        ? String(cols[idxMataUang]).trim().toUpperCase()
+        : (currentTenant?.mata_uang || 'IDR');
+      const rawKurs = idxKurs >= 0 ? Number(cols[idxKurs]) : 1;
+      const kurs = !isNaN(rawKurs) && rawKurs > 0 ? rawKurs : 1;
+      const catatan = idxCatatan >= 0 && cols[idxCatatan] ? String(cols[idxCatatan]).trim() : undefined;
+      const externalRef = idxExtRef >= 0 && cols[idxExtRef] ? String(cols[idxExtRef]).trim() : undefined;
+
+      rows.push({
+        noDokumen,
+        noFakturVendor,
+        tanggal,
+        jatuhTempo,
+        partnerKode,
+        saldo,
+        mata_uang,
+        kurs,
+        catatan,
+        externalRef,
+      });
     }
 
     setParseErrors(errors);
     setParsedRows(rows);
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Upload file Excel / spreadsheet
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const text = event.target?.result as string;
-      setCsvText(text);
-      parseCSV(text);
-    };
-    reader.readAsText(file);
+    setUploadedFileName(file.name);
+    setErrorMsg(null);
+    setImportResult(null);
+
+    try {
+      const rows = await readExcelFile(file);
+      processRawRows(rows);
+    } catch (err: any) {
+      console.error('Gagal membaca file Excel:', err);
+      setParseErrors([`Gagal membaca file Excel: ${err.message || 'Format tidak didukung'}`]);
+    }
+  };
+
+  // Parse CSV string jika user mengetik/menempel teks
+  const parseCSV = (content: string) => {
+    const lines = content.trim().split(/\r?\n/).filter((l) => l.trim() !== '');
+    const rawRows = lines.map((l) => l.split(',').map((c) => c.trim().replace(/^["']|["']$/g, '')));
+    processRawRows(rawRows);
   };
 
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const text = e.target.value;
     setCsvText(text);
-    parseCSV(text);
+    if (text.trim()) {
+      parseCSV(text);
+    } else {
+      setParsedRows([]);
+      setParseErrors([]);
+    }
   };
 
   // Submit Import
@@ -242,10 +296,10 @@ export const ApOpeningBalancePage: React.FC<ApOpeningBalancePageProps> = ({
         </div>
         <button
           onClick={handleDownloadTemplate}
-          className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-lg text-sm transition-colors border border-slate-200"
+          className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg text-sm shadow-sm transition-all"
         >
-          <Download className="w-4 h-4" />
-          Unduh Template CSV
+          <FileSpreadsheet className="w-4 h-4" />
+          Unduh Template Excel (.xlsx)
         </button>
       </div>
 
@@ -370,14 +424,20 @@ export const ApOpeningBalancePage: React.FC<ApOpeningBalancePageProps> = ({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
-              Pilih Berkas CSV
+            <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center justify-between">
+              <span>Pilih Berkas Excel (.xlsx / .xls)</span>
+              {uploadedFileName && (
+                <span className="text-[11px] text-emerald-600 font-medium flex items-center gap-1">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  {uploadedFileName} ({parsedRows.length} baris)
+                </span>
+              )}
             </label>
             <input
               type="file"
-              accept=".csv"
+              accept=".xlsx, .xls, .csv"
               onChange={handleFileUpload}
-              className="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer"
+              className="w-full text-xs text-slate-500 file:mr-3 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-600 file:text-white hover:file:bg-emerald-700 cursor-pointer border border-slate-200 rounded-lg p-1"
             />
           </div>
         </div>

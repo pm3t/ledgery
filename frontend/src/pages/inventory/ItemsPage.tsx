@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
+import { exportToExcel } from '../../utils/excelUtils';
 import {
   api,
   Tenant,
@@ -195,11 +196,15 @@ export const ItemsPage: React.FC<ItemsPageProps> = ({ currentTenant }) => {
     }
   };
 
-  // CSV Template & Import
+  // Excel/CSV Template & Import
   const handleDownloadTemplate = () => {
-    const csv = 'kode,nama,groupCode,satuan,tipe,valuationMethod\nITEM-001,Beras Pandan Wangi 5kg,SEMBAKO,SAK,STOK,MOVING_AVERAGE\nITEM-002,Minyak Goreng 2L,SEMBAKO,POUCH,STOK,FIFO\nSRV-001,Jasa Pengiriman Cepat,LOGISTIK,TRIP,JASA,MOVING_AVERAGE';
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    saveAs(blob, 'template_master_barang.csv');
+    const data = [
+      ['kode', 'nama', 'groupCode', 'satuan', 'tipe', 'valuationMethod'],
+      ['ITEM-001', 'Beras Pandan Wangi 5kg', 'SEMBAKO', 'SAK', 'STOK', 'MOVING_AVERAGE'],
+      ['ITEM-002', 'Minyak Goreng 2L', 'SEMBAKO', 'POUCH', 'STOK', 'FIFO'],
+      ['SRV-001', 'Jasa Pengiriman Cepat', 'LOGISTIK', 'TRIP', 'JASA', 'MOVING_AVERAGE'],
+    ];
+    exportToExcel(data, 'template_master_barang.xlsx', 'Master Barang');
   };
 
   const handleExecuteImport = async () => {

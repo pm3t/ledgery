@@ -100,26 +100,31 @@ span.text-white:not(aside *):not(button *):not(.btn *) {
 }
 
 /* 5. Input Fields, Dropdowns, dan Formulir */
-input.bg-slate-950,
-select.bg-slate-950,
-textarea.bg-slate-950,
-input.bg-slate-900,
-select.bg-slate-900,
-textarea.bg-slate-900 {
+input[class*="bg-slate-"],
+select[class*="bg-slate-"],
+textarea[class*="bg-slate-"],
+input[class*="bg-zinc-"],
+select[class*="bg-zinc-"],
+textarea[class*="bg-zinc-"],
+input[class*="bg-gray-"],
+select[class*="bg-gray-"],
+textarea[class*="bg-gray-"] {
   background-color: #ffffff !important;
   color: #142820 !important;
-  border: 1px solid #d4ded1 !important;
+  border: 1px solid #cbdcd0 !important;
   box-shadow: 0 1px 2px rgba(20, 40, 28, 0.03) !important;
 }
 
-input.bg-slate-950::placeholder,
-textarea.bg-slate-950::placeholder {
-  color: #84988b !important;
+input[class*="bg-slate-"]::placeholder,
+textarea[class*="bg-slate-"]::placeholder,
+input::placeholder,
+textarea::placeholder {
+  color: #71887b !important;
 }
 
-input.bg-slate-950:focus,
-select.bg-slate-950:focus,
-textarea.bg-slate-950:focus {
+input[class*="bg-slate-"]:focus,
+select[class*="bg-slate-"]:focus,
+textarea[class*="bg-slate-"]:focus {
   border-color: #15803d !important;
   box-shadow: 0 0 0 3px rgba(22, 101, 52, 0.12) !important;
   outline: none !important;
@@ -166,36 +171,42 @@ textarea.bg-slate-950:focus {
    ========================================================================= */
 
 /* Tab / Pill yang Tidak Aktif */
-button[class*="bg-slate-800"]:not(aside *):not([class*="bg-indigo"]):not([class*="bg-emerald"]),
-button[class*="bg-slate-950"]:not(aside *):not([class*="bg-indigo"]):not([class*="bg-emerald"]),
-button[class*="bg-slate-900"]:not(aside *):not([class*="bg-indigo"]):not([class*="bg-emerald"]),
-.bg-slate-800:not(aside *),
-.bg-slate-800\/80:not(aside *),
-.bg-slate-800\/60:not(aside *),
-.bg-slate-950\/60:not(aside *),
-.bg-slate-950\/80:not(aside *) {
+button[class*="bg-slate-"]:not([class*="bg-indigo"]):not([class*="bg-emerald"]):not(aside *),
+button[class*="bg-zinc-"]:not([class*="bg-indigo"]):not([class*="bg-emerald"]):not(aside *),
+button[class*="bg-gray-"]:not([class*="bg-indigo"]):not([class*="bg-emerald"]):not(aside *),
+button[class*="bg-stone-"]:not([class*="bg-indigo"]):not([class*="bg-emerald"]):not(aside *),
+.bg-slate-800:not(aside *):not(button[class*="bg-indigo"]):not(button[class*="bg-emerald"]),
+.bg-slate-800\/80:not(aside *):not(button[class*="bg-indigo"]):not(button[class*="bg-emerald"]),
+.bg-slate-800\/60:not(aside *):not(button[class*="bg-indigo"]):not(button[class*="bg-emerald"]),
+.bg-slate-950\/60:not(aside *):not(button[class*="bg-indigo"]):not(button[class*="bg-emerald"]),
+.bg-slate-950\/80:not(aside *):not(button[class*="bg-indigo"]):not(button[class*="bg-emerald"]) {
   background-color: #edf2ea !important;
-  color: #1a2e22 !important; /* Hijau Tua / Charcoal sangat kontras & jelas terbaca */
-  border: 1px solid #d0ded0 !important;
+  color: #142820 !important; /* Deep Pine Charcoal - kontras tinggi, sangat tajam & jelas */
+  border: 1px solid #c9d8c8 !important;
   font-weight: 600 !important;
 }
 
-button[class*="bg-slate-800"]:hover:not(aside *),
-button[class*="bg-slate-950"]:hover:not(aside *),
-button[class*="bg-slate-900"]:hover:not(aside *) {
-  background-color: #e2ebe0 !important;
-  color: #112217 !important;
-  border-color: #b0c4af !important;
+/* Pastikan semua teks & anak elemen tombol inactive selalu kontras gelap */
+button[class*="bg-slate-"]:not([class*="bg-indigo"]):not([class*="bg-emerald"]):not(aside *) *,
+button[class*="bg-zinc-"]:not([class*="bg-indigo"]):not([class*="bg-emerald"]):not(aside *) *,
+button[class*="bg-gray-"]:not([class*="bg-indigo"]):not([class*="bg-emerald"]):not(aside *) *,
+button[class*="bg-stone-"]:not([class*="bg-indigo"]):not([class*="bg-emerald"]):not(aside *) *,
+button.text-slate-400:not([class*="bg-indigo"]):not([class*="bg-emerald"]):not(aside *),
+button.text-slate-500:not([class*="bg-indigo"]):not([class*="bg-emerald"]):not(aside *) {
+  color: #142820 !important;
 }
 
-/* Pastikan teks di dalam tombol inactive filter selalu gelap dan tajam */
-button[class*="bg-slate-800"] span,
-button[class*="bg-slate-800"] p,
-button[class*="bg-slate-950"] span,
-button[class*="bg-slate-950"] p,
-button[class*="bg-slate-800\/80"],
-button[class*="bg-slate-950\/60"] {
-  color: #1a2e22 !important;
+button[class*="bg-slate-"]:hover:not([class*="bg-indigo"]):not([class*="bg-emerald"]):not(aside *),
+button[class*="bg-zinc-"]:hover:not([class*="bg-indigo"]):not([class*="bg-emerald"]):not(aside *),
+button[class*="bg-gray-"]:hover:not([class*="bg-indigo"]):not([class*="bg-emerald"]):not(aside *),
+button[class*="bg-stone-"]:hover:not([class*="bg-indigo"]):not([class*="bg-emerald"]):not(aside *) {
+  background-color: #dbe7da !important;
+  color: #0b1a13 !important;
+  border-color: #9cb89a !important;
+}
+
+button[class*="bg-slate-"]:hover:not([class*="bg-indigo"]):not([class*="bg-emerald"]):not(aside *) * {
+  color: #0b1a13 !important;
 }
 
 /* Tab / Pill yang Aktif */
@@ -213,21 +224,30 @@ button[class*="bg-emerald-"]:not(aside *) * {
   color: #ffffff !important;
 }
 
-/* 7. Tabel Data Bersih & Segar */
-thead tr.bg-slate-950,
-thead tr.bg-slate-950\/50,
-thead tr.bg-slate-950\/70,
-thead tr.bg-slate-950\/80,
-thead tr.bg-slate-900,
-thead tr.bg-slate-900\/90 {
-  background-color: #edf3ec !important; /* Soft Forest Mist */
-  color: #3b5042 !important;
-  border-bottom: 1px solid #d4ded1 !important;
+/* 7. Tabel Data Bersih, Segar & Kontras Tinggi */
+thead,
+thead.bg-slate-950,
+thead.bg-slate-950\/70,
+thead.bg-slate-950\/50,
+thead.bg-slate-900,
+thead[class*="bg-slate-"],
+thead[class*="bg-gray-"],
+thead[class*="bg-zinc-"],
+thead tr,
+thead tr[class*="bg-"] {
+  background-color: #eaf1e8 !important; /* Soft Forest Mist */
+  color: #142e20 !important;
+  border-bottom: 1px solid #cbdcd0 !important;
 }
 
-thead th {
-  color: #3b5042 !important;
-  font-weight: 600 !important;
+thead th,
+thead tr th,
+thead th div,
+thead th span,
+thead[class*="text-slate-"] th {
+  color: #142e20 !important; /* Deep Pine Charcoal Header Text - Sangat tajam & jelas */
+  font-weight: 700 !important;
+  letter-spacing: 0.04em;
 }
 
 tbody tr:hover {
@@ -236,6 +256,45 @@ tbody tr:hover {
 
 tbody tr {
   border-color: #edf2ea !important;
+}
+
+/* Teks No. Akun, Kode, dan Tombol di dalam Baris Tabel */
+td,
+td.text-white,
+td button.text-white,
+td a.text-white,
+td button:not([class*="bg-indigo"]):not([class*="bg-emerald"]):not([class*="bg-rose"]):not([class*="bg-red"]),
+td a,
+td span.text-white,
+td span[class*="text-slate-100"],
+td span[class*="text-slate-200"],
+td [class*="font-mono"]:not([class*="bg-emerald"]):not([class*="bg-indigo"]):not([class*="bg-rose"]):not([class*="bg-amber"]):not([class*="badge"]) {
+  color: #142820 !important; /* Deep Pine Charcoal - Terbaca jelas pada background putih */
+}
+
+td button:hover,
+td a:hover {
+  color: #15803d !important; /* Emerald on hover */
+}
+
+/* Footer Tabel (Tfoot) */
+tfoot,
+tfoot tr,
+tfoot[class*="bg-slate-"],
+tfoot[class*="bg-gray-"] {
+  background-color: #edf3ec !important;
+  border-top: 2px solid #cbdcd0 !important;
+  color: #142e20 !important;
+}
+
+tfoot td {
+  color: #142e20 !important;
+  font-weight: 700 !important;
+}
+
+/* Elemen dengan class text-white di luar sidebar yang bukan tombol berlatar warna */
+.text-white:not(aside *):not(button[class*="bg-indigo"]):not(button[class*="bg-emerald"]):not(button[class*="bg-rose"]):not(button[class*="bg-red"]):not(button[class*="bg-blue"]):not(button[class*="bg-amber"]):not(button[class*="bg-violet"]):not(button[class*="bg-purple"]):not(button[class*="bg-indigo-600"] *):not(button[class*="bg-emerald-600"] *):not(button[class*="bg-rose-600"] *):not(span[class*="bg-indigo-"]):not(span[class*="bg-emerald-"]):not(span[class*="bg-rose-"]):not(span[class*="bg-amber-"]):not(span[class*="bg-blue-"]) {
+  color: #142820 !important;
 }
 
 /* 8. Jamin Teks Putih Pada Tombol dan Badge Warna Tetap Putih */

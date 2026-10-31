@@ -13,6 +13,7 @@ import {
   Package,
 } from 'lucide-react';
 import { api, Tenant } from '../../services/api';
+import { readExcelFile, exportToExcel, formatExcelDate } from '../../utils/excelUtils';
 
 interface InventoryOpeningBalancePageProps {
   currentTenant: Tenant | null;
@@ -54,6 +55,7 @@ export const InventoryOpeningBalancePage: React.FC<InventoryOpeningBalancePagePr
     new Date().toISOString().slice(0, 10),
   );
   const [csvText, setCsvText] = useState<string>('');
+  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
   const [parsedRows, setParsedRows] = useState<ParsedStockRow[]>([]);
   const [parseErrors, setParseErrors] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -67,52 +69,48 @@ export const InventoryOpeningBalancePage: React.FC<InventoryOpeningBalancePagePr
     }).format(num);
   };
 
-  // Download contoh CSV template
+  // Unduh contoh Excel template (.xlsx)
   const handleDownloadTemplate = () => {
-    const header = 'itemKode,warehouseKode,tanggalMasuk,qty,biayaSatuan,catatan\n';
-    const sample = `ITM-001,GDG-UTM,2026-01-01,100,50000,Saldo awal stok batch 1\nITM-001,GDG-UTM,2026-01-15,50,52000,Saldo awal stok batch 2 (FIFO)\nITM-002,GDG-TKO,2026-01-01,25,120000,Saldo awal toko`;
-    const blob = new Blob([header + sample], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
+    const headers = ['itemKode', 'warehouseKode', 'tanggalMasuk', 'qty', 'biayaSatuan', 'catatan'];
+    const sampleRows = [
+      headers,
+      ['ITM-001', 'GDG-UTM', '2026-01-01', 100, 50000, 'Saldo awal stok batch 1'],
+      ['ITM-001', 'GDG-UTM', '2026-01-15', 50, 52000, 'Saldo awal stok batch 2 (FIFO)'],
+      ['ITM-002', 'GDG-TKO', '2026-01-01', 25, 120000, 'Saldo awal toko'],
+    ];
+
     const safeName = currentTenant?.nama_perusahaan
       ? currentTenant.nama_perusahaan.replace(/\s+/g, '_').toLowerCase()
       : 'tenant';
-    link.setAttribute('download', `template_saldo_awal_persediaan_${safeName}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    exportToExcel(sampleRows, `template_saldo_awal_persediaan_${safeName}.xlsx`, 'Saldo Awal Persediaan');
   };
 
-  // Parsing CSV
-  const handleParseCsv = (content: string) => {
-    setCsvText(content);
+  // Proses data baris dari Excel (array of arrays)
+  const processRawRows = (rawRows: any[][]) => {
     setParseErrors([]);
     setParsedRows([]);
     setErrorMsg(null);
     setImportResult(null);
 
-    if (!content.trim()) return;
-
-    const lines = content.trim().split(/\r?\n/);
-    if (lines.length < 2) {
-      setParseErrors(['File CSV minimal harus memiliki header dan 1 baris data.']);
+    if (rawRows.length <= 1) {
+      setParseErrors(['File Excel minimal harus memiliki baris header dan 1 baris data.']);
       return;
     }
 
-    const headers = lines[0].split(',').map((h) => h.trim().toLowerCase());
-    const expectedHeaders = ['itemkode', 'warehousekode', 'tanggalmasuk', 'qty', 'biayasatuan', 'catatan'];
+    const headers = rawRows[0].map((h: any) =>
+      String(h || '').trim().toLowerCase().replace(/[\s_\-]/g, '')
+    );
 
-    const itemKodeIdx = headers.indexOf('itemkode');
-    const warehouseKodeIdx = headers.indexOf('warehousekode');
-    const tanggalMasukIdx = headers.indexOf('tanggalmasuk');
-    const qtyIdx = headers.indexOf('qty');
-    const biayaSatuanIdx = headers.indexOf('biayasatuan');
-    const catatanIdx = headers.indexOf('catatan');
+    const itemKodeIdx = headers.findIndex((h: string) => h === 'itemkode' || h === 'kodebarang');
+    const warehouseKodeIdx = headers.findIndex((h: string) => h === 'warehousekode' || h === 'kodegudang');
+    const tanggalMasukIdx = headers.findIndex((h: string) => h === 'tanggalmasuk' || h === 'tglmasuk' || h === 'tanggal');
+    const qtyIdx = headers.findIndex((h: string) => h === 'qty' || h === 'kuantitas' || h === 'jumlah');
+    const biayaSatuanIdx = headers.findIndex((h: string) => h === 'biayasatuan' || h === 'hargasatuan' || h === 'hpp');
+    const catatanIdx = headers.findIndex((h: string) => h === 'catatan' || h === 'keterangan' || h === 'note');
 
     if (itemKodeIdx === -1 || warehouseKodeIdx === -1 || qtyIdx === -1 || biayaSatuanIdx === -1) {
       setParseErrors([
-        `Header CSV wajib memiliki: itemKode, warehouseKode, qty, biayaSatuan. Header terdeteksi: ${headers.join(', ')}`,
+        `Header Excel wajib menyertakan: itemKode, warehouseKode, qty, biayaSatuan. Header terdeteksi: ${rawRows[0].join(', ')}`,
       ]);
       return;
     }
@@ -120,21 +118,27 @@ export const InventoryOpeningBalancePage: React.FC<InventoryOpeningBalancePagePr
     const rows: ParsedStockRow[] = [];
     const errors: string[] = [];
 
-    for (let i = 1; i < lines.length; i++) {
-      const line = lines[i].trim();
-      if (!line) continue;
+    for (let i = 1; i < rawRows.length; i++) {
+      const cols = rawRows[i];
+      if (!cols || cols.length === 0 || cols.every((c: any) => c === '' || c === undefined || c === null)) {
+        continue;
+      }
 
-      const cols = line.split(',').map((c) => c.trim().replace(/^["']|["']$/g, ''));
+      const itemKode = String(cols[itemKodeIdx] || '').trim();
+      const warehouseKode = String(cols[warehouseKodeIdx] || '').trim();
+      const rawTanggal = tanggalMasukIdx !== -1 ? cols[tanggalMasukIdx] : undefined;
+      const tanggalMasuk = rawTanggal ? formatExcelDate(rawTanggal) : undefined;
+      
+      const rawQty = typeof cols[qtyIdx] === 'number'
+        ? cols[qtyIdx]
+        : parseFloat(String(cols[qtyIdx] || '').replace(/[^0-9.-]/g, ''));
+      const rawBiaya = typeof cols[biayaSatuanIdx] === 'number'
+        ? cols[biayaSatuanIdx]
+        : parseFloat(String(cols[biayaSatuanIdx] || '').replace(/[^0-9.-]/g, ''));
 
-      const itemKode = cols[itemKodeIdx] || '';
-      const warehouseKode = cols[warehouseKodeIdx] || '';
-      const tanggalMasuk = tanggalMasukIdx !== -1 ? cols[tanggalMasukIdx] : undefined;
-      const qtyStr = cols[qtyIdx] || '0';
-      const biayaSatuanStr = cols[biayaSatuanIdx] || '0';
-      const catatan = catatanIdx !== -1 ? cols[catatanIdx] : undefined;
-
-      const qty = parseFloat(qtyStr);
-      const biayaSatuan = parseFloat(biayaSatuanStr);
+      const qty = Number(rawQty);
+      const biayaSatuan = Number(rawBiaya);
+      const catatan = catatanIdx !== -1 && cols[catatanIdx] ? String(cols[catatanIdx]).trim() : undefined;
 
       if (!itemKode) {
         errors.push(`Baris ${i + 1}: itemKode tidak boleh kosong.`);
@@ -143,36 +147,54 @@ export const InventoryOpeningBalancePage: React.FC<InventoryOpeningBalancePagePr
         errors.push(`Baris ${i + 1}: warehouseKode tidak boleh kosong.`);
       }
       if (isNaN(qty) || qty <= 0) {
-        errors.push(`Baris ${i + 1}: kuantitas (qty) harus angka > 0.`);
+        errors.push(`Baris ${i + 1}: kuantitas (qty) harus angka > 0 (${itemKode || 'Tanpa Kode'}).`);
       }
       if (isNaN(biayaSatuan) || biayaSatuan < 0) {
-        errors.push(`Baris ${i + 1}: biayaSatuan harus angka >= 0.`);
+        errors.push(`Baris ${i + 1}: biayaSatuan harus angka >= 0 (${itemKode || 'Tanpa Kode'}).`);
       }
 
-      rows.push({
-        itemKode,
-        warehouseKode,
-        tanggalMasuk: tanggalMasuk || asOfDate,
-        qty: isNaN(qty) ? 0 : qty,
-        biayaSatuan: isNaN(biayaSatuan) ? 0 : biayaSatuan,
-        catatan,
-      });
+      if (itemKode && warehouseKode && qty > 0 && biayaSatuan >= 0) {
+        rows.push({
+          itemKode,
+          warehouseKode,
+          tanggalMasuk: tanggalMasuk || asOfDate,
+          qty,
+          biayaSatuan,
+          catatan,
+        });
+      }
     }
 
     setParsedRows(rows);
     setParseErrors(errors);
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Upload file Excel / spreadsheet
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = (evt) => {
-      const text = evt.target?.result as string;
-      handleParseCsv(text);
-    };
-    reader.readAsText(file);
+    setUploadedFileName(file.name);
+    try {
+      const rows = await readExcelFile(file);
+      processRawRows(rows);
+    } catch (err: any) {
+      console.error('Gagal membaca file Excel:', err);
+      setParseErrors([`Gagal membaca file Excel: ${err.message || 'Format tidak didukung'}`]);
+    }
+  };
+
+  // Parsing CSV string jika pengguna menempel teks
+  const handleParseCsv = (content: string) => {
+    setCsvText(content);
+    if (!content.trim()) {
+      setParsedRows([]);
+      setParseErrors([]);
+      return;
+    }
+    const lines = content.trim().split(/\r?\n/).filter((l) => l.trim() !== '');
+    const rawRows = lines.map((l) => l.split(',').map((c) => c.trim().replace(/^["']|["']$/g, '')));
+    processRawRows(rawRows);
   };
 
   const calculateSubledgerTotal = () => {
@@ -234,10 +256,10 @@ export const InventoryOpeningBalancePage: React.FC<InventoryOpeningBalancePagePr
         <div className="flex items-center gap-3">
           <button
             onClick={handleDownloadTemplate}
-            className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 shadow-sm transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium shadow-sm transition-all"
           >
-            <Download className="w-4 h-4 text-gray-500" />
-            Unduh Template CSV
+            <FileSpreadsheet className="w-4 h-4" />
+            Unduh Template Excel (.xlsx)
           </button>
         </div>
       </div>
@@ -274,14 +296,20 @@ export const InventoryOpeningBalancePage: React.FC<InventoryOpeningBalancePagePr
           </div>
 
           <div className="md:col-span-2">
-            <label className="block text-xs font-semibold text-gray-700 uppercase mb-1">
-              Unggah Berkas CSV
+            <label className="block text-xs font-semibold text-gray-700 uppercase mb-1 flex items-center justify-between">
+              <span>Unggah Berkas Excel (.xlsx / .xls)</span>
+              {uploadedFileName && (
+                <span className="text-xs text-emerald-600 font-medium normal-case flex items-center gap-1">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  {uploadedFileName} ({parsedRows.length} baris)
+                </span>
+              )}
             </label>
             <input
               type="file"
-              accept=".csv"
+              accept=".xlsx, .xls, .csv"
               onChange={handleFileUpload}
-              className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer"
+              className="w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-emerald-600 file:text-white hover:file:bg-emerald-700 cursor-pointer border border-gray-200 rounded-lg p-1"
             />
           </div>
         </div>

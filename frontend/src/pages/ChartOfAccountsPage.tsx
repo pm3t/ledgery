@@ -612,28 +612,28 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm text-slate-300">
-              <thead className="bg-slate-950/70 text-slate-400 text-xs uppercase tracking-wider border-b border-slate-800">
+            <table className="w-full text-left text-sm text-slate-800">
+              <thead className="bg-[#eaf1e8] text-[#142e20] text-xs uppercase tracking-wider border-b border-[#cbdcd0]">
                 <tr>
                   {visibleColumns.kode_akun && (
-                    <th className="py-3.5 px-4 font-semibold">Kode Akun</th>
+                    <th className="py-3.5 px-4 font-bold text-[#142e20]">Kode Akun</th>
                   )}
                   {visibleColumns.nama_akun && (
-                    <th className="py-3.5 px-4 font-semibold">Nama Akun</th>
+                    <th className="py-3.5 px-4 font-bold text-[#142e20]">Nama Akun</th>
                   )}
                   {visibleColumns.kategori && (
-                    <th className="py-3.5 px-4 font-semibold">Kategori</th>
+                    <th className="py-3.5 px-4 font-bold text-[#142e20]">Kategori</th>
                   )}
                   {visibleColumns.controlType && (
-                    <th className="py-3.5 px-4 font-semibold">Tipe Kontrol</th>
+                    <th className="py-3.5 px-4 font-bold text-[#142e20]">Tipe Kontrol</th>
                   )}
                   {visibleColumns.parent && (
-                    <th className="py-3.5 px-4 font-semibold">Akun Induk</th>
+                    <th className="py-3.5 px-4 font-bold text-[#142e20]">Akun Induk</th>
                   )}
                   {visibleColumns.saldo && (
-                    <th className="py-3.5 px-4 font-semibold text-right min-w-[150px]">
+                    <th className="py-3.5 px-4 font-bold text-right min-w-[150px] text-[#142e20]">
                       <div>Saldo ({currentTenant?.mata_uang || 'IDR'})</div>
-                      <div className="text-[10px] text-indigo-400 font-normal tracking-normal lowercase">
+                      <div className="text-[10px] text-emerald-800 font-semibold tracking-normal lowercase">
                         {tipeSaldo === 'AS_OF'
                           ? `as of ${asOfDate}`
                           : `mutasi ${mutasiStartDate} s/d ${mutasiEndDate}`}
@@ -641,25 +641,25 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
                     </th>
                   )}
                   {visibleColumns.status && (
-                    <th className="py-3.5 px-4 font-semibold">Status</th>
+                    <th className="py-3.5 px-4 font-bold text-[#142e20]">Status</th>
                   )}
                   {visibleColumns.aksi && (
-                    <th className="py-3.5 px-4 font-semibold text-right">Aksi</th>
+                    <th className="py-3.5 px-4 font-bold text-right text-[#142e20]">Aksi</th>
                   )}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60">
+              <tbody className="divide-y divide-slate-200">
                 {accounts.map((acc) => {
                   const isChild = !!acc.parentId;
                   return (
-                    <tr key={acc.id} className="hover:bg-slate-800/40 transition-colors">
+                    <tr key={acc.id} className="hover:bg-emerald-50/40 transition-colors">
                       {visibleColumns.kode_akun && (
-                        <td className="py-3 px-4 font-mono font-bold text-white">
+                        <td className="py-3 px-4 font-mono font-bold text-slate-900">
                           <button
                             type="button"
                             onClick={() => handleOpenMutationModal(acc)}
-                            className={`hover:underline flex items-center gap-1.5 text-left transition-colors ${
-                              isChild ? 'pl-4 text-indigo-300 hover:text-indigo-200' : 'text-white hover:text-indigo-300'
+                            className={`hover:underline flex items-center gap-1.5 text-left transition-colors font-mono font-bold ${
+                              isChild ? 'pl-4 text-emerald-700 hover:text-emerald-900' : 'text-slate-900 hover:text-emerald-700'
                             }`}
                             title="Klik untuk melihat kartu mutasi akun ini"
                           >
@@ -669,9 +669,9 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
                         </td>
                       )}
                       {visibleColumns.nama_akun && (
-                        <td className="py-3 px-4 font-medium text-slate-200">
+                        <td className="py-3 px-4 font-medium text-slate-800">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className={isChild ? 'pl-2 text-slate-300' : 'font-semibold text-white'}>
+                            <span className={isChild ? 'pl-2 text-slate-700 font-medium' : 'font-bold text-slate-900'}>
                               {acc.nama_akun}
                             </span>
                             {acc.isControlAccount && (
@@ -717,13 +717,13 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
                         </td>
                       )}
                       {visibleColumns.parent && (
-                        <td className="py-3 px-4 text-xs text-slate-400">
+                        <td className="py-3 px-4 text-xs text-slate-600">
                           {acc.parent ? (
-                            <span className="font-mono bg-slate-800/80 px-2 py-1 rounded text-slate-300">
+                            <span className="font-mono bg-slate-100 border border-slate-200 px-2 py-1 rounded text-slate-800 font-medium">
                               {acc.parent.kode_akun} - {acc.parent.nama_akun}
                             </span>
                           ) : (
-                            <span className="text-slate-600 italic">Utama (Induk)</span>
+                            <span className="text-slate-500 italic">Utama (Induk)</span>
                           )}
                         </td>
                       )}
@@ -732,7 +732,7 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
                       {visibleColumns.saldo && (
                         <td className="py-3 px-4 text-right font-mono font-medium">
                           {balanceLoading ? (
-                            <span className="text-slate-600 animate-pulse text-xs">...</span>
+                            <span className="text-slate-400 animate-pulse text-xs">...</span>
                           ) : (
                             <button
                               type="button"
@@ -741,8 +741,8 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
                                 (balanceMap[acc.id] || 0) === 0
                                   ? 'text-slate-500'
                                   : (balanceMap[acc.id] || 0) < 0
-                                  ? 'text-rose-400 font-semibold'
-                                  : 'text-slate-100 font-semibold'
+                                  ? 'text-rose-600 font-bold'
+                                  : 'text-slate-900 font-bold'
                               }`}
                               title="Klik untuk melihat rincian mutasi akun ini"
                             >
@@ -801,7 +801,7 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
               </tbody>
               {/* Footer Total Saldo */}
               {accounts.length > 0 && visibleColumns.saldo && (
-                <tfoot className="bg-slate-950/80 border-t-2 border-slate-800 font-semibold text-xs">
+                <tfoot className="bg-[#edf3ec] border-t-2 border-[#cbdcd0] font-bold text-xs text-[#142e20]">
                   <tr>
                     {['kode_akun', 'nama_akun', 'kategori', 'parent'].filter(
                       (k) => visibleColumns[k as keyof ColumnVisibility],
@@ -812,12 +812,12 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
                             (k) => visibleColumns[k as keyof ColumnVisibility],
                           ).length
                         }
-                        className="py-3 px-4 text-slate-400"
+                        className="py-3 px-4 text-[#142e20]"
                       >
                         Total ({accounts.length} Akun Ditampilkan)
                       </td>
                     )}
-                    <td className="py-3 px-4 text-right font-mono text-white font-bold text-sm">
+                    <td className="py-3 px-4 text-right font-mono text-[#142e20] font-bold text-sm">
                       {formatSaldo(
                         accounts.reduce(
                           (sum, a) => sum + (balanceMap[a.id] || 0),

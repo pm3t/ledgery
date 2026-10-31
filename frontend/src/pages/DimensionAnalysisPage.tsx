@@ -209,13 +209,13 @@ export const DimensionAnalysisPage: React.FC<Props> = ({ currentTenant }) => {
       </div>
 
       {/* Panel Parameter & Filter */}
-      <div className="bg-slate-900/70 border border-slate-800/80 rounded-2xl p-5 backdrop-blur-sm shadow-xl space-y-4">
-        <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-          <div className="flex items-center gap-2 text-sm font-semibold text-slate-200">
-            <Filter className="w-4 h-4 text-indigo-400" />
+      <div className="bg-white border border-[#d4ded1] rounded-2xl p-5 shadow-sm space-y-4">
+        <div className="flex items-center justify-between pb-3 border-b border-[#e2e8df]">
+          <div className="flex items-center gap-2 text-sm font-bold text-[#142820]">
+            <Filter className="w-4 h-4 text-emerald-600" />
             Parameter Matriks Analisa
           </div>
-          <span className="text-xs text-slate-400 bg-slate-800 px-2.5 py-1 rounded-full border border-slate-700/60">
+          <span className="text-xs text-[#142820] bg-[#edf2ea] px-3 py-1 rounded-full border border-[#cbdcd0] font-semibold">
             {dimensions.length} Dimensi Tersedia
           </span>
         </div>
@@ -223,18 +223,18 @@ export const DimensionAnalysisPage: React.FC<Props> = ({ currentTenant }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Parameter 1: Tipe Saldo */}
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1.5 flex items-center gap-1.5">
-              <ArrowRightLeft className="w-3.5 h-3.5 text-indigo-400" />
+            <label className="block text-xs font-semibold text-[#142820] mb-1.5 flex items-center gap-1.5">
+              <ArrowRightLeft className="w-3.5 h-3.5 text-emerald-600" />
               Tipe Saldo
             </label>
-            <div className="grid grid-cols-2 p-1 bg-slate-950/70 rounded-xl border border-slate-800">
+            <div className="grid grid-cols-2 p-1 bg-[#edf2ea] rounded-xl border border-[#cbdcd0]">
               <button
                 type="button"
                 onClick={() => setTipeSaldo('MUTASI')}
-                className={`py-1.5 px-3 rounded-lg text-xs font-semibold transition-all ${
+                className={`py-1.5 px-3 rounded-lg text-xs font-bold transition-all ${
                   tipeSaldo === 'MUTASI'
-                    ? 'bg-indigo-600 text-white shadow-md'
-                    : 'text-slate-400 hover:text-slate-200'
+                    ? 'bg-emerald-600 text-white shadow-sm'
+                    : 'text-[#142820] hover:text-emerald-800'
                 }`}
               >
                 Mutasi
@@ -242,16 +242,16 @@ export const DimensionAnalysisPage: React.FC<Props> = ({ currentTenant }) => {
               <button
                 type="button"
                 onClick={() => setTipeSaldo('AS_OF')}
-                className={`py-1.5 px-3 rounded-lg text-xs font-semibold transition-all ${
+                className={`py-1.5 px-3 rounded-lg text-xs font-bold transition-all ${
                   tipeSaldo === 'AS_OF'
-                    ? 'bg-indigo-600 text-white shadow-md'
-                    : 'text-slate-400 hover:text-slate-200'
+                    ? 'bg-emerald-600 text-white shadow-sm'
+                    : 'text-[#142820] hover:text-emerald-800'
                 }`}
               >
                 As Of
               </button>
             </div>
-            <p className="text-[11px] text-slate-500 mt-1">
+            <p className="text-[11px] text-[#556c5e] mt-1">
               {tipeSaldo === 'MUTASI'
                 ? 'Pergerakan saldo dalam rentang tanggal'
                 : 'Saldo kumulatif s.d tanggal akhir'}
@@ -260,14 +260,14 @@ export const DimensionAnalysisPage: React.FC<Props> = ({ currentTenant }) => {
 
           {/* Parameter 2: Dimensi yang Dianalisis */}
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1.5 flex items-center gap-1.5">
-              <Layers className="w-3.5 h-3.5 text-indigo-400" />
+            <label className="block text-xs font-semibold text-[#142820] mb-1.5 flex items-center gap-1.5">
+              <Layers className="w-3.5 h-3.5 text-emerald-600" />
               Pilih Dimensi (Kolom)
             </label>
             <select
               value={selectedDimensionId}
               onChange={(e) => setSelectedDimensionId(e.target.value)}
-              className="w-full bg-slate-950/70 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500 transition-colors"
+              className="w-full bg-white border border-[#cbdcd0] rounded-xl px-3.5 py-2 text-sm text-[#142820] font-medium focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 transition-colors shadow-sm"
             >
               {dimensions.length === 0 && (
                 <option value="">Belum ada dimensi di tenant ini</option>
@@ -278,15 +278,15 @@ export const DimensionAnalysisPage: React.FC<Props> = ({ currentTenant }) => {
                 </option>
               ))}
             </select>
-            <p className="text-[11px] text-slate-500 mt-1">
+            <p className="text-[11px] text-[#556c5e] mt-1">
               Kolom akan memetakan nilai dari dimensi ini
             </p>
           </div>
 
           {/* Parameter 3: Tanggal Dari */}
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1.5 flex items-center gap-1.5">
-              <Calendar className="w-3.5 h-3.5 text-indigo-400" />
+            <label className="block text-xs font-semibold text-[#142820] mb-1.5 flex items-center gap-1.5">
+              <Calendar className="w-3.5 h-3.5 text-emerald-600" />
               Tanggal Dari
             </label>
             <input
@@ -294,9 +294,9 @@ export const DimensionAnalysisPage: React.FC<Props> = ({ currentTenant }) => {
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
               disabled={tipeSaldo === 'AS_OF'}
-              className="w-full bg-slate-950/70 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="w-full bg-white border border-[#cbdcd0] rounded-xl px-3.5 py-2 text-sm text-[#142820] font-medium focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
             />
-            <p className="text-[11px] text-slate-500 mt-1">
+            <p className="text-[11px] text-[#556c5e] mt-1">
               {tipeSaldo === 'AS_OF'
                 ? 'Tidak aktif untuk mode kumulatif (As Of)'
                 : 'Awal periode mutasi'}
@@ -305,8 +305,8 @@ export const DimensionAnalysisPage: React.FC<Props> = ({ currentTenant }) => {
 
           {/* Parameter 4: Tanggal Sampai */}
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1.5 flex items-center gap-1.5">
-              <Calendar className="w-3.5 h-3.5 text-indigo-400" />
+            <label className="block text-xs font-semibold text-[#142820] mb-1.5 flex items-center gap-1.5">
+              <Calendar className="w-3.5 h-3.5 text-emerald-600" />
               Tanggal Sampai
             </label>
             <div className="flex gap-2">
@@ -314,29 +314,29 @@ export const DimensionAnalysisPage: React.FC<Props> = ({ currentTenant }) => {
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="w-full bg-slate-950/70 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500 transition-colors"
+                className="w-full bg-white border border-[#cbdcd0] rounded-xl px-3.5 py-2 text-sm text-[#142820] font-medium focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 transition-colors shadow-sm"
               />
               <button
                 type="button"
                 onClick={fetchReport}
                 disabled={loading || !selectedDimensionId}
-                className="px-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-medium transition-colors flex items-center justify-center shrink-0"
+                className="px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-colors flex items-center justify-center shrink-0 shadow-sm"
               >
                 Terapkan
               </button>
             </div>
-            <p className="text-[11px] text-slate-500 mt-1">
+            <p className="text-[11px] text-[#556c5e] mt-1">
               {tipeSaldo === 'AS_OF' ? 'Posisi saldo per tanggal ini' : 'Batas akhir periode'}
             </p>
           </div>
         </div>
 
         {/* Secondary Toolbar: Filter Kategori & Search */}
-        <div className="pt-3 border-t border-slate-800/80 flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div className="pt-3 border-t border-[#e2e8df] flex flex-col md:flex-row md:items-center justify-between gap-3">
           {/* Category Tabs */}
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-xs text-slate-400 mr-1 flex items-center gap-1">
-              <Building className="w-3 h-3" />
+            <span className="text-xs text-[#142820] font-semibold mr-1 flex items-center gap-1">
+              <Building className="w-3.5 h-3.5 text-emerald-700" />
               Kategori:
             </span>
             {[
@@ -351,10 +351,10 @@ export const DimensionAnalysisPage: React.FC<Props> = ({ currentTenant }) => {
                 key={cat.id}
                 type="button"
                 onClick={() => setSelectedCategory(cat.id)}
-                className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
+                className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
                   selectedCategory === cat.id
-                    ? 'bg-slate-700 text-white border border-slate-600'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 border border-transparent'
+                    ? 'bg-emerald-600 text-white shadow-sm'
+                    : 'bg-[#edf2ea] text-[#142820] border border-[#cbdcd0] hover:bg-[#dbe7da]'
                 }`}
               >
                 {cat.label}
@@ -365,21 +365,21 @@ export const DimensionAnalysisPage: React.FC<Props> = ({ currentTenant }) => {
           {/* Search & Hide Zero Balance */}
           <div className="flex items-center gap-3">
             <div className="relative">
-              <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 placeholder="Cari akun..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="bg-slate-950/70 border border-slate-800 rounded-xl pl-8 pr-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 transition-colors w-44"
+                className="bg-white border border-[#cbdcd0] rounded-xl pl-8 pr-3 py-1.5 text-xs text-[#142820] focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 transition-colors w-48 shadow-sm"
               />
             </div>
-            <label className="flex items-center gap-2 cursor-pointer select-none text-xs text-slate-300">
+            <label className="flex items-center gap-2 cursor-pointer select-none text-xs text-[#142820] font-medium">
               <input
                 type="checkbox"
                 checked={hideZeroBalances}
                 onChange={(e) => setHideZeroBalances(e.target.checked)}
-                className="w-4 h-4 rounded bg-slate-950 border-slate-700 text-indigo-600 focus:ring-0 focus:ring-offset-0"
+                className="w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
               />
               Sembunyikan Saldo 0
             </label>
@@ -417,15 +417,15 @@ export const DimensionAnalysisPage: React.FC<Props> = ({ currentTenant }) => {
         <div className="overflow-x-auto max-h-[700px] relative">
           <table className="w-full text-left text-xs border-collapse">
             {/* Header Columns */}
-            <thead className="bg-slate-950 text-slate-300 uppercase tracking-wider font-semibold sticky top-0 z-20 shadow-sm border-b border-slate-800">
+            <thead className="bg-[#eaf1e8] text-[#142e20] uppercase tracking-wider font-bold sticky top-0 z-20 shadow-sm border-b border-[#cbdcd0]">
               <tr>
-                <th className="py-3 px-3.5 sticky left-0 z-30 bg-slate-950 min-w-[100px] border-r border-slate-800/80 shadow-[2px_0_5px_rgba(0,0,0,0.3)]">
+                <th className="py-3 px-3.5 sticky left-0 z-30 bg-[#eaf1e8] min-w-[100px] border-r border-[#cbdcd0] font-bold text-[#142e20]">
                   Kode Akun
                 </th>
-                <th className="py-3 px-3.5 sticky left-[100px] z-30 bg-slate-950 min-w-[200px] border-r border-slate-800/80 shadow-[2px_0_5px_rgba(0,0,0,0.3)]">
+                <th className="py-3 px-3.5 sticky left-[100px] z-30 bg-[#eaf1e8] min-w-[200px] border-r border-[#cbdcd0] font-bold text-[#142e20]">
                   Nama Akun
                 </th>
-                <th className="py-3 px-3 text-center min-w-[90px] border-r border-slate-800/80">
+                <th className="py-3 px-3 text-center min-w-[90px] border-r border-[#cbdcd0] font-bold text-[#142e20]">
                   Kategori
                 </th>
 
@@ -433,31 +433,31 @@ export const DimensionAnalysisPage: React.FC<Props> = ({ currentTenant }) => {
                 {reportData?.columns.map((col) => (
                   <th
                     key={col.id}
-                    className="py-3 px-3.5 text-right min-w-[130px] border-r border-slate-800/80 bg-slate-950"
+                    className="py-3 px-3.5 text-right min-w-[130px] border-r border-[#cbdcd0] bg-[#eaf1e8]"
                   >
-                    <div className="font-semibold text-slate-200 truncate">{col.nama}</div>
-                    <div className="text-[10px] text-indigo-400 font-mono tracking-normal">{col.kode}</div>
+                    <div className="font-bold text-[#142e20] truncate">{col.nama}</div>
+                    <div className="text-[10px] text-emerald-800 font-mono tracking-normal font-semibold">{col.kode}</div>
                   </th>
                 ))}
 
                 {/* Unassigned Dimension Column */}
                 {reportData?.hasUnassigned && (
-                  <th className="py-3 px-3.5 text-right min-w-[130px] border-r border-slate-800/80 bg-amber-950/20 text-amber-300">
-                    <div className="font-semibold truncate">Tanpa Dimensi</div>
-                    <div className="text-[10px] text-amber-400/70 font-mono tracking-normal">UNASSIGNED</div>
+                  <th className="py-3 px-3.5 text-right min-w-[130px] border-r border-[#cbdcd0] bg-[#fef9c3] text-[#854d0e]">
+                    <div className="font-bold truncate text-[#854d0e]">Tanpa Dimensi</div>
+                    <div className="text-[10px] text-[#a16207] font-mono tracking-normal font-bold">UNASSIGNED</div>
                   </th>
                 )}
 
                 {/* Row Total Column */}
-                <th className="py-3 px-4 text-right min-w-[140px] bg-indigo-950/40 text-indigo-200 font-bold">
+                <th className="py-3 px-4 text-right min-w-[140px] bg-[#ecfdf5] text-[#065f46] font-bold">
                   <div>TOTAL</div>
-                  <div className="text-[10px] text-indigo-400 tracking-normal font-normal">Seluruh Kolom</div>
+                  <div className="text-[10px] text-[#047857] tracking-normal font-medium">Seluruh Kolom</div>
                 </th>
               </tr>
             </thead>
 
             {/* Table Body (Rows: COA, Cells: Values) */}
-            <tbody className="divide-y divide-slate-800/60">
+            <tbody className="divide-y divide-[#e2e8df]">
               {loading ? (
                 <tr>
                   <td
@@ -465,11 +465,11 @@ export const DimensionAnalysisPage: React.FC<Props> = ({ currentTenant }) => {
                       (reportData?.columns.length || 0) +
                       (reportData?.hasUnassigned ? 4 : 3)
                     }
-                    className="py-16 text-center text-slate-400"
+                    className="py-16 text-center text-slate-500"
                   >
                     <div className="flex flex-col items-center justify-center gap-2">
-                      <RefreshCw className="w-6 h-6 animate-spin text-indigo-500" />
-                      <span className="text-sm">Memuat matriks analisa per dimensi...</span>
+                      <RefreshCw className="w-6 h-6 animate-spin text-emerald-600" />
+                      <span className="text-sm font-medium">Memuat matriks analisa per dimensi...</span>
                     </div>
                   </td>
                 </tr>
@@ -480,11 +480,11 @@ export const DimensionAnalysisPage: React.FC<Props> = ({ currentTenant }) => {
                       (reportData?.columns.length || 0) +
                       (reportData?.hasUnassigned ? 4 : 3)
                     }
-                    className="py-16 text-center text-slate-400"
+                    className="py-16 text-center text-slate-500"
                   >
                     <div className="flex flex-col items-center justify-center gap-2">
-                      <Layers className="w-8 h-8 text-slate-600" />
-                      <span className="text-sm font-medium text-slate-300">
+                      <Layers className="w-8 h-8 text-slate-400" />
+                      <span className="text-sm font-medium text-slate-700">
                         {dimensions.length === 0
                           ? 'Tenant ini belum memiliki master Dimensi. Silakan buat di menu Manajemen Dimensi.'
                           : 'Tidak ada data transaksi yang cocok dengan filter yang dipilih.'}
@@ -493,7 +493,7 @@ export const DimensionAnalysisPage: React.FC<Props> = ({ currentTenant }) => {
                         <button
                           type="button"
                           onClick={() => setHideZeroBalances(false)}
-                          className="text-xs text-indigo-400 hover:underline mt-1"
+                          className="text-xs text-emerald-700 font-semibold hover:underline mt-1"
                         >
                           Tampilkan akun bersaldo 0
                         </button>
@@ -506,14 +506,14 @@ export const DimensionAnalysisPage: React.FC<Props> = ({ currentTenant }) => {
                   return (
                     <tr
                       key={row.coa.id}
-                      className="hover:bg-slate-800/40 transition-colors group"
+                      className="hover:bg-[#f7faf6] transition-colors group"
                     >
                       {/* Sticky Left: Kode Akun */}
-                      <td className="py-2.5 px-3.5 sticky left-0 z-10 bg-slate-900 group-hover:bg-slate-850 font-mono text-slate-300 font-medium border-r border-slate-800/80 shadow-[2px_0_5px_rgba(0,0,0,0.3)]">
+                      <td className="py-2.5 px-3.5 sticky left-0 z-10 bg-white group-hover:bg-[#f7faf6] font-mono text-slate-900 font-bold border-r border-[#cbdcd0]">
                         <div className="flex items-center gap-1.5">
                           {row.coa.kode_akun}
                           {row.coa.isControlAccount && (
-                            <span className="text-[10px] text-amber-400" title="Akun Kontrol / Subledger">
+                            <span className="text-[10px] text-amber-600" title="Akun Kontrol / Subledger">
                               🛡️
                             </span>
                           )}
@@ -521,23 +521,23 @@ export const DimensionAnalysisPage: React.FC<Props> = ({ currentTenant }) => {
                       </td>
 
                       {/* Sticky Left: Nama Akun */}
-                      <td className="py-2.5 px-3.5 sticky left-[100px] z-10 bg-slate-900 group-hover:bg-slate-850 text-slate-200 border-r border-slate-800/80 shadow-[2px_0_5px_rgba(0,0,0,0.3)] truncate max-w-[240px]">
+                      <td className="py-2.5 px-3.5 sticky left-[100px] z-10 bg-white group-hover:bg-[#f7faf6] text-slate-900 font-semibold border-r border-[#cbdcd0] truncate max-w-[240px]">
                         {row.coa.nama_akun}
                       </td>
 
                       {/* Kategori Badge */}
-                      <td className="py-2.5 px-3 text-center border-r border-slate-800/80">
+                      <td className="py-2.5 px-3 text-center border-r border-[#cbdcd0]">
                         <span
-                          className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                          className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
                             row.coa.kategori === 'ASET'
-                              ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+                              ? 'bg-blue-50 text-blue-800 border border-blue-200'
                               : row.coa.kategori === 'LIABILITAS'
-                              ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20'
+                              ? 'bg-orange-50 text-orange-800 border border-orange-200'
                               : row.coa.kategori === 'EKUITAS'
-                              ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                              ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
                               : row.coa.kategori === 'PENDAPATAN'
-                              ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
-                              : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                              ? 'bg-purple-50 text-purple-800 border border-purple-200'
+                              : 'bg-rose-50 text-rose-800 border border-rose-200'
                           }`}
                         >
                           {row.coa.kategori}
@@ -550,12 +550,12 @@ export const DimensionAnalysisPage: React.FC<Props> = ({ currentTenant }) => {
                         return (
                           <td
                             key={col.id}
-                            className={`py-2.5 px-3.5 text-right font-mono border-r border-slate-800/80 ${
+                            className={`py-2.5 px-3.5 text-right font-mono border-r border-[#cbdcd0] ${
                               val === 0
-                                ? 'text-slate-600'
+                                ? 'text-slate-400'
                                 : val < 0
-                                ? 'text-rose-400 font-medium'
-                                : 'text-slate-200'
+                                ? 'text-rose-600 font-semibold'
+                                : 'text-slate-900 font-semibold'
                             }`}
                           >
                             {formatRupiah(val)}
@@ -566,12 +566,12 @@ export const DimensionAnalysisPage: React.FC<Props> = ({ currentTenant }) => {
                       {/* Matrix Value Cell for Unassigned */}
                       {reportData.hasUnassigned && (
                         <td
-                          className={`py-2.5 px-3.5 text-right font-mono border-r border-slate-800/80 bg-amber-950/10 ${
+                          className={`py-2.5 px-3.5 text-right font-mono border-r border-[#cbdcd0] bg-amber-50/50 ${
                             (row.values['UNASSIGNED'] || 0) === 0
-                              ? 'text-slate-600'
+                              ? 'text-slate-400'
                               : (row.values['UNASSIGNED'] || 0) < 0
-                              ? 'text-rose-400 font-medium'
-                              : 'text-amber-200'
+                              ? 'text-rose-600 font-semibold'
+                              : 'text-amber-900 font-bold'
                           }`}
                         >
                           {formatRupiah(row.values['UNASSIGNED'] || 0)}
@@ -580,12 +580,12 @@ export const DimensionAnalysisPage: React.FC<Props> = ({ currentTenant }) => {
 
                       {/* Row Total */}
                       <td
-                        className={`py-2.5 px-4 text-right font-mono font-semibold bg-indigo-950/20 ${
+                        className={`py-2.5 px-4 text-right font-mono font-bold bg-emerald-50/50 ${
                           row.total === 0
-                            ? 'text-slate-600'
+                            ? 'text-slate-400'
                             : row.total < 0
-                            ? 'text-rose-400'
-                            : 'text-indigo-200'
+                            ? 'text-rose-600'
+                            : 'text-emerald-900'
                         }`}
                       >
                         {formatRupiah(row.total)}
@@ -598,15 +598,15 @@ export const DimensionAnalysisPage: React.FC<Props> = ({ currentTenant }) => {
 
             {/* Footer Summary (Totals per column & Grand Total) */}
             {reportData && filteredRows.length > 0 && (
-              <tfoot className="bg-slate-950 font-semibold border-t-2 border-slate-700 sticky bottom-0 z-20 shadow-md">
-                <tr className="text-slate-100">
-                  <td className="py-3 px-3.5 sticky left-0 z-30 bg-slate-950 border-r border-slate-800 font-bold text-white shadow-[2px_0_5px_rgba(0,0,0,0.3)]">
+              <tfoot className="bg-[#eaf1e8] font-bold border-t-2 border-[#cbdcd0] sticky bottom-0 z-20 shadow-md">
+                <tr className="text-[#142e20]">
+                  <td className="py-3 px-3.5 sticky left-0 z-30 bg-[#eaf1e8] border-r border-[#cbdcd0] font-bold text-[#142e20]">
                     TOTAL
                   </td>
-                  <td className="py-3 px-3.5 sticky left-[100px] z-30 bg-slate-950 border-r border-slate-800 text-slate-400 text-[11px] shadow-[2px_0_5px_rgba(0,0,0,0.3)]">
+                  <td className="py-3 px-3.5 sticky left-[100px] z-30 bg-[#eaf1e8] border-r border-[#cbdcd0] text-[#142e20] text-xs font-semibold">
                     Ringkasan Seluruh Akun
                   </td>
-                  <td className="py-3 px-3 border-r border-slate-800 text-center text-slate-500">
+                  <td className="py-3 px-3 border-r border-[#cbdcd0] text-center text-slate-400">
                     -
                   </td>
 
@@ -616,8 +616,8 @@ export const DimensionAnalysisPage: React.FC<Props> = ({ currentTenant }) => {
                     return (
                       <td
                         key={col.id}
-                        className={`py-3 px-3.5 text-right font-mono border-r border-slate-800 ${
-                          colTotal < 0 ? 'text-rose-400' : 'text-slate-100'
+                        className={`py-3 px-3.5 text-right font-mono border-r border-[#cbdcd0] font-bold ${
+                          colTotal < 0 ? 'text-rose-600' : 'text-slate-900'
                         }`}
                       >
                         {formatRupiah(colTotal)}
@@ -628,10 +628,10 @@ export const DimensionAnalysisPage: React.FC<Props> = ({ currentTenant }) => {
                   {/* Unassigned Total */}
                   {reportData.hasUnassigned && (
                     <td
-                      className={`py-3 px-3.5 text-right font-mono border-r border-slate-800 bg-amber-950/30 ${
+                      className={`py-3 px-3.5 text-right font-mono border-r border-[#cbdcd0] bg-[#fef3c7] font-bold ${
                         (reportData.columnTotals['UNASSIGNED'] || 0) < 0
-                          ? 'text-rose-400'
-                          : 'text-amber-200'
+                          ? 'text-rose-600'
+                          : 'text-[#92400e]'
                       }`}
                     >
                       {formatRupiah(reportData.columnTotals['UNASSIGNED'] || 0)}
@@ -640,10 +640,10 @@ export const DimensionAnalysisPage: React.FC<Props> = ({ currentTenant }) => {
 
                   {/* Grand Total */}
                   <td
-                    className={`py-3 px-4 text-right font-mono font-bold text-sm bg-indigo-950/60 ${
+                    className={`py-3 px-4 text-right font-mono font-bold text-sm bg-[#d1fae5] ${
                       reportData.grandTotal < 0
-                        ? 'text-rose-400'
-                        : 'text-emerald-300'
+                        ? 'text-rose-600'
+                        : 'text-[#065f46]'
                     }`}
                   >
                     {formatRupiah(reportData.grandTotal)}
