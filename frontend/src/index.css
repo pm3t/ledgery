@@ -161,17 +161,56 @@ textarea.bg-slate-950:focus {
   border-color: #a7f3d0 !important;
 }
 
-/* Tombol Sekunder / Abu-abu */
-button.bg-slate-800:not(aside *),
-.bg-slate-800:not(aside *):not(aside) {
-  background-color: #edf2eb !important;
-  color: #2b3e33 !important;
-  border-color: #d4ded1 !important;
+/* =========================================================================
+   TAB FILTER & PILL BUTTONS (SELEKSI KATEGORI, STATUS, DLL.)
+   ========================================================================= */
+
+/* Tab / Pill yang Tidak Aktif */
+button[class*="bg-slate-800"]:not(aside *):not([class*="bg-indigo"]):not([class*="bg-emerald"]),
+button[class*="bg-slate-950"]:not(aside *):not([class*="bg-indigo"]):not([class*="bg-emerald"]),
+button[class*="bg-slate-900"]:not(aside *):not([class*="bg-indigo"]):not([class*="bg-emerald"]),
+.bg-slate-800:not(aside *),
+.bg-slate-800\/80:not(aside *),
+.bg-slate-800\/60:not(aside *),
+.bg-slate-950\/60:not(aside *),
+.bg-slate-950\/80:not(aside *) {
+  background-color: #edf2ea !important;
+  color: #1a2e22 !important; /* Hijau Tua / Charcoal sangat kontras & jelas terbaca */
+  border: 1px solid #d0ded0 !important;
+  font-weight: 600 !important;
 }
 
-button.bg-slate-800:hover:not(aside *) {
-  background-color: #e2ebd0 !important;
-  color: #142820 !important;
+button[class*="bg-slate-800"]:hover:not(aside *),
+button[class*="bg-slate-950"]:hover:not(aside *),
+button[class*="bg-slate-900"]:hover:not(aside *) {
+  background-color: #e2ebe0 !important;
+  color: #112217 !important;
+  border-color: #b0c4af !important;
+}
+
+/* Pastikan teks di dalam tombol inactive filter selalu gelap dan tajam */
+button[class*="bg-slate-800"] span,
+button[class*="bg-slate-800"] p,
+button[class*="bg-slate-950"] span,
+button[class*="bg-slate-950"] p,
+button[class*="bg-slate-800\/80"],
+button[class*="bg-slate-950\/60"] {
+  color: #1a2e22 !important;
+}
+
+/* Tab / Pill yang Aktif */
+button[class*="bg-indigo-"]:not(aside *),
+button[class*="bg-emerald-"]:not(aside *) {
+  background-color: #166534 !important; /* Forest Emerald */
+  color: #ffffff !important;
+  border: 1px solid #14532d !important;
+  font-weight: 700 !important;
+  box-shadow: 0 1px 3px 0 rgba(22, 101, 52, 0.25) !important;
+}
+
+button[class*="bg-indigo-"]:not(aside *) *,
+button[class*="bg-emerald-"]:not(aside *) * {
+  color: #ffffff !important;
 }
 
 /* 7. Tabel Data Bersih & Segar */
