@@ -57,8 +57,8 @@ export const AccountantDashboardSummaryWidget: React.FC<Props> = ({ currentTenan
 
   if (loading) {
     return (
-      <div className="rounded-2xl border border-slate-800 bg-slate-900/40 p-4 flex items-center justify-center space-x-2 text-xs text-slate-400">
-        <Loader2 className="h-4 w-4 animate-spin text-indigo-400" />
+      <div className="rounded-2xl border border-stone-200 bg-white p-4 flex items-center justify-center space-x-2 text-xs text-stone-500 shadow-xs">
+        <Loader2 className="h-4 w-4 animate-spin text-emerald-600" />
         <span>Memuat ringkasan sub ledger & buku besar...</span>
       </div>
     );
@@ -70,15 +70,15 @@ export const AccountantDashboardSummaryWidget: React.FC<Props> = ({ currentTenan
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          <Scale className="h-4 w-4 text-indigo-400" />
-          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+          <Scale className="h-4 w-4 text-emerald-700" />
+          <h3 className="text-xs font-bold uppercase tracking-wider text-stone-600">
             Ringkasan Keuangan & Sub Ledger
           </h3>
         </div>
         {onNavigate && (
           <button
             onClick={() => onNavigate('subledger-reconciliation')}
-            className="flex items-center space-x-1 text-xs font-medium text-indigo-400 hover:text-indigo-300 transition-colors"
+            className="flex items-center space-x-1 text-xs font-semibold text-emerald-700 hover:text-emerald-800 transition-colors"
           >
             <span>Halaman Audit Rekonsiliasi</span>
             <ChevronRight className="h-3 w-3" />
@@ -90,61 +90,61 @@ export const AccountantDashboardSummaryWidget: React.FC<Props> = ({ currentTenan
         {/* Total Piutang */}
         <div
           onClick={() => onNavigate?.('ar-invoices')}
-          className="cursor-pointer rounded-xl border border-slate-800 bg-slate-900/60 p-3.5 hover:border-slate-700 transition-all shadow-sm group"
+          className="cursor-pointer rounded-xl border border-stone-200 bg-white p-3.5 hover:border-emerald-600/40 hover:shadow-sm transition-all group"
         >
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-semibold text-slate-400">Total Piutang (AR)</span>
-            <TrendingUp className="h-3.5 w-3.5 text-indigo-400 group-hover:translate-x-0.5 transition-transform" />
+            <span className="text-[11px] font-semibold text-stone-500">Total Piutang (AR)</span>
+            <TrendingUp className="h-3.5 w-3.5 text-emerald-600 group-hover:translate-x-0.5 transition-transform" />
           </div>
-          <div className="mt-1.5 text-sm font-bold text-white font-mono">
+          <div className="mt-1.5 text-sm font-bold text-stone-900 font-mono">
             {formatCurrency(data?.totalPiutang)}
           </div>
-          <div className="mt-1 text-[10px] text-slate-500">Saldo invoice belum lunas</div>
+          <div className="mt-1 text-[10px] text-stone-400">Saldo invoice belum lunas</div>
         </div>
 
         {/* Total Hutang */}
         <div
           onClick={() => onNavigate?.('ap-bills')}
-          className="cursor-pointer rounded-xl border border-slate-800 bg-slate-900/60 p-3.5 hover:border-slate-700 transition-all shadow-sm group"
+          className="cursor-pointer rounded-xl border border-stone-200 bg-white p-3.5 hover:border-amber-600/40 hover:shadow-sm transition-all group"
         >
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-semibold text-slate-400">Total Hutang (AP)</span>
-            <CreditCard className="h-3.5 w-3.5 text-amber-400 group-hover:translate-x-0.5 transition-transform" />
+            <span className="text-[11px] font-semibold text-stone-500">Total Hutang (AP)</span>
+            <CreditCard className="h-3.5 w-3.5 text-amber-600 group-hover:translate-x-0.5 transition-transform" />
           </div>
-          <div className="mt-1.5 text-sm font-bold text-white font-mono">
+          <div className="mt-1.5 text-sm font-bold text-stone-900 font-mono">
             {formatCurrency(data?.totalHutang)}
           </div>
-          <div className="mt-1 text-[10px] text-slate-500">Saldo tagihan belum dibayar</div>
+          <div className="mt-1 text-[10px] text-stone-400">Saldo tagihan belum dibayar</div>
         </div>
 
         {/* Nilai Persediaan */}
         <div
           onClick={() => onNavigate?.('inventory-reports')}
-          className="cursor-pointer rounded-xl border border-slate-800 bg-slate-900/60 p-3.5 hover:border-slate-700 transition-all shadow-sm group"
+          className="cursor-pointer rounded-xl border border-stone-200 bg-white p-3.5 hover:border-teal-600/40 hover:shadow-sm transition-all group"
         >
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-semibold text-slate-400">Nilai Persediaan</span>
-            <Package className="h-3.5 w-3.5 text-emerald-400 group-hover:translate-x-0.5 transition-transform" />
+            <span className="text-[11px] font-semibold text-stone-500">Nilai Persediaan</span>
+            <Package className="h-3.5 w-3.5 text-teal-600 group-hover:translate-x-0.5 transition-transform" />
           </div>
-          <div className="mt-1.5 text-sm font-bold text-white font-mono">
+          <div className="mt-1.5 text-sm font-bold text-stone-900 font-mono">
             {formatCurrency(data?.nilaiPersediaan)}
           </div>
-          <div className="mt-1 text-[10px] text-slate-500">Total valuasi stok gudang</div>
+          <div className="mt-1 text-[10px] text-stone-400">Total valuasi stok gudang</div>
         </div>
 
         {/* Faktur Jatuh Tempo */}
         <div
           onClick={() => onNavigate?.('ar-reports')}
-          className="cursor-pointer rounded-xl border border-slate-800 bg-slate-900/60 p-3.5 hover:border-slate-700 transition-all shadow-sm group"
+          className="cursor-pointer rounded-xl border border-stone-200 bg-white p-3.5 hover:border-rose-600/40 hover:shadow-sm transition-all group"
         >
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-semibold text-slate-400">Jatuh Tempo (Overdue)</span>
-            <Clock className="h-3.5 w-3.5 text-rose-400 group-hover:translate-x-0.5 transition-transform" />
+            <span className="text-[11px] font-semibold text-stone-500">Jatuh Tempo (Overdue)</span>
+            <Clock className="h-3.5 w-3.5 text-rose-500 group-hover:translate-x-0.5 transition-transform" />
           </div>
-          <div className="mt-1.5 text-sm font-bold text-rose-400 font-mono">
+          <div className="mt-1.5 text-sm font-bold text-rose-600 font-mono">
             {data?.jumlahFakturJatuhTempo || 0} Faktur
           </div>
-          <div className="mt-1 text-[10px] text-slate-500">
+          <div className="mt-1 text-[10px] text-stone-400">
             {data?.detailJatuhTempo?.piutangJatuhTempo || 0} AR / {data?.detailJatuhTempo?.hutangJatuhTempo || 0} AP
           </div>
         </div>
@@ -152,16 +152,16 @@ export const AccountantDashboardSummaryWidget: React.FC<Props> = ({ currentTenan
         {/* Pesanan Terbuka */}
         <div
           onClick={() => onNavigate?.('order-sales-orders')}
-          className="cursor-pointer rounded-xl border border-slate-800 bg-slate-900/60 p-3.5 hover:border-slate-700 transition-all shadow-sm group"
+          className="cursor-pointer rounded-xl border border-stone-200 bg-white p-3.5 hover:border-stone-400 hover:shadow-sm transition-all group"
         >
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-semibold text-slate-400">Pesanan Terbuka</span>
-            <ShoppingCart className="h-3.5 w-3.5 text-purple-400 group-hover:translate-x-0.5 transition-transform" />
+            <span className="text-[11px] font-semibold text-stone-500">Pesanan Terbuka</span>
+            <ShoppingCart className="h-3.5 w-3.5 text-stone-600 group-hover:translate-x-0.5 transition-transform" />
           </div>
-          <div className="mt-1.5 text-sm font-bold text-white font-mono">
+          <div className="mt-1.5 text-sm font-bold text-stone-900 font-mono">
             {(data?.jumlahPoTerbuka || 0) + (data?.jumlahSoTerbuka || 0)} Order
           </div>
-          <div className="mt-1 text-[10px] text-slate-500">
+          <div className="mt-1 text-[10px] text-stone-400">
             {data?.jumlahSoTerbuka || 0} SO / {data?.jumlahPoTerbuka || 0} PO
           </div>
         </div>
@@ -169,28 +169,28 @@ export const AccountantDashboardSummaryWidget: React.FC<Props> = ({ currentTenan
         {/* Status Rekonsiliasi */}
         <div
           onClick={() => onNavigate?.('subledger-reconciliation')}
-          className={`cursor-pointer rounded-xl border p-3.5 transition-all shadow-sm group ${
+          className={`cursor-pointer rounded-xl border p-3.5 transition-all shadow-xs group ${
             isReconciled
-              ? 'border-emerald-500/30 bg-emerald-950/20 hover:border-emerald-500/50'
-              : 'border-rose-500/30 bg-rose-950/20 hover:border-rose-500/50'
+              ? 'border-emerald-200 bg-emerald-50/70 hover:border-emerald-400'
+              : 'border-rose-200 bg-rose-50/70 hover:border-rose-400'
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-semibold text-slate-400">Rekonsiliasi GL</span>
+            <span className="text-[11px] font-semibold text-stone-600">Rekonsiliasi GL</span>
             {isReconciled ? (
-              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
+              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
             ) : (
-              <AlertTriangle className="h-3.5 w-3.5 text-rose-400" />
+              <AlertTriangle className="h-3.5 w-3.5 text-rose-600" />
             )}
           </div>
           <div
             className={`mt-1.5 text-sm font-bold font-mono ${
-              isReconciled ? 'text-emerald-400' : 'text-rose-400'
+              isReconciled ? 'text-emerald-700' : 'text-rose-700'
             }`}
           >
             {isReconciled ? 'SEIMBANG (OK)' : 'ADA SELISIH'}
           </div>
-          <div className="mt-1 text-[10px] text-slate-500">
+          <div className="mt-1 text-[10px] text-stone-500">
             {isReconciled ? 'Selisih Rp 0' : `Selisih ${formatCurrency(data?.totalSelisihAbsolut)}`}
           </div>
         </div>

@@ -4,33 +4,33 @@
 
 @layer base {
   :root {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 100 15% 95%; /* #f4f6f0 Warm Natural Sage/Linen */
+    --foreground: 145 28% 12%; /* #15291e Deep Forest Charcoal */
 
-    --card: 222.2 84% 6.5%;
-    --card-foreground: 210 40% 98%;
+    --card: 0 0% 100%;
+    --card-foreground: 145 28% 12%;
 
-    --popover: 222.2 84% 6.5%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 145 28% 12%;
 
-    --primary: 239 84% 67%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 142 60% 25%; /* #166534 Forest Emerald */
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 105 15% 93%; /* #edf2ea Soft Moss/Stone */
+    --secondary-foreground: 145 25% 18%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 105 12% 91%;
+    --muted-foreground: 140 10% 40%; /* #556c5e Sage Gray */
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 142 45% 94%; /* #e8f5ec Fresh Sprout Mint */
+    --accent-foreground: 142 60% 25%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 239 84% 67%;
+    --border: 105 12% 88%; /* #e2e8df Soft Earth/Stone */
+    --input: 105 12% 88%;
+    --ring: 142 60% 25%;
 
     --radius: 0.75rem;
   }
@@ -38,22 +38,191 @@
 
 body {
   font-family: 'Plus Jakarta Sans', sans-serif;
-  background-color: #0b0f19;
-  color: #f8fafc;
+  background-color: #f4f6f0;
+  color: #1c2e24;
 }
 
-/* Scrollbar kustom */
+/* =========================================================================
+   NATURAL / ALAM THEME MAPPINGS (MENGUBAH TAMPILAN GELAP MENJADI WARNA ALAM)
+   ========================================================================= */
+
+/* 1. Canvas & Workspace */
+.bg-slate-950:not(aside *):not(aside) {
+  background-color: #f4f6f0 !important;
+}
+
+/* 2. Kartu, Panel, & Kontainer Putih Bersih Alami */
+.bg-slate-900:not(aside *):not(aside),
+.bg-slate-900\/50:not(aside *):not(aside),
+.bg-slate-900\/60:not(aside *):not(aside),
+.bg-slate-900\/70:not(aside *):not(aside),
+.bg-slate-900\/80:not(aside *):not(aside),
+.bg-slate-900\/90:not(aside *):not(aside) {
+  background-color: #ffffff !important;
+  border-color: #e2e8df !important;
+  box-shadow: 0 1px 3px 0 rgba(20, 40, 28, 0.04), 0 1px 2px -1px rgba(20, 40, 28, 0.04) !important;
+}
+
+/* 3. Border Alami Lembut (Batu / Kayu / Tanah Halus) */
+.border-slate-800:not(aside *):not(aside),
+.border-slate-800\/50:not(aside *):not(aside),
+.border-slate-800\/60:not(aside *):not(aside),
+.border-slate-800\/70:not(aside *):not(aside),
+.border-slate-800\/80:not(aside *):not(aside),
+.border-slate-700:not(aside *):not(aside),
+.border-slate-700\/60:not(aside *):not(aside),
+.border-slate-700\/80:not(aside *):not(aside) {
+  border-color: #e2e8df !important;
+}
+
+/* 4. Tipografi & Teks Kontras Alami */
+h1.text-white:not(aside *):not(button *):not(.btn *),
+h2.text-white:not(aside *):not(button *):not(.btn *),
+h3.text-white:not(aside *):not(button *):not(.btn *),
+h4.text-white:not(aside *):not(button *):not(.btn *),
+h5.text-white:not(aside *):not(button *):not(.btn *),
+h6.text-white:not(aside *):not(button *):not(.btn *),
+p.text-white:not(aside *):not(button *):not(.btn *),
+div.text-white:not(aside *):not(button *):not(.btn *),
+span.text-white:not(aside *):not(button *):not(.btn *) {
+  color: #142820 !important; /* Deep Pine Charcoal */
+}
+
+.text-slate-400:not(aside *):not(aside),
+.text-slate-500:not(aside *):not(aside) {
+  color: #556c5e !important; /* Soft Sage Gray */
+}
+
+.text-slate-300:not(aside *):not(aside),
+.text-slate-200:not(aside *):not(aside),
+.text-slate-100:not(aside *):not(aside) {
+  color: #27382e !important; /* Natural Stone Slate */
+}
+
+/* 5. Input Fields, Dropdowns, dan Formulir */
+input.bg-slate-950,
+select.bg-slate-950,
+textarea.bg-slate-950,
+input.bg-slate-900,
+select.bg-slate-900,
+textarea.bg-slate-900 {
+  background-color: #ffffff !important;
+  color: #142820 !important;
+  border: 1px solid #d4ded1 !important;
+  box-shadow: 0 1px 2px rgba(20, 40, 28, 0.03) !important;
+}
+
+input.bg-slate-950::placeholder,
+textarea.bg-slate-950::placeholder {
+  color: #84988b !important;
+}
+
+input.bg-slate-950:focus,
+select.bg-slate-950:focus,
+textarea.bg-slate-950:focus {
+  border-color: #15803d !important;
+  box-shadow: 0 0 0 3px rgba(22, 101, 52, 0.12) !important;
+  outline: none !important;
+}
+
+/* 6. Tombol Aksi & Brand: Warna Hijau Hutan (Forest Emerald) */
+.bg-indigo-600,
+.bg-indigo-500 {
+  background-color: #166534 !important; /* Forest Emerald */
+  color: #ffffff !important;
+  border-color: #14532d !important;
+}
+
+.hover\:bg-indigo-500:hover,
+.hover\:bg-indigo-600:hover {
+  background-color: #14532d !important; /* Deep Pine */
+}
+
+.text-indigo-600,
+.text-indigo-500,
+.text-indigo-400 {
+  color: #15803d !important; /* Emerald Accent */
+}
+
+.text-indigo-300 {
+  color: #166534 !important;
+}
+
+/* Badge Lembut Warna Tunas / Mint Segar */
+.bg-indigo-500\/10,
+.bg-indigo-500\/20,
+.bg-indigo-600\/15,
+.bg-indigo-950:not(aside *):not(aside),
+.bg-indigo-950\/20:not(aside *):not(aside),
+.bg-indigo-950\/30:not(aside *):not(aside),
+.bg-indigo-950\/40:not(aside *):not(aside) {
+  background-color: #ecfdf5 !important;
+  color: #166534 !important;
+  border-color: #a7f3d0 !important;
+}
+
+/* Tombol Sekunder / Abu-abu */
+button.bg-slate-800:not(aside *),
+.bg-slate-800:not(aside *):not(aside) {
+  background-color: #edf2eb !important;
+  color: #2b3e33 !important;
+  border-color: #d4ded1 !important;
+}
+
+button.bg-slate-800:hover:not(aside *) {
+  background-color: #e2ebd0 !important;
+  color: #142820 !important;
+}
+
+/* 7. Tabel Data Bersih & Segar */
+thead tr.bg-slate-950,
+thead tr.bg-slate-950\/50,
+thead tr.bg-slate-950\/70,
+thead tr.bg-slate-950\/80,
+thead tr.bg-slate-900,
+thead tr.bg-slate-900\/90 {
+  background-color: #edf3ec !important; /* Soft Forest Mist */
+  color: #3b5042 !important;
+  border-bottom: 1px solid #d4ded1 !important;
+}
+
+thead th {
+  color: #3b5042 !important;
+  font-weight: 600 !important;
+}
+
+tbody tr:hover {
+  background-color: #f7faf6 !important;
+}
+
+tbody tr {
+  border-color: #edf2ea !important;
+}
+
+/* 8. Jamin Teks Putih Pada Tombol dan Badge Warna Tetap Putih */
+button[class*="bg-indigo-"] *,
+button[class*="bg-emerald-"] *,
+button[class*="bg-rose-"] *,
+button[class*="bg-blue-"] *,
+button[class*="bg-amber-"] *,
+span[class*="bg-indigo-600"],
+span[class*="bg-emerald-600"],
+span[class*="bg-rose-600"] {
+  color: #ffffff !important;
+}
+
+/* 9. Scrollbar Alami */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #0f172a;
+  background: #edf2ea;
 }
 ::-webkit-scrollbar-thumb {
-  background: #334155;
+  background: #a3b8a8;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #475569;
+  background: #7e9985;
 }
