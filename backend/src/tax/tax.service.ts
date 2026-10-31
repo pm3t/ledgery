@@ -37,19 +37,177 @@ export class TaxService {
   /**
    * PERHATIAN: Modul ini adalah REKAP dasar untuk kebutuhan internal (estimasi), 
    * BUKAN integrasi resmi ke sistem DJP/Coretax.
+   * Mendukung sumber dari dokumen Sub Ledger (Faktur Penjualan/Pembelian berstatus POSTED)
+   * maupun fallback mekanisme jurnal lama bila tenant belum mengaktifkan sub ledger.
    */
   async calculatePPN(tenantId: string, periode: string) {
     // periode format: "YYYY-MM"
     const setting = await this.getTaxSetting(tenantId);
     const tarif = setting.tarif_ppn / 100; // default 0.11 (11%)
 
-    // Cari jurnal di bulan tersebut yang diposting/disetujui
     const startDate = new Date(`${periode}-01T00:00:00Z`);
     const endOfMonth = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0);
     const endDate = new Date(`${endOfMonth.toISOString().split('T')[0]}T23:59:59Z`);
 
-    // Untuk MVP PPN, kita ambil total Pendapatan (Kredit) sebagai dasar pengenaan PPN Keluaran.
-    // Dalam realita, tidak semua pendapatan kena PPN. Tapi untuk estimasi ini kita asumsikan semua Pendapatan kena PPN 11%
+    // Periksa apakah tenant mengaktifkan sub ledger (AR atau AP)
+    const subledgerSetting = await this.prisma.subledgerSetting.findUnique({
+      where: { tenantId },
+    });
+    const hasSubledger =
+      subledgerSetting && (subledgerSetting.arEnabled || subledgerSetting.apEnabled);
+
+    if (hasSubledger) {
+      // 1. PPN KELUARAN (DARI SALES INVOICE & CREDIT NOTE POSTED)
+      const salesInvoices = await this.prisma.salesInvoice.findMany({
+        where: {
+          tenantId,
+          status: { in: ['POSTED', 'PARTIAL', 'PAID'] },
+          tanggal: { gte: startDate, lte: endDate },
+        },
+        include: { partner: true },
+      });
+
+      const creditNotes = await this.prisma.creditNote.findMany({
+        where: {
+          tenantId,
+          status: 'POSTED',
+          tanggal: { gte: startDate, lte: endDate },
+        },
+      });
+
+      let dppKeluaran = 0;
+      let totalPpnKeluaran = 0;
+      const dokumenKeluaran: any[] = [];
+
+      for (const inv of salesInvoices) {
+        const dpp = Math.max(0, Number(inv.subtotalFungsional || inv.subtotal || 0) - Number(inv.totalDiskonFungsional || inv.totalDiskon || 0));
+        const ppn = Number(inv.totalPpnFungsional || inv.totalPpn || 0);
+        dppKeluaran += dpp;
+        totalPpnKeluaran += ppn;
+
+        dokumenKeluaran.push({
+          id: inv.id,
+          noDokumen: inv.noDokumen,
+          tipe: 'FAKTUR_PENJUALAN',
+          tanggal: inv.tanggal,
+          pelanggan: inv.partner?.nama,
+          dpp,
+          ppn,
+        });
+      }
+
+      for (const cn of creditNotes) {
+        const dpp = Math.max(0, Number(cn.subtotalFungsional || cn.subtotal || 0) - Number(cn.totalDiskonFungsional || cn.totalDiskon || 0));
+        const ppn = Number(cn.totalPpnFungsional || cn.totalPpn || 0);
+        dppKeluaran -= dpp;
+        totalPpnKeluaran -= ppn;
+
+        dokumenKeluaran.push({
+          id: cn.id,
+          noDokumen: cn.noDokumen,
+          tipe: 'RETUR_NOTA_KREDIT',
+          tanggal: cn.tanggal,
+          dpp: -dpp,
+          ppn: -ppn,
+        });
+      }
+
+      // 2. PPN MASUKAN (DARI PURCHASE BILL & DEBIT NOTE POSTED)
+      const purchaseBills = await this.prisma.purchaseBill.findMany({
+        where: {
+          tenantId,
+          status: { in: ['POSTED', 'PARTIAL', 'PAID'] },
+          tanggal: { gte: startDate, lte: endDate },
+        },
+        include: { partner: true },
+      });
+
+      const debitNotes = await this.prisma.debitNote.findMany({
+        where: {
+          tenantId,
+          status: 'POSTED',
+          tanggal: { gte: startDate, lte: endDate },
+        },
+      });
+
+      let dppMasukan = 0;
+      let totalPpnMasukan = 0;
+      const dokumenMasukan: any[] = [];
+
+      for (const bill of purchaseBills) {
+        const dpp = Math.max(0, Number(bill.subtotalFungsional || bill.subtotal || 0) - Number(bill.totalDiskonFungsional || bill.totalDiskon || (bill as any).diskon || 0));
+        const ppn = Number(bill.totalPpnFungsional || bill.totalPpn || (bill as any).ppnMasukan || 0);
+        dppMasukan += dpp;
+        totalPpnMasukan += ppn;
+
+        dokumenMasukan.push({
+          id: bill.id,
+          noDokumen: bill.noDokumen,
+          noFakturVendor: bill.noFakturVendor,
+          nomorFakturPajakMasukan: bill.nomorFakturPajakMasukan,
+          tipe: 'FAKTUR_PEMBELIAN',
+          tanggal: bill.tanggal,
+          vendor: bill.partner?.nama,
+          dpp,
+          ppn,
+        });
+      }
+
+      for (const dn of debitNotes) {
+        const dpp = Math.max(0, Number(dn.subtotalFungsional || dn.subtotal || 0) - Number(dn.totalDiskonFungsional || dn.totalDiskon || 0));
+        const ppn = Number(dn.totalPpnFungsional || dn.totalPpn || 0);
+        dppMasukan -= dpp;
+        totalPpnMasukan -= ppn;
+
+        dokumenMasukan.push({
+          id: dn.id,
+          noDokumen: dn.noDokumen,
+          tipe: 'RETUR_NOTA_DEBIT',
+          tanggal: dn.tanggal,
+          dpp: -dpp,
+          ppn: -ppn,
+        });
+      }
+
+      dppKeluaran = Math.round(Math.max(0, dppKeluaran) * 100) / 100;
+      totalPpnKeluaran = Math.round(Math.max(0, totalPpnKeluaran) * 100) / 100;
+      dppMasukan = Math.round(Math.max(0, dppMasukan) * 100) / 100;
+      totalPpnMasukan = Math.round(Math.max(0, totalPpnMasukan) * 100) / 100;
+
+      const ppnKurangLebihBayar = Math.round((totalPpnKeluaran - totalPpnMasukan) * 100) / 100;
+
+      // Simpan ke TaxRecap (DPP = dppKeluaran, Total Pajak = Net PPN Kurang/Lebih Bayar)
+      const recap = await this.prisma.taxRecap.create({
+        data: {
+          tenantId,
+          jenis_pajak: JenisPajak.PPN,
+          periode,
+          total_dasar_pengenaan: dppKeluaran,
+          total_pajak: ppnKurangLebihBayar,
+        },
+      });
+
+      return {
+        ...recap,
+        metodeSumber: 'SUBLEDGER_DOCUMENTS',
+        ppnKeluaran: {
+          totalDpp: dppKeluaran,
+          totalPpn: totalPpnKeluaran,
+          jumlahDokumen: dokumenKeluaran.length,
+          dokumen: dokumenKeluaran,
+        },
+        ppnMasukan: {
+          totalDpp: dppMasukan,
+          totalPpn: totalPpnMasukan,
+          jumlahDokumen: dokumenMasukan.length,
+          dokumen: dokumenMasukan,
+        },
+        ppnKurangLebihBayar,
+        posisiPajak: ppnKurangLebihBayar >= 0 ? 'KURANG_BAYAR' : 'LEBIH_BAYAR',
+      };
+    }
+
+    // Fallback: Mekanisme lama jurnal untuk tenant tanpa sub ledger
     const entries = await this.prisma.journalEntry.findMany({
       where: {
         journal: {
@@ -62,22 +220,19 @@ export class TaxService {
         },
         chartOfAccount: {
           kategori: KategoriAkun.PENDAPATAN,
-        }
+        },
       },
     });
 
     let totalDasarPengenaan = 0;
-    entries.forEach(e => {
-      // Saldo normal pendapatan adalah kredit, jika kredit = tambah, debit = kurang
+    entries.forEach((e) => {
       if (e.tipe === 'KREDIT') totalDasarPengenaan += Number(e.jumlah);
       if (e.tipe === 'DEBIT') totalDasarPengenaan -= Number(e.jumlah);
     });
 
     if (totalDasarPengenaan < 0) totalDasarPengenaan = 0;
+    const totalPajak = Math.round(totalDasarPengenaan * tarif * 100) / 100;
 
-    const totalPajak = totalDasarPengenaan * tarif;
-
-    // Simpan ke TaxRecap
     const recap = await this.prisma.taxRecap.create({
       data: {
         tenantId,
@@ -85,10 +240,17 @@ export class TaxService {
         periode,
         total_dasar_pengenaan: totalDasarPengenaan,
         total_pajak: totalPajak,
-      }
+      },
     });
 
-    return recap;
+    return {
+      ...recap,
+      metodeSumber: 'GENERAL_LEDGER_ENTRIES',
+      ppnKeluaran: { totalDpp: totalDasarPengenaan, totalPpn: totalPajak, jumlahDokumen: entries.length, dokumen: [] },
+      ppnMasukan: { totalDpp: 0, totalPpn: 0, jumlahDokumen: 0, dokumen: [] },
+      ppnKurangLebihBayar: totalPajak,
+      posisiPajak: 'KURANG_BAYAR',
+    };
   }
 
   // ==========================================

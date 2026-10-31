@@ -35,6 +35,7 @@ import {
   Boxes,
   ShoppingCart,
   Truck,
+  Scale,
 } from 'lucide-react';
 import { Tenant, api, AppNotification } from '../services/api';
 import { AuthUser } from '../context/AuthContext';
@@ -51,6 +52,7 @@ export type TenantTab =
   | 'reports'
   | 'dimension-analysis'
   | 'tax'
+  | 'subledger-reconciliation'
   | 'integration-log'
   | 'user-management'
   | 'dimensions'
@@ -209,6 +211,7 @@ export const Layout: React.FC<LayoutProps> = ({
           { id: 'reports', label: 'Laporan Keuangan', icon: BarChart3 },
           { id: 'dimension-analysis', label: 'Analisa Dimensi', icon: SlidersHorizontal },
           { id: 'tax', label: 'Rekapitulasi Pajak', icon: Calculator },
+          { id: 'subledger-reconciliation', label: 'Rekonsiliasi Sub Ledger', icon: Scale },
         ],
       },
       {

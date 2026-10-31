@@ -109,18 +109,20 @@ export class OrderManagementController {
   async cancelPo(
     @Param('tenantId') tenantId: string,
     @Param('id') id: string,
+    @Request() req: any,
     @Body('alasan') alasan?: string,
   ) {
-    return this.poService.cancel(tenantId, id, alasan);
+    return this.poService.cancel(tenantId, id, alasan, req.user);
   }
 
   @Post('purchase-orders/:tenantId/:id/close')
   async closePo(
     @Param('tenantId') tenantId: string,
     @Param('id') id: string,
+    @Request() req: any,
     @Body('catatan') catatan?: string,
   ) {
-    return this.poService.forceClose(tenantId, id, catatan);
+    return this.poService.forceClose(tenantId, id, catatan, req.user);
   }
 
   // ==========================================
@@ -273,18 +275,20 @@ export class OrderManagementController {
   async cancelSo(
     @Param('tenantId') tenantId: string,
     @Param('id') id: string,
+    @Request() req: any,
     @Body('alasan') alasan?: string,
   ) {
-    return this.soService.cancel(tenantId, id, alasan);
+    return this.soService.cancel(tenantId, id, alasan, req.user);
   }
 
   @Post('sales-orders/:tenantId/:id/close')
   async closeSo(
     @Param('tenantId') tenantId: string,
     @Param('id') id: string,
+    @Request() req: any,
     @Body('catatan') catatan?: string,
   ) {
-    return this.soService.forceClose(tenantId, id, catatan);
+    return this.soService.forceClose(tenantId, id, catatan, req.user);
   }
 
   // ==========================================

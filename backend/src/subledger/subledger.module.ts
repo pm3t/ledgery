@@ -5,6 +5,7 @@ import { AccountingPeriodModule } from '../accounting-period/accounting-period.m
 import { DocumentNumberingService } from './document-numbering.service';
 import { SubledgerPostingService } from './subledger-posting.service';
 import { SubledgerSettingService } from './subledger-setting.service';
+import { SubledgerReconciliationService } from './subledger-reconciliation.service';
 import { SubledgerSettingController } from './subledger-setting.controller';
 
 @Module({
@@ -18,11 +19,13 @@ import { SubledgerSettingController } from './subledger-setting.controller';
     DocumentNumberingService,
     SubledgerPostingService,
     SubledgerSettingService,
+    SubledgerReconciliationService,
   ],
   exports: [
     DocumentNumberingService,
     SubledgerPostingService,
     SubledgerSettingService,
+    SubledgerReconciliationService,
   ],
 })
 export class SubledgerModule {}

@@ -294,6 +294,7 @@ export class VendorPaymentService {
           idempotencyKey: dto.idempotencyKey,
           createdBy: userName || 'SYSTEM',
           postedAt: new Date(),
+          postedBy: userName || 'SYSTEM',
           allocations: {
             create: processedAllocations,
           },
@@ -326,7 +327,7 @@ export class VendorPaymentService {
   /**
    * Membatalkan Pembayaran Vendor (Void)
    */
-  async voidPayment(tenantId: string, paymentId: string, alasan: string) {
+  async voidPayment(tenantId: string, paymentId: string, alasan: string, user?: any) {
     const payment = await this.prisma.vendorPayment.findUnique({
       where: { id: paymentId },
       include: {
@@ -393,6 +394,8 @@ export class VendorPaymentService {
         data: {
           status: VendorPaymentStatus.VOID,
           voidJournalId,
+          voidedAt: new Date(),
+          voidedBy: user?.userId || user?.id || user?.email || 'SYSTEM',
         },
       });
     });

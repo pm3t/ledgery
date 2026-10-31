@@ -351,7 +351,7 @@ export class SalesInvoiceService {
   /**
    * Memposting Faktur Penjualan ke GL via SubledgerPostingService
    */
-  async postInvoice(tenantId: string, id: string) {
+  async postInvoice(tenantId: string, id: string, user?: any) {
     const invoice = await this.prisma.salesInvoice.findUnique({
       where: { id },
       include: {
@@ -543,6 +543,7 @@ export class SalesInvoiceService {
         status: SalesInvoiceStatus.POSTED,
         journalId: journal.id,
         postedAt: new Date(),
+        postedBy: user?.userId || user?.id || user?.email || 'SYSTEM',
       },
       include: {
         lines: true,
@@ -555,7 +556,7 @@ export class SalesInvoiceService {
   /**
    * Membatalkan / Void Faktur Penjualan
    */
-  async voidInvoice(tenantId: string, id: string, alasan?: string) {
+  async voidInvoice(tenantId: string, id: string, alasan?: string, user?: any) {
     const invoice = await this.prisma.salesInvoice.findUnique({
       where: { id },
       include: { allocations: true, lines: true },
@@ -628,6 +629,8 @@ export class SalesInvoiceService {
         voidJournalId,
         saldo: 0,
         saldoFungsional: 0,
+        voidedAt: new Date(),
+        voidedBy: user?.userId || user?.id || user?.email || 'SYSTEM',
       },
     });
   }

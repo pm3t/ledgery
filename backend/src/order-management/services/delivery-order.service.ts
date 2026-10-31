@@ -414,6 +414,7 @@ export class DeliveryOrderService {
         totalNilaiHpp: new Prisma.Decimal(totalNilaiHpp),
         journalId: journal.id,
         postedAt: new Date(),
+        postedBy: user?.userId || user?.id || user?.email || 'SYSTEM',
       },
       include: {
         partner: true,
@@ -499,6 +500,8 @@ export class DeliveryOrderService {
       data: {
         status: DeliveryOrderStatus.VOID,
         voidJournalId,
+        voidedAt: new Date(),
+        voidedBy: user?.userId || user?.id || user?.email || 'SYSTEM',
         catatan: alasan ? `${dOrder.catatan ? dOrder.catatan + ' | ' : ''}Void: ${alasan}` : dOrder.catatan,
       },
       include: {

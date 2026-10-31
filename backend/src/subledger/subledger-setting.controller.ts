@@ -5,10 +5,14 @@ import {
   Post,
   Body,
   Param,
+  Query,
+  Request,
   UseGuards,
   HttpStatus,
+  BadRequestException,
 } from '@nestjs/common';
 import { SubledgerSettingService } from './subledger-setting.service';
+import { SubledgerReconciliationService } from './subledger-reconciliation.service';
 import {
   UpdateSubledgerSettingDto,
   UpsertPostingSetupItemDto,
@@ -21,7 +25,66 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 export class SubledgerSettingController {
   constructor(
     private readonly subledgerSettingService: SubledgerSettingService,
+    private readonly reconciliationService: SubledgerReconciliationService,
   ) {}
+
+  @Get('reconciliation/:tenantId')
+  async getReconciliationByTenant(
+    @Param('tenantId') tenantId: string,
+    @Query('tanggal') tanggal?: string,
+  ) {
+    const data = await this.reconciliationService.getReconciliation(tenantId, tanggal);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Data rekonsiliasi subledger vs GL berhasil dihitung',
+      data,
+    };
+  }
+
+  @Get('reconciliation')
+  async getReconciliation(
+    @Request() req: any,
+    @Query('tenantId') queryTenantId?: string,
+    @Query('tanggal') tanggal?: string,
+  ) {
+    const tenantId = queryTenantId || req.user?.tenantId;
+    if (!tenantId) {
+      throw new BadRequestException('tenantId diperlukan untuk audit rekonsiliasi');
+    }
+    const data = await this.reconciliationService.getReconciliation(tenantId, tanggal);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Data rekonsiliasi subledger vs GL berhasil dihitung',
+      data,
+    };
+  }
+
+  @Get('dashboard-summary/:tenantId')
+  async getDashboardSummaryByTenant(@Param('tenantId') tenantId: string) {
+    const data = await this.reconciliationService.getDashboardSummary(tenantId);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Ringkasan dashboard staf akuntansi berhasil dihitung',
+      data,
+    };
+  }
+
+  @Get('dashboard-summary')
+  async getDashboardSummary(
+    @Request() req: any,
+    @Query('tenantId') queryTenantId?: string,
+  ) {
+    const tenantId = queryTenantId || req.user?.tenantId;
+    if (!tenantId) {
+      throw new BadRequestException('tenantId diperlukan untuk ringkasan dashboard');
+    }
+    const data = await this.reconciliationService.getDashboardSummary(tenantId);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Ringkasan dashboard staf akuntansi berhasil dihitung',
+      data,
+    };
+  }
 
   @Get('settings/:tenantId')
   async getSettings(@Param('tenantId') tenantId: string) {

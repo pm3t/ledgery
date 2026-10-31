@@ -62,7 +62,15 @@ export class GeneralLedgerService {
       where: whereClause,
       include: {
         journal: {
-          select: { no_voucher: true, tanggal: true, deskripsi: true, sumber_aplikasi: true },
+          select: {
+            id: true,
+            no_voucher: true,
+            tanggal: true,
+            deskripsi: true,
+            sumber_aplikasi: true,
+            sourceDocType: true,
+            sourceDocId: true,
+          },
         },
         dimensions: {
           include: {
@@ -99,10 +107,13 @@ export class GeneralLedgerService {
 
       return {
         id: entry.id,
+        journalId: entry.journal.id,
         tanggal: entry.journal.tanggal,
         no_voucher: entry.journal.no_voucher,
         deskripsi: entry.journal.deskripsi,
         sumber_aplikasi: entry.journal.sumber_aplikasi,
+        sourceDocType: entry.journal.sourceDocType,
+        sourceDocId: entry.journal.sourceDocId,
         debit: entry.tipe === 'DEBIT' ? amount : 0,
         kredit: entry.tipe === 'KREDIT' ? amount : 0,
         saldo_berjalan: runningBalance,

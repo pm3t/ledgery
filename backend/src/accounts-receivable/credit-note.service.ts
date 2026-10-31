@@ -271,6 +271,7 @@ export class CreditNoteService {
         idempotencyKey: dto.idempotencyKey,
         createdBy: userName || 'SYSTEM',
         postedAt: new Date(),
+        postedBy: userName || 'SYSTEM',
         lines: {
           create: totals.calculatedLines.map((l) => ({
             itemId: l.itemId || null,
@@ -297,7 +298,7 @@ export class CreditNoteService {
   /**
    * Membatalkan / Void Nota Kredit
    */
-  async voidCreditNote(tenantId: string, id: string, alasan?: string) {
+  async voidCreditNote(tenantId: string, id: string, alasan?: string, user?: any) {
     const note = await this.prisma.creditNote.findUnique({
       where: { id },
       include: { allocations: true },
@@ -338,6 +339,8 @@ export class CreditNoteService {
       data: {
         status: CreditNoteStatus.VOID,
         voidJournalId,
+        voidedAt: new Date(),
+        voidedBy: user?.userId || user?.id || user?.email || 'SYSTEM',
         saldo: 0,
         saldoFungsional: 0,
       },

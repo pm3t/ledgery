@@ -207,6 +207,8 @@ export interface LedgerLine {
   debit: number;
   kredit: number;
   saldo_berjalan: number;
+  sourceDocType?: string | null;
+  sourceDocId?: string | null;
   dimensions?: {
     dimensionName?: string;
     valueName?: string;
@@ -640,7 +642,10 @@ export const api = {
   adminGetAllApiKeys: () => request<any[]>(`/admin/api-keys`),
 
   // --- INTEGRATION LOGS API ---
-  getIntegrationLogs: (tenantId: string) => request<IntegrationLog[]>(`/internal/integration-logs/tenant/${tenantId}`),
+  getIntegrationLogs: (tenantId: string, modul?: string) => {
+    const q = modul && modul !== 'ALL' ? `?modul=${encodeURIComponent(modul)}` : '';
+    return request<IntegrationLog[]>(`/internal/integration-logs/tenant/${tenantId}${q}`);
+  },
 
   // --- AUTH API ---
   login: (email: string, password: string) => request<{
@@ -1100,6 +1105,14 @@ export const api = {
   },
   getGrIrClearingReport: (tenantId: string) =>
     request<any>(`/order-management/reports/gr-ir-clearing/${tenantId}`).then((res: any) => res.data || res),
+
+  // 6. Subledger Cross-Module Reconciliation & Dashboard
+  getSubledgerReconciliation: (tenantId: string, tanggal?: string) => {
+    const q = tanggal ? `?tanggal=${encodeURIComponent(tanggal)}` : '';
+    return request<any>(`/subledger/reconciliation/${tenantId}${q}`).then((res: any) => res.data || res);
+  },
+  getAccountantDashboardSummary: (tenantId: string) =>
+    request<any>(`/subledger/dashboard-summary/${tenantId}`).then((res: any) => res.data || res),
 };
 
 export type SalesInvoiceStatus = 'DRAFT' | 'POSTED' | 'PARTIAL' | 'PAID' | 'VOID';
@@ -1829,6 +1842,72 @@ export interface DeliveryOrder {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface ReconciliationAccountResult {
+  controlType: 'AR' | 'AP' | 'INVENTORY' | 'GR_IR_CLEARING';
+  account: {
+    id: string;
+    kode: string;
+    nama: string;
+  } | null;
+  normalBalance: 'DEBIT' | 'KREDIT';
+  glBalance: number;
+  subledgerBalance: number;
+  selisih: number;
+  status: 'OK' | 'SELISIH';
+  keterangan: string;
+  drillDown: {
+    unpostedOrOrphanDocs: any[];
+    rawOrUnlinkedJournals: any[];
+    summary: {
+      totalOrphanDocs: number;
+      totalRawJournals: number;
+      totalRawJournalValue: number;
+    };
+  };
+}
+
+export interface SubledgerReconciliationSummary {
+  tanggal: string;
+  isFullyReconciled: boolean;
+  totalSelisihAbsolut: number;
+  setting: {
+    arEnabled: boolean;
+    apEnabled: boolean;
+    inventoryEnabled: boolean;
+    orderManagementEnabled: boolean;
+    blockPeriodCloseOnRecon: boolean;
+  };
+  accounts: {
+    ar: ReconciliationAccountResult;
+    ap: ReconciliationAccountResult;
+    inventory: ReconciliationAccountResult;
+    grIrClearing: ReconciliationAccountResult;
+  };
+}
+
+export interface AccountantDashboardSummary {
+  totalPiutang: number;
+  totalHutang: number;
+  nilaiPersediaan: number;
+  totalUnbilledGr: number;
+  jumlahFakturJatuhTempo: number;
+  detailJatuhTempo: {
+    piutangJatuhTempo: number;
+    hutangJatuhTempo: number;
+  };
+  jumlahPoTerbuka: number;
+  jumlahSoTerbuka: number;
+  statusRekonsiliasi: 'OK' | 'SELISIH';
+  totalSelisihAbsolut: number;
+  accounts: {
+    ar: { status: 'OK' | 'SELISIH'; selisih: number };
+    ap: { status: 'OK' | 'SELISIH'; selisih: number };
+    inventory: { status: 'OK' | 'SELISIH'; selisih: number };
+    grIrClearing: { status: 'OK' | 'SELISIH'; selisih: number };
+  };
+}
+
 
 
 

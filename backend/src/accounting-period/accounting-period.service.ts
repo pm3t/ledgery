@@ -1,11 +1,17 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, Inject, forwardRef, Optional } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateFiscalYearDto } from './dto/create-fiscal-year.dto';
 import { PeriodStatus } from '@prisma/client';
+import { SubledgerReconciliationService } from '../subledger/subledger-reconciliation.service';
 
 @Injectable()
 export class AccountingPeriodService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Optional()
+    @Inject(forwardRef(() => SubledgerReconciliationService))
+    private readonly subledgerReconService?: SubledgerReconciliationService,
+  ) {}
 
   async createFiscalYear(tenantId: string, dto: CreateFiscalYearDto) {
     const { nama_tahun_buku, tanggal_mulai, tanggal_selesai, auto_generate, periods } = dto;
@@ -66,18 +72,82 @@ export class AccountingPeriodService {
   }
 
   async closePeriod(periodId: string, userId: string) {
-    const period = await this.prisma.accountingPeriod.findUnique({ where: { id: periodId } });
+    const period = await this.prisma.accountingPeriod.findUnique({
+      where: { id: periodId },
+      include: { fiscalYear: true },
+    });
     if (!period) throw new BadRequestException('Periode tidak ditemukan');
     if (period.status === PeriodStatus.CLOSED) throw new BadRequestException('Periode sudah ditutup');
 
-    return this.prisma.accountingPeriod.update({
+    const tenantId = period.fiscalYear.tenantId;
+
+    // Periksa apakah tenant mengaktifkan modul subledger
+    const subledgerSetting = await this.prisma.subledgerSetting.findUnique({
+      where: { tenantId },
+    });
+
+    const isSubledgerActive =
+      subledgerSetting &&
+      (subledgerSetting.arEnabled ||
+        subledgerSetting.apEnabled ||
+        subledgerSetting.inventoryEnabled ||
+        subledgerSetting.orderManagementEnabled);
+
+    let reconciliationWarning: any = null;
+
+    if (isSubledgerActive && this.subledgerReconService) {
+      const tanggalSelesaiStr = period.tanggal_selesai.toISOString().slice(0, 10);
+      const recon = await this.subledgerReconService.getReconciliation(tenantId, tanggalSelesaiStr);
+
+      if (!recon.isFullyReconciled) {
+        const discrepantAccounts: string[] = [];
+        if (recon.accounts.ar.status === 'SELISIH') {
+          discrepantAccounts.push(`Piutang (AR): Selisih Rp ${Math.abs(recon.accounts.ar.selisih).toLocaleString('id-ID')}`);
+        }
+        if (recon.accounts.ap.status === 'SELISIH') {
+          discrepantAccounts.push(`Hutang (AP): Selisih Rp ${Math.abs(recon.accounts.ap.selisih).toLocaleString('id-ID')}`);
+        }
+        if (recon.accounts.inventory.status === 'SELISIH') {
+          discrepantAccounts.push(`Persediaan: Selisih Rp ${Math.abs(recon.accounts.inventory.selisih).toLocaleString('id-ID')}`);
+        }
+        if (recon.accounts.grIrClearing.status === 'SELISIH') {
+          discrepantAccounts.push(`Kliring GR/IR: Selisih Rp ${Math.abs(recon.accounts.grIrClearing.selisih).toLocaleString('id-ID')}`);
+        }
+
+        const detailsMsg = discrepantAccounts.join('; ');
+
+        if (subledgerSetting.blockPeriodCloseOnRecon) {
+          throw new BadRequestException({
+            errorCode: 'PERIOD_CLOSE_BLOCKED_ON_RECONCILIATION',
+            message: `Penutupan periode dibatalkan: Ditemukan selisih antara Sub Ledger dan Buku Besar pada akun: ${detailsMsg}. Pengaturan tenant mewajibkan rekonsiliasi tuntas sebelum periode ditutup.`,
+            details: {
+              reconciliation: recon,
+              discrepancies: discrepantAccounts,
+            },
+          });
+        } else {
+          // Warning jika blockPeriodCloseOnRecon = false
+          reconciliationWarning = {
+            message: `Peringatan: Terdapat selisih rekonsiliasi subledger pada penutupan periode: ${detailsMsg}`,
+            discrepancies: discrepantAccounts,
+          };
+        }
+      }
+    }
+
+    const updated = await this.prisma.accountingPeriod.update({
       where: { id: periodId },
       data: {
         status: PeriodStatus.CLOSED,
         closedAt: new Date(),
         closedBy: userId,
-      }
+      },
     });
+
+    return {
+      ...updated,
+      warning: reconciliationWarning,
+    };
   }
 
   async reopenPeriod(periodId: string, userId: string) {

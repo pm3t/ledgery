@@ -293,7 +293,7 @@ export class PurchaseBillService {
   /**
    * Memposting Faktur Pembelian ke GL via SubledgerPostingService
    */
-  async postBill(tenantId: string, id: string) {
+  async postBill(tenantId: string, id: string, user?: any) {
     const bill = await this.prisma.purchaseBill.findUnique({
       where: { id },
       include: {
@@ -524,6 +524,7 @@ export class PurchaseBillService {
         status: PurchaseBillStatus.POSTED,
         journalId: journal.id,
         postedAt: new Date(),
+        postedBy: user?.userId || user?.id || user?.email || 'SYSTEM',
       },
       include: {
         lines: true,
@@ -536,7 +537,7 @@ export class PurchaseBillService {
   /**
    * Membatalkan faktur pembelian (Void)
    */
-  async voidBill(tenantId: string, id: string, alasan: string) {
+  async voidBill(tenantId: string, id: string, alasan: string, user?: any) {
     const bill = await this.prisma.purchaseBill.findUnique({
       where: { id },
       include: {
@@ -606,6 +607,8 @@ export class PurchaseBillService {
       data: {
         status: PurchaseBillStatus.VOID,
         voidJournalId,
+        voidedAt: new Date(),
+        voidedBy: user?.userId || user?.id || user?.email || 'SYSTEM',
       },
     });
   }

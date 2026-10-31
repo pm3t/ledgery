@@ -304,6 +304,7 @@ export class CustomerReceiptService {
           idempotencyKey: dto.idempotencyKey,
           createdBy: userName || 'SYSTEM',
           postedAt: new Date(),
+          postedBy: userName || 'SYSTEM',
           allocations: {
             create: processedAllocations,
           },
@@ -323,7 +324,7 @@ export class CustomerReceiptService {
   /**
    * Membatalkan / Void Penerimaan Pembayaran
    */
-  async voidReceipt(tenantId: string, id: string, alasan?: string) {
+  async voidReceipt(tenantId: string, id: string, alasan?: string, user?: any) {
     const receipt = await this.prisma.customerReceipt.findUnique({
       where: { id },
       include: {
@@ -388,6 +389,8 @@ export class CustomerReceiptService {
         data: {
           status: CustomerReceiptStatus.VOID,
           voidJournalId,
+          voidedAt: new Date(),
+          voidedBy: user?.userId || user?.id || user?.email || 'SYSTEM',
           totalDialokasikan: 0,
           belumDialokasikan: 0,
         },

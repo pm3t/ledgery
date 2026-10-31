@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api, Tenant, Journal } from '../services/api';
+import { AccountantDashboardSummaryWidget } from '../components/dashboard/AccountantDashboardSummaryWidget';
 import {
   BookOpen,
   Search,
@@ -20,9 +21,10 @@ import {
 
 interface Props {
   currentTenant: Tenant | null;
+  onNavigate?: (tab: string) => void;
 }
 
-export const JournalListPage: React.FC<Props> = ({ currentTenant }) => {
+export const JournalListPage: React.FC<Props> = ({ currentTenant, onNavigate }) => {
   const [journals, setJournals] = useState<Journal[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -167,6 +169,9 @@ export const JournalListPage: React.FC<Props> = ({ currentTenant }) => {
           </button>
         </div>
       )}
+
+      {/* Accountant Dashboard Summary Widget */}
+      <AccountantDashboardSummaryWidget currentTenant={currentTenant} onNavigate={onNavigate} />
 
       <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-4 flex gap-4 flex-wrap items-end">
         <div>

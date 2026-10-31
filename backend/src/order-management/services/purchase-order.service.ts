@@ -298,7 +298,7 @@ export class PurchaseOrderService {
     });
   }
 
-  async cancel(tenantId: string, id: string, alasan?: string) {
+  async cancel(tenantId: string, id: string, alasan?: string, user?: any) {
     const po = await this.findById(tenantId, id);
 
     if (po.status === OrderStatus.CANCELLED) {
@@ -320,13 +320,15 @@ export class PurchaseOrderService {
       where: { id },
       data: {
         status: OrderStatus.CANCELLED,
+        cancelledAt: new Date(),
+        cancelledBy: user?.userId || user?.id || user?.email || 'SYSTEM',
         catatan: alasan ? `${po.catatan ? po.catatan + ' | ' : ''}Alasan Batal: ${alasan}` : po.catatan,
       },
       include: { partner: true, lines: true },
     });
   }
 
-  async forceClose(tenantId: string, id: string, catatan?: string) {
+  async forceClose(tenantId: string, id: string, catatan?: string, user?: any) {
     const po = await this.findById(tenantId, id);
 
     if (po.status !== OrderStatus.OPEN && po.status !== OrderStatus.PARTIAL) {
@@ -339,6 +341,8 @@ export class PurchaseOrderService {
       where: { id },
       data: {
         status: OrderStatus.CLOSED,
+        closedAt: new Date(),
+        closedBy: user?.userId || user?.id || user?.email || 'SYSTEM',
         catatan: catatan ? `${po.catatan ? po.catatan + ' | ' : ''}Ditutup Manual: ${catatan}` : po.catatan,
       },
       include: { partner: true, lines: true },

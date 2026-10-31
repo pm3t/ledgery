@@ -439,6 +439,7 @@ export class GoodsReceiptService {
         totalNilai: new Prisma.Decimal(actualTotalNilai),
         journalId: journal.id,
         postedAt: new Date(),
+        postedBy: user?.userId || user?.id || user?.email || 'SYSTEM',
       },
       include: {
         partner: true,
@@ -522,6 +523,8 @@ export class GoodsReceiptService {
       data: {
         status: GoodsReceiptStatus.VOID,
         voidJournalId,
+        voidedAt: new Date(),
+        voidedBy: user?.userId || user?.id || user?.email || 'SYSTEM',
         catatan: alasan ? `${gr.catatan ? gr.catatan + ' | ' : ''}Void: ${alasan}` : gr.catatan,
       },
       include: {

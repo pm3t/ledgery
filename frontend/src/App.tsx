@@ -44,6 +44,7 @@ import { GoodsReceiptsPage } from './pages/order-management/GoodsReceiptsPage';
 import { SalesOrdersPage } from './pages/order-management/SalesOrdersPage';
 import { DeliveryOrdersPage } from './pages/order-management/DeliveryOrdersPage';
 import { OrderReportsPage } from './pages/order-management/OrderReportsPage';
+import { SubledgerReconciliationPage } from './pages/SubledgerReconciliationPage';
 
 // Admin Pages
 import { AdminLayout } from './layouts/AdminLayout';
@@ -67,6 +68,7 @@ type TenantTab =
   | 'reports'
   | 'dimension-analysis'
   | 'tax'
+  | 'subledger-reconciliation'
   | 'integration-log'
   | 'user-management'
   | 'dimensions'
@@ -225,18 +227,39 @@ export function App() {
       {activeTab === 'coa' && <ChartOfAccountsPage currentTenant={currentTenant} />}
       {activeTab === 'business-partners' && <BusinessPartnersPage currentTenant={currentTenant} />}
       {activeTab === 'settings' && <SettingsPage currentTenant={currentTenant} />}
-      {activeTab === 'journals' && <JournalListPage currentTenant={currentTenant} />}
+      {activeTab === 'journals' && (
+        <JournalListPage
+          currentTenant={currentTenant}
+          onNavigate={(tab) => setActiveTab(tab as TenantTab)}
+        />
+      )}
       {activeTab === 'journals-manual' && <ManualJournalPage currentTenant={currentTenant} />}
-      {activeTab === 'ledger' && <GeneralLedgerPage currentTenant={currentTenant} />}
+      {activeTab === 'ledger' && (
+        <GeneralLedgerPage
+          currentTenant={currentTenant}
+          onNavigate={(tab) => setActiveTab(tab as TenantTab)}
+        />
+      )}
       {activeTab === 'journal-approval' && <JournalApprovalPage currentTenant={currentTenant} />}
       {activeTab === 'approval-history' && <JournalApprovalHistoryPage currentTenant={currentTenant} />}
       {activeTab === 'reports' && <FinancialReportsPage currentTenant={currentTenant} />}
       {activeTab === 'dimension-analysis' && <DimensionAnalysisPage currentTenant={currentTenant} />}
       {activeTab === 'tax' && <TaxPage currentTenant={currentTenant} />}
+      {activeTab === 'subledger-reconciliation' && (
+        <SubledgerReconciliationPage
+          currentTenant={currentTenant}
+          onNavigate={(tab) => setActiveTab(tab as TenantTab)}
+        />
+      )}
       {activeTab === 'integration-log' && <IntegrationLogPage currentTenant={currentTenant} />}
       {activeTab === 'user-management' && <UserManagementPage />}
       {activeTab === 'dimensions' && <DimensionsPage currentTenant={currentTenant} />}
-      {activeTab === 'accounting-periods' && <AccountingPeriodsPage currentTenant={currentTenant} />}
+      {activeTab === 'accounting-periods' && (
+        <AccountingPeriodsPage
+          currentTenant={currentTenant}
+          onNavigate={(tab) => setActiveTab(tab as TenantTab)}
+        />
+      )}
       {activeTab === 'ar-invoices' && <SalesInvoicesPage currentTenant={currentTenant} />}
       {activeTab === 'ar-receipts' && <CustomerReceiptsPage currentTenant={currentTenant} />}
       {activeTab === 'ar-credit-notes' && <CreditNotesPage currentTenant={currentTenant} />}

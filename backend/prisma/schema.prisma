@@ -652,6 +652,9 @@ model SalesInvoice {
   catatan                String?
   createdBy              String?
   postedAt               DateTime?
+  postedBy               String?
+  voidedAt               DateTime?
+  voidedBy               String?
   createdAt              DateTime           @default(now())
   updatedAt              DateTime           @updatedAt
 
@@ -724,6 +727,9 @@ model CreditNote {
   catatan                String?
   createdBy              String?
   postedAt               DateTime?
+  postedBy               String?
+  voidedAt               DateTime?
+  voidedBy               String?
   createdAt              DateTime           @default(now())
   updatedAt              DateTime           @updatedAt
 
@@ -787,6 +793,9 @@ model CustomerReceipt {
   catatan           String?
   createdBy         String?
   postedAt          DateTime?
+  postedBy          String?
+  voidedAt          DateTime?
+  voidedBy          String?
   createdAt         DateTime              @default(now())
   updatedAt         DateTime              @updatedAt
 
@@ -883,6 +892,9 @@ model PurchaseBill {
   catatan                 String?
   createdBy               String?
   postedAt                DateTime?
+  postedBy                String?
+  voidedAt                DateTime?
+  voidedBy                String?
   createdAt               DateTime           @default(now())
   updatedAt               DateTime           @updatedAt
 
@@ -956,6 +968,9 @@ model DebitNote {
   catatan               String?
   createdBy             String?
   postedAt              DateTime?
+  postedBy              String?
+  voidedAt              DateTime?
+  voidedBy              String?
   createdAt             DateTime        @default(now())
   updatedAt             DateTime        @updatedAt
 
@@ -1019,6 +1034,9 @@ model VendorPayment {
   catatan           String?
   createdBy         String?
   postedAt          DateTime?
+  postedBy          String?
+  voidedAt          DateTime?
+  voidedBy          String?
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
 
@@ -1261,6 +1279,9 @@ model StockAdjustment {
   voidJournalId      String?
   createdBy          String?
   postedAt           DateTime?
+  postedBy           String?
+  voidedAt           DateTime?
+  voidedBy           String?
   createdAt          DateTime              @default(now())
   updatedAt          DateTime              @updatedAt
 
@@ -1305,6 +1326,9 @@ model StockTransfer {
   voidJournalId   String?
   createdBy       String?
   postedAt        DateTime?
+  postedBy        String?
+  voidedAt        DateTime?
+  voidedBy        String?
   createdAt       DateTime            @default(now())
   updatedAt       DateTime            @updatedAt
 
@@ -1348,6 +1372,9 @@ model StockReceiptOther {
   voidJournalId  String?
   createdBy      String?
   postedAt       DateTime?
+  postedBy       String?
+  voidedAt       DateTime?
+  voidedBy       String?
   createdAt      DateTime                @default(now())
   updatedAt      DateTime                @updatedAt
 
@@ -1420,6 +1447,10 @@ model PurchaseOrder {
   externalRef       String?
   idempotencyKey    String?
   createdBy         String?
+  closedAt          DateTime?
+  closedBy          String?
+  cancelledAt       DateTime?
+  cancelledBy       String?
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
 
@@ -1475,6 +1506,9 @@ model GoodsReceipt {
   idempotencyKey String?
   createdBy      String?
   postedAt       DateTime?
+  postedBy       String?
+  voidedAt       DateTime?
+  voidedBy       String?
   createdAt      DateTime           @default(now())
   updatedAt      DateTime           @updatedAt
 
@@ -1529,6 +1563,10 @@ model SalesOrder {
   externalRef       String?
   idempotencyKey    String?
   createdBy         String?
+  closedAt          DateTime?
+  closedBy          String?
+  cancelledAt       DateTime?
+  cancelledBy       String?
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
 
@@ -1584,6 +1622,9 @@ model DeliveryOrder {
   idempotencyKey String?
   createdBy      String?
   postedAt       DateTime?
+  postedBy       String?
+  voidedAt       DateTime?
+  voidedBy       String?
   createdAt      DateTime            @default(now())
   updatedAt      DateTime            @updatedAt
 

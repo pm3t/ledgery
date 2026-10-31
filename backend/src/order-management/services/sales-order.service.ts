@@ -333,7 +333,7 @@ export class SalesOrderService {
     });
   }
 
-  async cancel(tenantId: string, id: string, alasan?: string) {
+  async cancel(tenantId: string, id: string, alasan?: string, user?: any) {
     const so = await this.findById(tenantId, id);
 
     if (so.status === OrderStatus.CANCELLED) {
@@ -354,13 +354,15 @@ export class SalesOrderService {
       where: { id },
       data: {
         status: OrderStatus.CANCELLED,
+        cancelledAt: new Date(),
+        cancelledBy: user?.userId || user?.id || user?.email || 'SYSTEM',
         catatan: alasan ? `${so.catatan ? so.catatan + ' | ' : ''}Alasan Batal: ${alasan}` : so.catatan,
       },
       include: { partner: true, lines: true },
     });
   }
 
-  async forceClose(tenantId: string, id: string, catatan?: string) {
+  async forceClose(tenantId: string, id: string, catatan?: string, user?: any) {
     const so = await this.findById(tenantId, id);
 
     if (so.status !== OrderStatus.OPEN && so.status !== OrderStatus.PARTIAL) {
@@ -373,6 +375,8 @@ export class SalesOrderService {
       where: { id },
       data: {
         status: OrderStatus.CLOSED,
+        closedAt: new Date(),
+        closedBy: user?.userId || user?.id || user?.email || 'SYSTEM',
         catatan: catatan ? `${so.catatan ? so.catatan + ' | ' : ''}Ditutup Manual: ${catatan}` : so.catatan,
       },
       include: { partner: true, lines: true },

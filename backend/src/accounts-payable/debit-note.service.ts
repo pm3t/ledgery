@@ -293,6 +293,7 @@ export class DebitNoteService {
         idempotencyKey: dto.idempotencyKey,
         createdBy: userName || 'SYSTEM',
         postedAt: new Date(),
+        postedBy: userName || 'SYSTEM',
         lines: {
           create: totals.calculatedLines.map((l) => ({
             itemId: l.itemId || null,
@@ -319,7 +320,7 @@ export class DebitNoteService {
   /**
    * Membatalkan Nota Debit (Void)
    */
-  async voidDebitNote(tenantId: string, id: string, alasan: string) {
+  async voidDebitNote(tenantId: string, id: string, alasan: string, user?: any) {
     const dn = await this.prisma.debitNote.findUnique({
       where: { id },
       include: { allocations: true },
@@ -358,6 +359,8 @@ export class DebitNoteService {
       data: {
         status: DebitNoteStatus.VOID,
         voidJournalId,
+        voidedAt: new Date(),
+        voidedBy: user?.userId || user?.id || user?.email || 'SYSTEM',
       },
     });
   }

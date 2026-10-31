@@ -1,15 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { api, Tenant, FiscalYear, AccountingPeriod } from '../services/api';
-import { Calendar, Plus, Lock, Unlock, AlertCircle, Loader2 } from 'lucide-react';
+import { Calendar, Plus, Lock, Unlock, AlertCircle, Loader2, Scale, AlertTriangle, CheckCircle2, X } from 'lucide-react';
 
 interface Props {
   currentTenant: Tenant | null;
+  onNavigate?: (tab: string) => void;
 }
 
-export const AccountingPeriodsPage: React.FC<Props> = ({ currentTenant }) => {
+export const AccountingPeriodsPage: React.FC<Props> = ({ currentTenant, onNavigate }) => {
   const [fiscalYears, setFiscalYears] = useState<FiscalYear[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Reconciliation Alert / Modal State
+  const [reconModal, setReconModal] = useState<{
+    isOpen: boolean;
+    isBlocked: boolean;
+    message: string;
+    details?: any;
+  } | null>(null);
 
   // Form State
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -99,13 +108,30 @@ export const AccountingPeriodsPage: React.FC<Props> = ({ currentTenant }) => {
     try {
       setLoading(true);
       if (period.status === 'OPEN') {
-        await api.closePeriod(period.id);
+        const res: any = await api.closePeriod(period.id);
+        if (res?.warning) {
+          setReconModal({
+            isOpen: true,
+            isBlocked: false,
+            message: res.warning.message || 'Peringatan selisih rekonsiliasi subledger',
+            details: res.warning.details,
+          });
+        }
       } else {
         await api.reopenPeriod(period.id);
       }
       fetchFiscalYears();
     } catch (err: any) {
-      alert(err.message || `Gagal ${actionName} periode`);
+      const errMsg = err.message || '';
+      if (errMsg.includes('selisih rekonsiliasi') || errMsg.includes('PERIOD_CLOSE_BLOCKED_ON_RECONCILIATION')) {
+        setReconModal({
+          isOpen: true,
+          isBlocked: true,
+          message: errMsg,
+        });
+      } else {
+        alert(errMsg || `Gagal ${actionName} periode`);
+      }
     } finally {
       setLoading(false);
     }
@@ -298,6 +324,78 @@ export const AccountingPeriodsPage: React.FC<Props> = ({ currentTenant }) => {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Reconciliation Alert / Blocking Modal */}
+      {reconModal?.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="relative w-full max-w-lg rounded-2xl border border-slate-700 bg-slate-900 p-6 shadow-2xl">
+            <button
+              onClick={() => setReconModal(null)}
+              className="absolute right-4 top-4 text-slate-400 hover:text-white"
+            >
+              <X className="h-5 w-5" />
+            </button>
+
+            <div className="flex items-start space-x-3">
+              <div
+                className={`rounded-xl p-2.5 ${
+                  reconModal.isBlocked
+                    ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                    : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                }`}
+              >
+                {reconModal.isBlocked ? (
+                  <AlertTriangle className="h-6 w-6" />
+                ) : (
+                  <Scale className="h-6 w-6" />
+                )}
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-bold text-white">
+                  {reconModal.isBlocked
+                    ? 'Penutupan Periode Ditolak (Ada Selisih)'
+                    : 'Peringatan Rekonsiliasi Sub Ledger'}
+                </h3>
+                <p className="mt-2 text-sm text-slate-300 leading-relaxed">
+                  {reconModal.message}
+                </p>
+
+                {reconModal.details && (
+                  <div className="mt-3 rounded-lg bg-slate-800/80 p-3 text-xs border border-slate-700 space-y-1 text-slate-300">
+                    <div>
+                      Total Selisih:{' '}
+                      <span className="font-mono font-bold text-rose-400">
+                        Rp {reconModal.details.totalSelisihAbsolut?.toLocaleString('id-ID')}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                <div className="mt-6 flex items-center justify-end space-x-3">
+                  <button
+                    onClick={() => setReconModal(null)}
+                    className="rounded-lg border border-slate-700 px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-800"
+                  >
+                    Tutup
+                  </button>
+                  {onNavigate && (
+                    <button
+                      onClick={() => {
+                        setReconModal(null);
+                        onNavigate('subledger-reconciliation');
+                      }}
+                      className="inline-flex items-center space-x-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold text-white hover:bg-indigo-500"
+                    >
+                      <Scale className="h-3.5 w-3.5" />
+                      <span>Buka Rekonsiliasi Sub Ledger</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
