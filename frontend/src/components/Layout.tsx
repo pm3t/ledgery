@@ -28,6 +28,13 @@ import {
   ShieldCheck,
   Building2,
   UserCheck,
+  Package,
+  PackagePlus,
+  ClipboardCheck,
+  ArrowLeftRight,
+  Boxes,
+  ShoppingCart,
+  Truck,
 } from 'lucide-react';
 import { Tenant, api, AppNotification } from '../services/api';
 import { AuthUser } from '../context/AuthContext';
@@ -52,7 +59,25 @@ export type TenantTab =
   | 'ar-receipts'
   | 'ar-credit-notes'
   | 'ar-reports'
-  | 'ar-opening-balance';
+  | 'ar-opening-balance'
+  | 'ap-bills'
+  | 'ap-payments'
+  | 'ap-debit-notes'
+  | 'ap-reports'
+  | 'ap-payment-schedule'
+  | 'ap-opening-balance'
+  | 'inv-items'
+  | 'inv-warehouses'
+  | 'inv-receipt-other'
+  | 'inv-adjustments'
+  | 'inv-transfers'
+  | 'inv-reports'
+  | 'inv-opening-balance'
+  | 'om-so'
+  | 'om-do'
+  | 'om-po'
+  | 'om-gr'
+  | 'om-reports';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -112,6 +137,48 @@ export const Layout: React.FC<LayoutProps> = ({
           { id: 'ar-credit-notes', label: 'Nota Kredit', icon: FileText },
           { id: 'ar-reports', label: 'Umur & Kartu Piutang', icon: FileSpreadsheet },
           { id: 'ar-opening-balance', label: 'Saldo Awal Piutang', icon: UploadCloud },
+        ],
+      },
+      {
+        id: 'ap',
+        label: 'Hutang & Pembelian (AP)',
+        icon: CreditCard,
+        colorClass: 'text-amber-400',
+        items: [
+          { id: 'ap-bills', label: 'Faktur Pembelian', icon: Receipt },
+          { id: 'ap-payments', label: 'Pembayaran Vendor', icon: CreditCard },
+          { id: 'ap-debit-notes', label: 'Nota Debit', icon: FileText },
+          { id: 'ap-reports', label: 'Umur & Kartu Hutang', icon: FileSpreadsheet },
+          { id: 'ap-payment-schedule', label: 'Jadwal Pembayaran', icon: Calendar },
+          { id: 'ap-opening-balance', label: 'Saldo Awal Hutang', icon: UploadCloud },
+        ],
+      },
+      {
+        id: 'inventory',
+        label: 'Persediaan & Gudang (Inventory)',
+        icon: Boxes,
+        colorClass: 'text-purple-400',
+        items: [
+          { id: 'inv-items', label: 'Master Barang & Jasa', icon: Package },
+          { id: 'inv-warehouses', label: 'Master Gudang', icon: Building2 },
+          { id: 'inv-receipt-other', label: 'Penerimaan Lainnya', icon: PackagePlus },
+          { id: 'inv-adjustments', label: 'Penyesuaian Stok (Opname)', icon: ClipboardCheck },
+          { id: 'inv-transfers', label: 'Transfer Antar Gudang', icon: ArrowLeftRight },
+          { id: 'inv-reports', label: 'Laporan & Kartu Stok', icon: FileSpreadsheet },
+          { id: 'inv-opening-balance', label: 'Saldo Awal Persediaan', icon: UploadCloud },
+        ],
+      },
+      {
+        id: 'order-management',
+        label: 'Pesanan & Logistik (Orders)',
+        icon: ShoppingCart,
+        colorClass: 'text-teal-400',
+        items: [
+          { id: 'om-so', label: 'Pesanan Penjualan (SO)', icon: ShoppingCart },
+          { id: 'om-do', label: 'Surat Jalan (DO)', icon: Truck },
+          { id: 'om-po', label: 'Pesanan Pembelian (PO)', icon: Package },
+          { id: 'om-gr', label: 'Penerimaan Barang (GR)', icon: Truck },
+          { id: 'om-reports', label: 'Laporan & Rekonsiliasi OM', icon: BarChart3 },
         ],
       },
       {
@@ -183,6 +250,8 @@ export const Layout: React.FC<LayoutProps> = ({
     } catch (e) {}
     return {
       ar: true,
+      ap: true,
+      inventory: true,
       gl: true,
       reports: true,
       master: true,

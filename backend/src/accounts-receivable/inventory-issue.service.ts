@@ -1,5 +1,6 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, Optional } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { ConcreteInventoryIssueService } from '../inventory/services/inventory-issue.service';
 
 export interface InventoryIssueResult {
   cogsAmount: number;
@@ -13,6 +14,7 @@ export interface IInventoryIssueService {
       itemId: string;
       qty: number;
       tanggal: Date;
+      warehouseId?: string;
     },
   ): Promise<InventoryIssueResult>;
 
@@ -24,18 +26,23 @@ export interface IInventoryIssueService {
       qty: number;
       tanggal: Date;
       originalCost?: number;
+      warehouseId?: string;
     },
   ): Promise<InventoryIssueResult>;
 }
 
 /**
- * Default Inventory Issue Service (Stub)
- * Modul 15 (Inventory) akan menggantikan atau mengimplementasikan logika lengkap kartu stok.
- * Jika modul Inventory belum aktif untuk tenant, baris bertipe STOK akan ditolak.
+ * Default Inventory Issue Service
+ * Menggunakan ConcreteInventoryIssueService jika modul Inventory aktif dan terinjeksi,
+ * atau menggunakan validasi stub jika modul Inventory belum diaktifkan.
  */
 @Injectable()
 export class DefaultInventoryIssueService implements IInventoryIssueService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Optional()
+    private readonly concreteService?: ConcreteInventoryIssueService,
+  ) {}
 
   async issueStockForInvoice(
     tenantId: string,
@@ -44,8 +51,13 @@ export class DefaultInventoryIssueService implements IInventoryIssueService {
       itemId: string;
       qty: number;
       tanggal: Date;
+      warehouseId?: string;
     },
   ): Promise<InventoryIssueResult> {
+    if (this.concreteService) {
+      return this.concreteService.issueStockForInvoice(tenantId, params);
+    }
+
     const setting = await this.prisma.subledgerSetting.findUnique({
       where: { tenantId },
     });
@@ -56,8 +68,6 @@ export class DefaultInventoryIssueService implements IInventoryIssueService {
       );
     }
 
-    // Stub: Pada Modul 15, fungsi ini akan menghitung HPP aktual (Moving Average / FIFO)
-    // dan mengurangi stok fisik barang di gudang.
     return {
       cogsAmount: 0,
     };
@@ -71,8 +81,13 @@ export class DefaultInventoryIssueService implements IInventoryIssueService {
       qty: number;
       tanggal: Date;
       originalCost?: number;
+      warehouseId?: string;
     },
   ): Promise<InventoryIssueResult> {
+    if (this.concreteService) {
+      return this.concreteService.returnStockForCreditNote(tenantId, params);
+    }
+
     const setting = await this.prisma.subledgerSetting.findUnique({
       where: { tenantId },
     });
@@ -83,10 +98,8 @@ export class DefaultInventoryIssueService implements IInventoryIssueService {
       );
     }
 
-    // Stub: Pada Modul 15, fungsi ini akan menambah stok fisik barang kembali ke gudang
     return {
       cogsAmount: params.originalCost || 0,
     };
   }
 }
-

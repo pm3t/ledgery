@@ -1,7 +1,8 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { PrismaModule } from '../prisma/prisma.module';
 import { SubledgerModule } from '../subledger/subledger.module';
 import { AccountingPeriodModule } from '../accounting-period/accounting-period.module';
+import { InventoryModule } from '../inventory/inventory.module';
 import { DefaultInventoryIssueService } from './inventory-issue.service';
 import { SalesInvoiceService } from './sales-invoice.service';
 import { CustomerReceiptService } from './customer-receipt.service';
@@ -12,7 +13,12 @@ import { AccountsReceivableController } from './accounts-receivable.controller';
 import { V1AccountsReceivableController } from './v1-accounts-receivable.controller';
 
 @Module({
-  imports: [PrismaModule, SubledgerModule, AccountingPeriodModule],
+  imports: [
+    PrismaModule,
+    SubledgerModule,
+    AccountingPeriodModule,
+    forwardRef(() => InventoryModule),
+  ],
   controllers: [AccountsReceivableController, V1AccountsReceivableController],
   providers: [
     DefaultInventoryIssueService,

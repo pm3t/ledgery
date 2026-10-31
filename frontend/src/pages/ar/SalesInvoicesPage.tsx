@@ -887,7 +887,14 @@ export const SalesInvoicesPage: React.FC<SalesInvoicesPageProps> = ({ currentTen
                 <tbody className="divide-y divide-slate-800/60 font-mono">
                   {selectedInvoice.lines.map((l, i) => (
                     <tr key={i}>
-                      <td className="py-2 px-3 font-sans">{l.deskripsi}</td>
+                      <td className="py-2 px-3 font-sans">
+                        <div>{l.deskripsi}</div>
+                        {l.sourceLineType === 'DO_LINE' && (
+                          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-emerald-950/80 text-emerald-400 border border-emerald-800 mt-0.5">
+                            DO Line (Tanpa Duplikasi HPP)
+                          </span>
+                        )}
+                      </td>
                       <td className="py-2 px-3 text-right">{l.qty}</td>
                       <td className="py-2 px-3 text-right">{new Intl.NumberFormat('id-ID').format(l.hargaSatuan)}</td>
                       <td className="py-2 px-3 text-right font-bold text-indigo-300">

@@ -27,6 +27,10 @@ export class CreateSalesInvoiceLineDto {
 
   @IsOptional()
   @IsString()
+  warehouseId?: string;
+
+  @IsOptional()
+  @IsString()
   itemType?: 'STOCK' | 'SERVICE';
 
   @IsString()

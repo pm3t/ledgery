@@ -229,6 +229,7 @@ export class SalesInvoiceService {
         lines: {
           create: totals.calculatedLines.map((l) => ({
             itemId: l.itemId || null,
+            warehouseId: l.warehouseId || null,
             itemType: l.itemType || 'SERVICE',
             deskripsi: l.deskripsi,
             qty: l.qty,
@@ -303,6 +304,7 @@ export class SalesInvoiceService {
           lines: {
             create: totals.calculatedLines.map((l) => ({
               itemId: l.itemId || null,
+              warehouseId: l.warehouseId || null,
               itemType: l.itemType || 'SERVICE',
               deskripsi: l.deskripsi,
               qty: l.qty,
@@ -414,6 +416,7 @@ export class SalesInvoiceService {
           {
             invoiceId: invoice.id,
             itemId: line.itemId,
+            warehouseId: line.warehouseId || undefined,
             qty: Number(line.qty),
             tanggal: invoice.tanggal,
           },
@@ -513,7 +516,27 @@ export class SalesInvoiceService {
       },
     );
 
-    // 6. Update Status Faktur menjadi POSTED
+    // 6. Update Status Faktur menjadi POSTED dan perbarui qtyDitagih pada Surat Jalan / SO jika ada
+    for (const line of invoice.lines) {
+      if (line.sourceLineType === 'DO_LINE' && line.sourceLineId) {
+        const doLine = await this.prisma.deliveryOrderLine.findUnique({
+          where: { id: line.sourceLineId },
+        });
+        if (doLine) {
+          await this.prisma.deliveryOrderLine.update({
+            where: { id: doLine.id },
+            data: { qtyDitagih: { increment: Number(line.qty) } },
+          });
+          if (doLine.soLineId) {
+            await this.prisma.salesOrderLine.update({
+              where: { id: doLine.soLineId },
+              data: { qtyDitagih: { increment: Number(line.qty) } },
+            });
+          }
+        }
+      }
+    }
+
     return await this.prisma.salesInvoice.update({
       where: { id: invoice.id },
       data: {
@@ -535,7 +558,7 @@ export class SalesInvoiceService {
   async voidInvoice(tenantId: string, id: string, alasan?: string) {
     const invoice = await this.prisma.salesInvoice.findUnique({
       where: { id },
-      include: { allocations: true },
+      include: { allocations: true, lines: true },
     });
 
     if (!invoice || invoice.tenantId !== tenantId) {
@@ -565,6 +588,27 @@ export class SalesInvoiceService {
       tenantId,
       new Date(),
     );
+
+    // Kembalikan qtyDitagih pada baris DO dan SO jika ada
+    for (const line of invoice.lines) {
+      if (line.sourceLineType === 'DO_LINE' && line.sourceLineId) {
+        const doLine = await this.prisma.deliveryOrderLine.findUnique({
+          where: { id: line.sourceLineId },
+        });
+        if (doLine) {
+          await this.prisma.deliveryOrderLine.update({
+            where: { id: doLine.id },
+            data: { qtyDitagih: { decrement: Number(line.qty) } },
+          });
+          if (doLine.soLineId) {
+            await this.prisma.salesOrderLine.update({
+              where: { id: doLine.soLineId },
+              data: { qtyDitagih: { decrement: Number(line.qty) } },
+            });
+          }
+        }
+      }
+    }
 
     let voidJournalId: string | null = null;
     if (invoice.journalId) {

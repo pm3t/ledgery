@@ -26,6 +26,9 @@ import { AccountingPeriodModule } from './accounting-period/accounting-period.mo
 import { SubledgerModule } from './subledger/subledger.module';
 import { BusinessPartnerModule } from './business-partner/business-partner.module';
 import { AccountsReceivableModule } from './accounts-receivable/accounts-receivable.module';
+import { AccountsPayableModule } from './accounts-payable/accounts-payable.module';
+import { InventoryModule } from './inventory/inventory.module';
+import { OrderManagementModule } from './order-management/order-management.module';
 
 // Modul Utama Aplikasi Backend Ledgery
 @Module({
@@ -57,6 +60,9 @@ import { AccountsReceivableModule } from './accounts-receivable/accounts-receiva
     SubledgerModule,
     BusinessPartnerModule,
     AccountsReceivableModule,
+    AccountsPayableModule,
+    InventoryModule,
+    OrderManagementModule,
   ],
 })
 export class AppModule {}

@@ -22,6 +22,28 @@ import { CustomerReceiptsPage } from './pages/ar/CustomerReceiptsPage';
 import { CreditNotesPage } from './pages/ar/CreditNotesPage';
 import { ArReportsPage } from './pages/ar/ArReportsPage';
 import { ArOpeningBalancePage } from './pages/ar/ArOpeningBalancePage';
+import { PurchaseBillsPage } from './pages/ap/PurchaseBillsPage';
+import { VendorPaymentsPage } from './pages/ap/VendorPaymentsPage';
+import { DebitNotesPage } from './pages/ap/DebitNotesPage';
+import { ApReportsPage } from './pages/ap/ApReportsPage';
+import { PaymentSchedulePage } from './pages/ap/PaymentSchedulePage';
+import { ApOpeningBalancePage } from './pages/ap/ApOpeningBalancePage';
+
+// Inventory Pages
+import { ItemsPage } from './pages/inventory/ItemsPage';
+import { WarehousesPage } from './pages/inventory/WarehousesPage';
+import { StockReceiptOtherPage } from './pages/inventory/StockReceiptOtherPage';
+import { StockAdjustmentPage } from './pages/inventory/StockAdjustmentPage';
+import { StockTransferPage } from './pages/inventory/StockTransferPage';
+import { InventoryReportsPage } from './pages/inventory/InventoryReportsPage';
+import { InventoryOpeningBalancePage } from './pages/inventory/InventoryOpeningBalancePage';
+
+// Order Management Pages
+import { PurchaseOrdersPage } from './pages/order-management/PurchaseOrdersPage';
+import { GoodsReceiptsPage } from './pages/order-management/GoodsReceiptsPage';
+import { SalesOrdersPage } from './pages/order-management/SalesOrdersPage';
+import { DeliveryOrdersPage } from './pages/order-management/DeliveryOrdersPage';
+import { OrderReportsPage } from './pages/order-management/OrderReportsPage';
 
 // Admin Pages
 import { AdminLayout } from './layouts/AdminLayout';
@@ -53,7 +75,25 @@ type TenantTab =
   | 'ar-receipts'
   | 'ar-credit-notes'
   | 'ar-reports'
-  | 'ar-opening-balance';
+  | 'ar-opening-balance'
+  | 'ap-bills'
+  | 'ap-payments'
+  | 'ap-debit-notes'
+  | 'ap-reports'
+  | 'ap-payment-schedule'
+  | 'ap-opening-balance'
+  | 'inv-items'
+  | 'inv-warehouses'
+  | 'inv-receipt-other'
+  | 'inv-adjustments'
+  | 'inv-transfers'
+  | 'inv-reports'
+  | 'inv-opening-balance'
+  | 'om-so'
+  | 'om-do'
+  | 'om-po'
+  | 'om-gr'
+  | 'om-reports';
 type AdminTab = 'tenants' | 'billing' | 'audit' | 'api-keys' | 'user-management';
 
 export function App() {
@@ -62,6 +102,8 @@ export function App() {
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [currentTenant, setCurrentTenant] = useState<Tenant | null>(null);
   const [activeTab, setActiveTab] = useState<TenantTab>('coa');
+  const [selectedPoIdForGr, setSelectedPoIdForGr] = useState<string | undefined>(undefined);
+  const [selectedSoIdForDo, setSelectedSoIdForDo] = useState<string | undefined>(undefined);
 
   // Admin states
   const [adminActiveTab, setAdminActiveTab] = useState<AdminTab>('tenants');
@@ -206,6 +248,71 @@ export function App() {
           onNavigateToReports={() => setActiveTab('ar-reports')}
         />
       )}
+      {activeTab === 'ap-bills' && <PurchaseBillsPage currentTenant={currentTenant} />}
+      {activeTab === 'ap-payments' && <VendorPaymentsPage currentTenant={currentTenant} />}
+      {activeTab === 'ap-debit-notes' && <DebitNotesPage currentTenant={currentTenant} />}
+      {activeTab === 'ap-reports' && <ApReportsPage currentTenant={currentTenant} />}
+      {activeTab === 'ap-payment-schedule' && (
+        <PaymentSchedulePage
+          currentTenant={currentTenant}
+          onNavigateToPayments={() => setActiveTab('ap-payments')}
+        />
+      )}
+      {activeTab === 'ap-opening-balance' && (
+        <ApOpeningBalancePage
+          currentTenant={currentTenant}
+          onNavigateToBills={() => setActiveTab('ap-bills')}
+          onNavigateToReports={() => setActiveTab('ap-reports')}
+        />
+      )}
+      {activeTab === 'inv-items' && <ItemsPage currentTenant={currentTenant} />}
+      {activeTab === 'inv-warehouses' && <WarehousesPage currentTenant={currentTenant} />}
+      {activeTab === 'inv-receipt-other' && <StockReceiptOtherPage currentTenant={currentTenant} />}
+      {activeTab === 'inv-adjustments' && <StockAdjustmentPage currentTenant={currentTenant} />}
+      {activeTab === 'inv-transfers' && <StockTransferPage currentTenant={currentTenant} />}
+      {activeTab === 'inv-reports' && <InventoryReportsPage currentTenant={currentTenant} />}
+      {activeTab === 'inv-opening-balance' && (
+        <InventoryOpeningBalancePage
+          currentTenant={currentTenant}
+          onNavigateToStock={() => setActiveTab('inv-items')}
+          onNavigateToReports={() => setActiveTab('inv-reports')}
+        />
+      )}
+      {activeTab === 'om-po' && (
+        <PurchaseOrdersPage
+          currentTenant={currentTenant}
+          onNavigateToGr={(poId) => {
+            setSelectedPoIdForGr(poId);
+            setActiveTab('om-gr');
+          }}
+          onNavigateToBill={() => setActiveTab('ap-bills')}
+        />
+      )}
+      {activeTab === 'om-gr' && (
+        <GoodsReceiptsPage
+          currentTenant={currentTenant}
+          initialPoId={selectedPoIdForGr}
+          onNavigateToBill={() => setActiveTab('ap-bills')}
+        />
+      )}
+      {activeTab === 'om-so' && (
+        <SalesOrdersPage
+          currentTenant={currentTenant}
+          onNavigateToDo={(soId) => {
+            setSelectedSoIdForDo(soId);
+            setActiveTab('om-do');
+          }}
+          onNavigateToInvoice={() => setActiveTab('ar-invoices')}
+        />
+      )}
+      {activeTab === 'om-do' && (
+        <DeliveryOrdersPage
+          currentTenant={currentTenant}
+          initialSoId={selectedSoIdForDo}
+          onNavigateToInvoice={() => setActiveTab('ar-invoices')}
+        />
+      )}
+      {activeTab === 'om-reports' && <OrderReportsPage currentTenant={currentTenant} />}
     </Layout>
   );
 }

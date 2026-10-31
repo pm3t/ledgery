@@ -783,6 +783,323 @@ export const api = {
 
   importArOpeningBalance: (tenantId: string, data: any) =>
     request<any>(`/ar/opening-balance/${tenantId}/import`, { method: 'POST', body: JSON.stringify(data) }).then((res: any) => res.data || res),
+
+  // ==========================================
+  // MODUL 14: SUB LEDGER ACCOUNTS PAYABLE (AP)
+  // ==========================================
+  getPurchaseBills: (tenantId: string, params?: { status?: string; partnerId?: string; startDate?: string; endDate?: string; externalRef?: string }) => {
+    const q = new URLSearchParams();
+    if (params?.status) q.append('status', params.status);
+    if (params?.partnerId) q.append('partnerId', params.partnerId);
+    if (params?.startDate) q.append('startDate', params.startDate);
+    if (params?.endDate) q.append('endDate', params.endDate);
+    if (params?.externalRef) q.append('externalRef', params.externalRef);
+    const qs = q.toString() ? `?${q.toString()}` : '';
+    return request<any>(`/ap/bills/${tenantId}${qs}`).then((res: any) => res.data || res);
+  },
+  getOutstandingPurchaseBills: (tenantId: string, partnerId?: string) => {
+    const qs = partnerId ? `?partnerId=${partnerId}` : '';
+    return request<any>(`/ap/bills/${tenantId}/outstanding${qs}`).then((res: any) => res.data || res);
+  },
+  getPurchaseBill: (tenantId: string, id: string) =>
+    request<any>(`/ap/bills/${tenantId}/${id}`).then((res: any) => res.data || res),
+  createDraftPurchaseBill: (tenantId: string, data: any) =>
+    request<any>(`/ap/bills/${tenantId}`, { method: 'POST', body: JSON.stringify(data) }).then((res: any) => res.data || res),
+  updateDraftPurchaseBill: (tenantId: string, id: string, data: any) =>
+    request<any>(`/ap/bills/${tenantId}/${id}`, { method: 'PUT', body: JSON.stringify(data) }).then((res: any) => res.data || res),
+  deleteDraftPurchaseBill: (tenantId: string, id: string) =>
+    request<any>(`/ap/bills/${tenantId}/${id}`, { method: 'DELETE' }).then((res: any) => res.data || res),
+  postPurchaseBill: (tenantId: string, id: string) =>
+    request<any>(`/ap/bills/${tenantId}/${id}/post`, { method: 'POST' }).then((res: any) => res.data || res),
+  voidPurchaseBill: (tenantId: string, id: string, alasan?: string) =>
+    request<any>(`/ap/bills/${tenantId}/${id}/void`, { method: 'POST', body: JSON.stringify({ alasan }) }).then((res: any) => res.data || res),
+
+  getVendorPayments: (tenantId: string, params?: { status?: string; partnerId?: string; startDate?: string; endDate?: string }) => {
+    const q = new URLSearchParams();
+    if (params?.status) q.append('status', params.status);
+    if (params?.partnerId) q.append('partnerId', params.partnerId);
+    if (params?.startDate) q.append('startDate', params.startDate);
+    if (params?.endDate) q.append('endDate', params.endDate);
+    const qs = q.toString() ? `?${q.toString()}` : '';
+    return request<any>(`/ap/payments/${tenantId}${qs}`).then((res: any) => res.data || res);
+  },
+  getVendorPayment: (tenantId: string, id: string) =>
+    request<any>(`/ap/payments/${tenantId}/${id}`).then((res: any) => res.data || res),
+  createVendorPayment: (tenantId: string, data: any) =>
+    request<any>(`/ap/payments/${tenantId}`, { method: 'POST', body: JSON.stringify(data) }).then((res: any) => res.data || res),
+  voidVendorPayment: (tenantId: string, id: string, alasan?: string) =>
+    request<any>(`/ap/payments/${tenantId}/${id}/void`, { method: 'POST', body: JSON.stringify({ alasan }) }).then((res: any) => res.data || res),
+
+  getDebitNotes: (tenantId: string, partnerId?: string) => {
+    const qs = partnerId ? `?partnerId=${partnerId}` : '';
+    return request<any>(`/ap/debit-notes/${tenantId}${qs}`).then((res: any) => res.data || res);
+  },
+  createDebitNote: (tenantId: string, data: any) =>
+    request<any>(`/ap/debit-notes/${tenantId}`, { method: 'POST', body: JSON.stringify(data) }).then((res: any) => res.data || res),
+  voidDebitNote: (tenantId: string, id: string, alasan?: string) =>
+    request<any>(`/ap/debit-notes/${tenantId}/${id}/void`, { method: 'POST', body: JSON.stringify({ alasan }) }).then((res: any) => res.data || res),
+
+  getApAgingReport: (tenantId: string, asOfDate?: string) => {
+    const qs = asOfDate ? `?asOfDate=${asOfDate}` : '';
+    return request<any>(`/ap/reports/aging/${tenantId}${qs}`).then((res: any) => res.data || res);
+  },
+  getVendorLedger: (tenantId: string, partnerId: string, startDate?: string, endDate?: string) => {
+    const q = new URLSearchParams();
+    if (startDate) q.append('startDate', startDate);
+    if (endDate) q.append('endDate', endDate);
+    const qs = q.toString() ? `?${q.toString()}` : '';
+    return request<any>(`/ap/reports/vendor-ledger/${tenantId}/${partnerId}${qs}`).then((res: any) => res.data || res);
+  },
+  getPaymentSchedule: (tenantId: string, daysAhead?: number, partnerId?: string) => {
+    const q = new URLSearchParams();
+    if (daysAhead !== undefined) q.append('daysAhead', String(daysAhead));
+    if (partnerId) q.append('partnerId', partnerId);
+    const qs = q.toString() ? `?${q.toString()}` : '';
+    return request<any>(`/ap/reports/payment-schedule/${tenantId}${qs}`).then((res: any) => res.data || res);
+  },
+
+  importApOpeningBalance: (tenantId: string, data: any) =>
+    request<any>(`/ap/opening-balance/${tenantId}/import`, { method: 'POST', body: JSON.stringify(data) }).then((res: any) => res.data || res),
+
+  // --- INVENTORY API ---
+  getItems: (tenantId: string, params?: { tipe?: string; groupCode?: string; isActive?: boolean; search?: string }) => {
+    const q = new URLSearchParams();
+    if (params?.tipe) q.append('tipe', params.tipe);
+    if (params?.groupCode) q.append('groupCode', params.groupCode);
+    if (params?.isActive !== undefined) q.append('isActive', String(params.isActive));
+    if (params?.search) q.append('search', params.search);
+    const qs = q.toString() ? `?${q.toString()}` : '';
+    return request<any>(`/inventory/items/${tenantId}${qs}`).then((res: any) => res.data || res);
+  },
+  getItem: (tenantId: string, id: string) =>
+    request<any>(`/inventory/items/${tenantId}/${id}`).then((res: any) => res.data || res),
+  createItem: (tenantId: string, data: any) =>
+    request<any>(`/inventory/items/${tenantId}`, { method: 'POST', body: JSON.stringify(data) }).then((res: any) => res.data || res),
+  updateItem: (tenantId: string, id: string, data: any) =>
+    request<any>(`/inventory/items/${tenantId}/${id}`, { method: 'PUT', body: JSON.stringify(data) }).then((res: any) => res.data || res),
+  deleteItem: (tenantId: string, id: string) =>
+    request<any>(`/inventory/items/${tenantId}/${id}`, { method: 'DELETE' }).then((res: any) => res.data || res),
+  importItems: (tenantId: string, data: any) =>
+    request<any>(`/inventory/items/${tenantId}/import`, { method: 'POST', body: JSON.stringify(data) }).then((res: any) => res.data || res),
+
+  getWarehouses: (tenantId: string, isActive?: boolean) => {
+    const qs = isActive !== undefined ? `?isActive=${isActive}` : '';
+    return request<any>(`/inventory/warehouses/${tenantId}${qs}`).then((res: any) => res.data || res);
+  },
+  getWarehouse: (tenantId: string, id: string) =>
+    request<any>(`/inventory/warehouses/${tenantId}/${id}`).then((res: any) => res.data || res),
+  createWarehouse: (tenantId: string, data: any) =>
+    request<any>(`/inventory/warehouses/${tenantId}`, { method: 'POST', body: JSON.stringify(data) }).then((res: any) => res.data || res),
+  updateWarehouse: (tenantId: string, id: string, data: any) =>
+    request<any>(`/inventory/warehouses/${tenantId}/${id}`, { method: 'PUT', body: JSON.stringify(data) }).then((res: any) => res.data || res),
+  deleteWarehouse: (tenantId: string, id: string) =>
+    request<any>(`/inventory/warehouses/${tenantId}/${id}`, { method: 'DELETE' }).then((res: any) => res.data || res),
+  importWarehouses: (tenantId: string, data: any) =>
+    request<any>(`/inventory/warehouses/${tenantId}/import`, { method: 'POST', body: JSON.stringify(data) }).then((res: any) => res.data || res),
+
+  getReceiptOthers: (tenantId: string, params?: { warehouseId?: string; status?: string }) => {
+    const q = new URLSearchParams();
+    if (params?.warehouseId) q.append('warehouseId', params.warehouseId);
+    if (params?.status) q.append('status', params.status);
+    const qs = q.toString() ? `?${q.toString()}` : '';
+    return request<any>(`/inventory/receipt-other/${tenantId}${qs}`).then((res: any) => res.data || res);
+  },
+  getReceiptOther: (tenantId: string, id: string) =>
+    request<any>(`/inventory/receipt-other/${tenantId}/${id}`).then((res: any) => res.data || res),
+  createReceiptOther: (tenantId: string, data: any) =>
+    request<any>(`/inventory/receipt-other/${tenantId}`, { method: 'POST', body: JSON.stringify(data) }).then((res: any) => res.data || res),
+  postReceiptOther: (tenantId: string, id: string) =>
+    request<any>(`/inventory/receipt-other/${tenantId}/${id}/post`, { method: 'POST' }).then((res: any) => res.data || res),
+  voidReceiptOther: (tenantId: string, id: string, alasan?: string) =>
+    request<any>(`/inventory/receipt-other/${tenantId}/${id}/void`, { method: 'POST', body: JSON.stringify({ alasan }) }).then((res: any) => res.data || res),
+
+  getAdjustments: (tenantId: string, params?: { warehouseId?: string; status?: string }) => {
+    const q = new URLSearchParams();
+    if (params?.warehouseId) q.append('warehouseId', params.warehouseId);
+    if (params?.status) q.append('status', params.status);
+    const qs = q.toString() ? `?${q.toString()}` : '';
+    return request<any>(`/inventory/adjustments/${tenantId}${qs}`).then((res: any) => res.data || res);
+  },
+  getAdjustment: (tenantId: string, id: string) =>
+    request<any>(`/inventory/adjustments/${tenantId}/${id}`).then((res: any) => res.data || res),
+  createAdjustment: (tenantId: string, data: any) =>
+    request<any>(`/inventory/adjustments/${tenantId}`, { method: 'POST', body: JSON.stringify(data) }).then((res: any) => res.data || res),
+  postAdjustment: (tenantId: string, id: string) =>
+    request<any>(`/inventory/adjustments/${tenantId}/${id}/post`, { method: 'POST' }).then((res: any) => res.data || res),
+  voidAdjustment: (tenantId: string, id: string, alasan?: string) =>
+    request<any>(`/inventory/adjustments/${tenantId}/${id}/void`, { method: 'POST', body: JSON.stringify({ alasan }) }).then((res: any) => res.data || res),
+
+  getTransfers: (tenantId: string, params?: { status?: string }) => {
+    const q = new URLSearchParams();
+    if (params?.status) q.append('status', params.status);
+    const qs = q.toString() ? `?${q.toString()}` : '';
+    return request<any>(`/inventory/transfers/${tenantId}${qs}`).then((res: any) => res.data || res);
+  },
+  getTransfer: (tenantId: string, id: string) =>
+    request<any>(`/inventory/transfers/${tenantId}/${id}`).then((res: any) => res.data || res),
+  createTransfer: (tenantId: string, data: any) =>
+    request<any>(`/inventory/transfers/${tenantId}`, { method: 'POST', body: JSON.stringify(data) }).then((res: any) => res.data || res),
+  postTransfer: (tenantId: string, id: string) =>
+    request<any>(`/inventory/transfers/${tenantId}/${id}/post`, { method: 'POST' }).then((res: any) => res.data || res),
+  voidTransfer: (tenantId: string, id: string, alasan?: string) =>
+    request<any>(`/inventory/transfers/${tenantId}/${id}/void`, { method: 'POST', body: JSON.stringify({ alasan }) }).then((res: any) => res.data || res),
+
+  importStockOpeningBalance: (tenantId: string, data: any) =>
+    request<any>(`/inventory/opening-balance/${tenantId}/import`, { method: 'POST', body: JSON.stringify(data) }).then((res: any) => res.data || res),
+
+  getStockCardReport: (tenantId: string, itemId: string, warehouseId: string, startDate?: string, endDate?: string) => {
+    const q = new URLSearchParams();
+    if (startDate) q.append('startDate', startDate);
+    if (endDate) q.append('endDate', endDate);
+    const qs = q.toString() ? `?${q.toString()}` : '';
+    return request<any>(`/inventory/reports/stock-card/${tenantId}/${itemId}/${warehouseId}${qs}`).then((res: any) => res.data || res);
+  },
+  getFifoLayersReport: (tenantId: string, itemId?: string, warehouseId?: string) => {
+    const q = new URLSearchParams();
+    if (itemId) q.append('itemId', itemId);
+    if (warehouseId) q.append('warehouseId', warehouseId);
+    const qs = q.toString() ? `?${q.toString()}` : '';
+    return request<any>(`/inventory/reports/fifo-layers/${tenantId}${qs}`).then((res: any) => res.data || res);
+  },
+  getCurrentStockReport: (tenantId: string, params?: { warehouseId?: string; search?: string; groupCode?: string }) => {
+    const q = new URLSearchParams();
+    if (params?.warehouseId) q.append('warehouseId', params.warehouseId);
+    if (params?.search) q.append('search', params.search);
+    if (params?.groupCode) q.append('groupCode', params.groupCode);
+    const qs = q.toString() ? `?${q.toString()}` : '';
+    return request<any>(`/inventory/reports/current-stock/${tenantId}${qs}`).then((res: any) => res.data || res);
+  },
+  getInventoryValuationReport: (tenantId: string, asOfDate?: string, warehouseId?: string) => {
+    const q = new URLSearchParams();
+    if (asOfDate) q.append('asOfDate', asOfDate);
+    if (warehouseId) q.append('warehouseId', warehouseId);
+    const qs = q.toString() ? `?${q.toString()}` : '';
+    return request<any>(`/inventory/reports/valuation/${tenantId}${qs}`).then((res: any) => res.data || res);
+  },
+
+  // --- ORDER MANAGEMENT API ---
+  // 1. Purchase Orders
+  getPurchaseOrders: (tenantId: string, params?: { status?: string; partnerId?: string; search?: string; startDate?: string; endDate?: string }) => {
+    const q = new URLSearchParams();
+    if (params?.status) q.append('status', params.status);
+    if (params?.partnerId) q.append('partnerId', params.partnerId);
+    if (params?.search) q.append('search', params.search);
+    if (params?.startDate) q.append('startDate', params.startDate);
+    if (params?.endDate) q.append('endDate', params.endDate);
+    const qs = q.toString() ? `?${q.toString()}` : '';
+    return request<any>(`/order-management/purchase-orders/${tenantId}${qs}`).then((res: any) => res.data || res);
+  },
+  getPurchaseOrder: (tenantId: string, id: string) =>
+    request<any>(`/order-management/purchase-orders/${tenantId}/${id}`).then((res: any) => res.data || res),
+  createPurchaseOrder: (tenantId: string, data: any) =>
+    request<any>(`/order-management/purchase-orders/${tenantId}`, { method: 'POST', body: JSON.stringify(data) }).then((res: any) => res.data || res),
+  updatePurchaseOrder: (tenantId: string, id: string, data: any) =>
+    request<any>(`/order-management/purchase-orders/${tenantId}/${id}`, { method: 'PUT', body: JSON.stringify(data) }).then((res: any) => res.data || res),
+  confirmOpenPo: (tenantId: string, id: string) =>
+    request<any>(`/order-management/purchase-orders/${tenantId}/${id}/open`, { method: 'POST' }).then((res: any) => res.data || res),
+  cancelPo: (tenantId: string, id: string, alasan?: string) =>
+    request<any>(`/order-management/purchase-orders/${tenantId}/${id}/cancel`, { method: 'POST', body: JSON.stringify({ alasan }) }).then((res: any) => res.data || res),
+  closePo: (tenantId: string, id: string, alasan?: string) =>
+    request<any>(`/order-management/purchase-orders/${tenantId}/${id}/close`, { method: 'POST', body: JSON.stringify({ alasan }) }).then((res: any) => res.data || res),
+
+  // 2. Goods Receipts
+  getGoodsReceipts: (tenantId: string, params?: { status?: string; poId?: string; partnerId?: string; warehouseId?: string; search?: string; startDate?: string; endDate?: string }) => {
+    const q = new URLSearchParams();
+    if (params?.status) q.append('status', params.status);
+    if (params?.poId) q.append('poId', params.poId);
+    if (params?.partnerId) q.append('partnerId', params.partnerId);
+    if (params?.warehouseId) q.append('warehouseId', params.warehouseId);
+    if (params?.search) q.append('search', params.search);
+    if (params?.startDate) q.append('startDate', params.startDate);
+    if (params?.endDate) q.append('endDate', params.endDate);
+    const qs = q.toString() ? `?${q.toString()}` : '';
+    return request<any>(`/order-management/goods-receipts/${tenantId}${qs}`).then((res: any) => res.data || res);
+  },
+  getGoodsReceipt: (tenantId: string, id: string) =>
+    request<any>(`/order-management/goods-receipts/${tenantId}/${id}`).then((res: any) => res.data || res),
+  createGoodsReceipt: (tenantId: string, data: any) =>
+    request<any>(`/order-management/goods-receipts/${tenantId}`, { method: 'POST', body: JSON.stringify(data) }).then((res: any) => res.data || res),
+  updateGoodsReceipt: (tenantId: string, id: string, data: any) =>
+    request<any>(`/order-management/goods-receipts/${tenantId}/${id}`, { method: 'PUT', body: JSON.stringify(data) }).then((res: any) => res.data || res),
+  postGoodsReceipt: (tenantId: string, id: string) =>
+    request<any>(`/order-management/goods-receipts/${tenantId}/${id}/post`, { method: 'POST' }).then((res: any) => res.data || res),
+  voidGoodsReceipt: (tenantId: string, id: string, alasan?: string) =>
+    request<any>(`/order-management/goods-receipts/${tenantId}/${id}/void`, { method: 'POST', body: JSON.stringify({ alasan }) }).then((res: any) => res.data || res),
+  createBillFromGr: (tenantId: string, id: string, data: any) =>
+    request<any>(`/order-management/goods-receipts/${tenantId}/${id}/create-bill`, { method: 'POST', body: JSON.stringify(data) }).then((res: any) => res.data || res),
+
+  // 3. Sales Orders
+  getSalesOrders: (tenantId: string, params?: { status?: string; partnerId?: string; search?: string; startDate?: string; endDate?: string }) => {
+    const q = new URLSearchParams();
+    if (params?.status) q.append('status', params.status);
+    if (params?.partnerId) q.append('partnerId', params.partnerId);
+    if (params?.search) q.append('search', params.search);
+    if (params?.startDate) q.append('startDate', params.startDate);
+    if (params?.endDate) q.append('endDate', params.endDate);
+    const qs = q.toString() ? `?${q.toString()}` : '';
+    return request<any>(`/order-management/sales-orders/${tenantId}${qs}`).then((res: any) => res.data || res);
+  },
+  getSalesOrder: (tenantId: string, id: string) =>
+    request<any>(`/order-management/sales-orders/${tenantId}/${id}`).then((res: any) => res.data || res),
+  getStockAvailability: (tenantId: string, itemId: string) =>
+    request<any>(`/order-management/stock-availability/${tenantId}/${itemId}`).then((res: any) => res.data || res),
+  createSalesOrder: (tenantId: string, data: any) =>
+    request<any>(`/order-management/sales-orders/${tenantId}`, { method: 'POST', body: JSON.stringify(data) }).then((res: any) => res.data || res),
+  updateSalesOrder: (tenantId: string, id: string, data: any) =>
+    request<any>(`/order-management/sales-orders/${tenantId}/${id}`, { method: 'PUT', body: JSON.stringify(data) }).then((res: any) => res.data || res),
+  confirmOpenSo: (tenantId: string, id: string) =>
+    request<any>(`/order-management/sales-orders/${tenantId}/${id}/open`, { method: 'POST' }).then((res: any) => res.data || res),
+  cancelSo: (tenantId: string, id: string, alasan?: string) =>
+    request<any>(`/order-management/sales-orders/${tenantId}/${id}/cancel`, { method: 'POST', body: JSON.stringify({ alasan }) }).then((res: any) => res.data || res),
+  closeSo: (tenantId: string, id: string, alasan?: string) =>
+    request<any>(`/order-management/sales-orders/${tenantId}/${id}/close`, { method: 'POST', body: JSON.stringify({ alasan }) }).then((res: any) => res.data || res),
+
+  // 4. Delivery Orders
+  getDeliveryOrders: (tenantId: string, params?: { status?: string; soId?: string; partnerId?: string; warehouseId?: string; search?: string; startDate?: string; endDate?: string }) => {
+    const q = new URLSearchParams();
+    if (params?.status) q.append('status', params.status);
+    if (params?.soId) q.append('soId', params.soId);
+    if (params?.partnerId) q.append('partnerId', params.partnerId);
+    if (params?.warehouseId) q.append('warehouseId', params.warehouseId);
+    if (params?.search) q.append('search', params.search);
+    if (params?.startDate) q.append('startDate', params.startDate);
+    if (params?.endDate) q.append('endDate', params.endDate);
+    const qs = q.toString() ? `?${q.toString()}` : '';
+    return request<any>(`/order-management/delivery-orders/${tenantId}${qs}`).then((res: any) => res.data || res);
+  },
+  getDeliveryOrder: (tenantId: string, id: string) =>
+    request<any>(`/order-management/delivery-orders/${tenantId}/${id}`).then((res: any) => res.data || res),
+  createDeliveryOrder: (tenantId: string, data: any) =>
+    request<any>(`/order-management/delivery-orders/${tenantId}`, { method: 'POST', body: JSON.stringify(data) }).then((res: any) => res.data || res),
+  updateDeliveryOrder: (tenantId: string, id: string, data: any) =>
+    request<any>(`/order-management/delivery-orders/${tenantId}/${id}`, { method: 'PUT', body: JSON.stringify(data) }).then((res: any) => res.data || res),
+  postDeliveryOrder: (tenantId: string, id: string) =>
+    request<any>(`/order-management/delivery-orders/${tenantId}/${id}/post`, { method: 'POST' }).then((res: any) => res.data || res),
+  voidDeliveryOrder: (tenantId: string, id: string, alasan?: string) =>
+    request<any>(`/order-management/delivery-orders/${tenantId}/${id}/void`, { method: 'POST', body: JSON.stringify({ alasan }) }).then((res: any) => res.data || res),
+  createInvoiceFromDo: (tenantId: string, id: string, data: any) =>
+    request<any>(`/order-management/delivery-orders/${tenantId}/${id}/create-invoice`, { method: 'POST', body: JSON.stringify(data) }).then((res: any) => res.data || res),
+
+  // 5. Order Management Reports
+  getOutstandingOrdersReport: (tenantId: string, params?: { type?: 'PO' | 'SO' | 'ALL'; partnerId?: string; startDate?: string; endDate?: string }) => {
+    const q = new URLSearchParams();
+    if (params?.type) q.append('type', params.type);
+    if (params?.partnerId) q.append('partnerId', params.partnerId);
+    if (params?.startDate) q.append('startDate', params.startDate);
+    if (params?.endDate) q.append('endDate', params.endDate);
+    const qs = q.toString() ? `?${q.toString()}` : '';
+    return request<any>(`/order-management/reports/outstanding-orders/${tenantId}${qs}`).then((res: any) => res.data || res);
+  },
+  getOrderFulfillmentReport: (tenantId: string, params?: { type?: 'PO' | 'SO' | 'ALL'; startDate?: string; endDate?: string }) => {
+    const q = new URLSearchParams();
+    if (params?.type) q.append('type', params.type);
+    if (params?.startDate) q.append('startDate', params.startDate);
+    if (params?.endDate) q.append('endDate', params.endDate);
+    const qs = q.toString() ? `?${q.toString()}` : '';
+    return request<any>(`/order-management/reports/fulfillment/${tenantId}${qs}`).then((res: any) => res.data || res);
+  },
+  getGrIrClearingReport: (tenantId: string) =>
+    request<any>(`/order-management/reports/gr-ir-clearing/${tenantId}`).then((res: any) => res.data || res),
 };
 
 export type SalesInvoiceStatus = 'DRAFT' | 'POSTED' | 'PARTIAL' | 'PAID' | 'VOID';
@@ -1013,3 +1330,505 @@ export interface FiscalYear {
   accountingPeriods?: AccountingPeriod[];
   createdAt: string;
 }
+
+// ==========================================
+// MODUL 14: SUB LEDGER ACCOUNTS PAYABLE (AP)
+// ==========================================
+export type PurchaseBillStatus = 'DRAFT' | 'POSTED' | 'PARTIAL' | 'PAID' | 'VOID';
+export type VendorPaymentStatus = 'DRAFT' | 'POSTED' | 'VOID';
+export type DebitNoteStatus = 'DRAFT' | 'POSTED' | 'VOID';
+
+export interface PurchaseBillLine {
+  id?: string;
+  billId?: string;
+  itemId?: string | null;
+  itemType?: 'STOCK' | 'SERVICE';
+  deskripsi: string;
+  qty: number;
+  hargaSatuan: number;
+  diskon?: number;
+  ppnRate?: number;
+  jumlah: number;
+  akunBiayaId?: string | null;
+  dimensions?: any;
+  sourceLineType?: 'PO_LINE' | 'GR_LINE' | null;
+  sourceLineId?: string | null;
+  akunBiaya?: ChartOfAccount;
+}
+
+export interface PurchaseBill {
+  id: string;
+  tenantId: string;
+  noDokumen: string;
+  noFakturVendor?: string | null;
+  nomorFakturPajakMasukan?: string | null;
+  tanggal: string;
+  jatuhTempo: string;
+  partnerId: string;
+  mata_uang: string;
+  kurs: number;
+  status: PurchaseBillStatus;
+  subtotal: number;
+  totalDiskon: number;
+  totalPpn: number;
+  total: number;
+  totalDialokasikan: number;
+  saldo: number;
+  subtotalFungsional: number;
+  totalDiskonFungsional: number;
+  totalPpnFungsional: number;
+  totalFungsional: number;
+  saldoFungsional: number;
+  journalId?: string | null;
+  voidJournalId?: string | null;
+  externalRef?: string | null;
+  sumberAplikasi: string;
+  idempotencyKey?: string | null;
+  catatan?: string | null;
+  createdBy?: string | null;
+  postedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  partner?: BusinessPartner;
+  lines: PurchaseBillLine[];
+  journal?: { id: string; no_voucher: string; status: string } | null;
+  allocations?: PaymentAllocation[];
+}
+
+export interface PaymentAllocation {
+  id: string;
+  paymentId: string;
+  billId?: string | null;
+  debitNoteId?: string | null;
+  jumlahAlokasi: number;
+  kursAlokasi: number;
+  selisihKurs: number;
+  tanggalAlokasi: string;
+  bill?: PurchaseBill;
+  debitNote?: DebitNote;
+}
+
+export interface VendorPayment {
+  id: string;
+  tenantId: string;
+  noDokumen: string;
+  tanggal: string;
+  partnerId: string;
+  akunKasBankId: string;
+  jumlah: number;
+  jumlahFungsional: number;
+  mata_uang: string;
+  kurs: number;
+  status: VendorPaymentStatus;
+  totalDialokasikan: number;
+  belumDialokasikan: number;
+  journalId?: string | null;
+  voidJournalId?: string | null;
+  externalRef?: string | null;
+  catatan?: string | null;
+  createdBy?: string | null;
+  postedAt?: string | null;
+  createdAt: string;
+  partner?: BusinessPartner;
+  akunKasBank?: ChartOfAccount;
+  allocations: PaymentAllocation[];
+  journal?: any;
+}
+
+export interface DebitNoteLine {
+  id?: string;
+  debitNoteId?: string;
+  itemId?: string | null;
+  itemType?: 'STOCK' | 'SERVICE';
+  deskripsi: string;
+  qty: number;
+  hargaSatuan: number;
+  diskon?: number;
+  ppnRate?: number;
+  jumlah: number;
+  akunBiayaId?: string | null;
+  dimensions?: any;
+}
+
+export interface DebitNote {
+  id: string;
+  tenantId: string;
+  noDokumen: string;
+  billId?: string | null;
+  partnerId: string;
+  tanggal: string;
+  mata_uang: string;
+  kurs: number;
+  returnStock: boolean;
+  status: DebitNoteStatus;
+  subtotal: number;
+  totalDiskon: number;
+  totalPpn: number;
+  total: number;
+  totalDialokasikan: number;
+  saldo: number;
+  subtotalFungsional: number;
+  totalFungsional: number;
+  journalId?: string | null;
+  voidJournalId?: string | null;
+  externalRef?: string | null;
+  catatan?: string | null;
+  partner?: BusinessPartner;
+  lines: DebitNoteLine[];
+  journal?: any;
+}
+
+export interface PaymentScheduleItem {
+  id: string;
+  noDokumen: string;
+  noFakturVendor?: string | null;
+  partnerId: string;
+  partnerKode: string;
+  partnerNama: string;
+  tanggal: string;
+  jatuhTempo: string;
+  daysUntilDue: number;
+  urgency: 'OVERDUE' | 'DUE_TODAY' | 'DUE_SOON' | 'UPCOMING';
+  mata_uang: string;
+  kurs: number;
+  total: number;
+  saldo: number;
+  saldoFungsional: number;
+}
+
+export interface PaymentScheduleResponse {
+  asOfDate: string;
+  daysAhead: number;
+  cutOffDate: string;
+  totalBills: number;
+  totalKomitmenFungsional: number;
+  summary: {
+    overdue: number;
+    dueToday: number;
+    dueThisWeek: number;
+    dueLater: number;
+  };
+  items: PaymentScheduleItem[];
+}
+
+// ==========================================
+// MODUL 15: SUB LEDGER INVENTORY (PERSEDIAAN)
+// ==========================================
+export type ItemType = 'STOK' | 'NON_STOK' | 'JASA';
+export type InventoryValuationMethod = 'MOVING_AVERAGE' | 'FIFO';
+export type StockAdjustmentStatus = 'DRAFT' | 'POSTED' | 'VOID';
+export type StockTransferStatus = 'DRAFT' | 'POSTED' | 'VOID';
+export type StockReceiptOtherStatus = 'DRAFT' | 'POSTED' | 'VOID';
+
+export interface Warehouse {
+  id: string;
+  tenantId: string;
+  kode: string;
+  nama: string;
+  alamat?: string | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface StockBalance {
+  id: string;
+  tenantId: string;
+  itemId: string;
+  warehouseId: string;
+  qty: number;
+  nilai: number;
+  biayaRataRata: number;
+  warehouse?: Warehouse;
+}
+
+export interface Item {
+  id: string;
+  tenantId: string;
+  kode: string;
+  nama: string;
+  groupCode?: string | null;
+  satuan: string;
+  tipe: ItemType;
+  akunPersediaanId?: string | null;
+  akunHppId?: string | null;
+  akunPendapatanId?: string | null;
+  valuationMethod: InventoryValuationMethod;
+  externalRef?: string | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  akunPersediaan?: ChartOfAccount;
+  akunHpp?: ChartOfAccount;
+  akunPendapatan?: ChartOfAccount;
+  balances?: StockBalance[];
+}
+
+export interface StockCostLayer {
+  id: string;
+  tenantId: string;
+  itemId: string;
+  warehouseId: string;
+  movementMasukId?: string | null;
+  tanggalMasuk: string;
+  qtyAwal: number;
+  qtySisa: number;
+  biayaSatuan: number;
+}
+
+export interface StockReceiptOtherLine {
+  id?: string;
+  receiptOtherId?: string;
+  itemId: string;
+  qty: number;
+  biayaSatuan: number;
+  totalNilai: number;
+  catatan?: string | null;
+  item?: Item;
+}
+
+export interface StockReceiptOther {
+  id: string;
+  tenantId: string;
+  noDokumen: string;
+  tanggal: string;
+  warehouseId: string;
+  akunLawanId: string;
+  status: StockReceiptOtherStatus;
+  totalNilai: number;
+  catatan?: string | null;
+  externalRef?: string | null;
+  journalId?: string | null;
+  voidJournalId?: string | null;
+  postedAt?: string | null;
+  createdAt: string;
+  warehouse?: Warehouse;
+  akunLawan?: ChartOfAccount;
+  journal?: any;
+  lines: StockReceiptOtherLine[];
+}
+
+export interface StockAdjustmentLine {
+  id?: string;
+  adjustmentId?: string;
+  itemId: string;
+  qtySistem: number;
+  qtyFisik: number;
+  selisihQty: number;
+  biayaSatuan: number;
+  selisihNilai: number;
+  catatan?: string | null;
+  item?: Item;
+}
+
+export interface StockAdjustment {
+  id: string;
+  tenantId: string;
+  noDokumen: string;
+  tanggal: string;
+  warehouseId: string;
+  status: StockAdjustmentStatus;
+  totalSelisihNilai: number;
+  catatan?: string | null;
+  journalId?: string | null;
+  voidJournalId?: string | null;
+  postedAt?: string | null;
+  createdAt: string;
+  warehouse?: Warehouse;
+  journal?: any;
+  lines: StockAdjustmentLine[];
+}
+
+export interface StockTransferLine {
+  id?: string;
+  transferId?: string;
+  itemId: string;
+  qty: number;
+  biayaSatuan: number;
+  totalNilai: number;
+  item?: Item;
+}
+
+export interface StockTransfer {
+  id: string;
+  tenantId: string;
+  noDokumen: string;
+  tanggal: string;
+  fromWarehouseId: string;
+  toWarehouseId: string;
+  status: StockTransferStatus;
+  totalNilai: number;
+  catatan?: string | null;
+  journalId?: string | null;
+  voidJournalId?: string | null;
+  postedAt?: string | null;
+  createdAt: string;
+  fromWarehouse?: Warehouse;
+  toWarehouse?: Warehouse;
+  journal?: any;
+  lines: StockTransferLine[];
+}
+
+// --- ORDER MANAGEMENT INTERFACES ---
+export type OrderStatus = 'DRAFT' | 'OPEN' | 'PARTIAL' | 'COMPLETED' | 'CANCELLED' | 'CLOSED';
+export type GoodsReceiptStatus = 'DRAFT' | 'POSTED' | 'VOID';
+export type DeliveryOrderStatus = 'DRAFT' | 'POSTED' | 'VOID';
+
+export interface PurchaseOrderLine {
+  id?: string;
+  poId?: string;
+  itemId?: string | null;
+  deskripsi: string;
+  qty: number;
+  harga: number;
+  diskon?: number;
+  ppnRate?: number;
+  warehouseId?: string | null;
+  qtyDiterima: number;
+  qtyDitagih: number;
+  dimensions?: any;
+  item?: Item;
+  warehouse?: Warehouse;
+}
+
+export interface PurchaseOrder {
+  id: string;
+  tenantId: string;
+  noDokumen: string;
+  tanggal: string;
+  tanggalDiharapkan?: string | null;
+  partnerId: string;
+  mata_uang: string;
+  kurs: number;
+  status: OrderStatus;
+  subtotal: number;
+  diskon: number;
+  ppn: number;
+  total: number;
+  externalRef?: string | null;
+  idempotencyKey?: string | null;
+  catatan?: string | null;
+  partner: BusinessPartner;
+  lines: PurchaseOrderLine[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface GoodsReceiptLine {
+  id?: string;
+  receiptId?: string;
+  poLineId?: string | null;
+  itemId: string;
+  deskripsi?: string | null;
+  qty: number;
+  biayaSatuan: number;
+  qtyDitagih: number;
+  dimensions?: any;
+  item?: Item;
+  poLine?: PurchaseOrderLine;
+}
+
+export interface GoodsReceipt {
+  id: string;
+  tenantId: string;
+  noDokumen: string;
+  tanggal: string;
+  poId?: string | null;
+  partnerId: string;
+  warehouseId: string;
+  status: GoodsReceiptStatus;
+  journalId?: string | null;
+  voidJournalId?: string | null;
+  externalRef?: string | null;
+  idempotencyKey?: string | null;
+  catatan?: string | null;
+  partner: BusinessPartner;
+  warehouse: Warehouse;
+  po?: PurchaseOrder;
+  journal?: any;
+  voidJournal?: any;
+  lines: GoodsReceiptLine[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SalesOrderLine {
+  id?: string;
+  soId?: string;
+  itemId?: string | null;
+  deskripsi: string;
+  qty: number;
+  harga: number;
+  diskon?: number;
+  ppnRate?: number;
+  warehouseId?: string | null;
+  qtyDikirim: number;
+  qtyDitagih: number;
+  dimensions?: any;
+  item?: Item;
+  warehouse?: Warehouse;
+}
+
+export interface SalesOrder {
+  id: string;
+  tenantId: string;
+  noDokumen: string;
+  tanggal: string;
+  tanggalDiharapkan?: string | null;
+  partnerId: string;
+  mata_uang: string;
+  kurs: number;
+  status: OrderStatus;
+  subtotal: number;
+  diskon: number;
+  ppn: number;
+  total: number;
+  externalRef?: string | null;
+  idempotencyKey?: string | null;
+  catatan?: string | null;
+  partner: BusinessPartner;
+  lines: SalesOrderLine[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DeliveryOrderLine {
+  id?: string;
+  deliveryOrderId?: string;
+  soLineId?: string | null;
+  itemId: string;
+  deskripsi?: string | null;
+  qty: number;
+  biayaTotal: number;
+  qtyDitagih: number;
+  dimensions?: any;
+  item?: Item;
+  soLine?: SalesOrderLine;
+}
+
+export interface DeliveryOrder {
+  id: string;
+  tenantId: string;
+  noDokumen: string;
+  tanggal: string;
+  soId?: string | null;
+  partnerId: string;
+  warehouseId: string;
+  status: DeliveryOrderStatus;
+  journalId?: string | null;
+  voidJournalId?: string | null;
+  externalRef?: string | null;
+  idempotencyKey?: string | null;
+  catatan?: string | null;
+  partner: BusinessPartner;
+  warehouse: Warehouse;
+  so?: SalesOrder;
+  journal?: any;
+  voidJournal?: any;
+  lines: DeliveryOrderLine[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+
+

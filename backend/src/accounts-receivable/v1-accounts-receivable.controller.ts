@@ -102,19 +102,41 @@ export class V1AccountsReceivableController {
       throw new BadRequestException('Faktur harus memiliki minimal satu baris item.');
     }
 
-    const lines = rawLines.map((l: any) => ({
-      itemId: l.itemId || l.item_id || null,
-      itemType: (l.itemType || l.item_type || 'SERVICE') as 'STOCK' | 'SERVICE',
-      deskripsi: l.deskripsi || l.description || 'Penjualan Barang/Jasa',
-      qty: Number(l.qty || l.quantity || 1),
-      hargaSatuan: Number(l.hargaSatuan || l.price || l.unit_price || 0),
-      diskon: Number(l.diskon || l.discount || 0),
-      ppnRate: Number(l.ppnRate || l.ppn_rate || l.tax_rate || 0),
-      akunPendapatanId: l.akunPendapatanId || l.revenue_account_id || null,
-      dimensions: l.dimensions || undefined,
-      sourceLineType: l.sourceLineType || l.source_line_type || null,
-      sourceLineId: l.sourceLineId || l.source_line_id || null,
-    }));
+    const lines = await Promise.all(
+      rawLines.map(async (l: any) => {
+        let sourceLineType = l.sourceLineType || l.source_line_type || null;
+        let sourceLineId = l.sourceLineId || l.source_line_id || null;
+
+        // Dukungan delivery_ref per baris
+        if (!sourceLineId && (l.delivery_ref || l.delivery_order_ref || l.do_ref)) {
+          const doRef = l.delivery_ref || l.delivery_order_ref || l.do_ref;
+          const doLine = await this.prisma.deliveryOrderLine.findFirst({
+            where: {
+              delivery: { tenantId, OR: [{ noDokumen: doRef }, { externalRef: doRef }] },
+              itemId: l.itemId || l.item_id || undefined,
+            },
+          });
+          if (doLine) {
+            sourceLineType = 'DO_LINE';
+            sourceLineId = doLine.id;
+          }
+        }
+
+        return {
+          itemId: l.itemId || l.item_id || null,
+          itemType: (l.itemType || l.item_type || 'SERVICE') as 'STOCK' | 'SERVICE',
+          deskripsi: l.deskripsi || l.description || 'Penjualan Barang/Jasa',
+          qty: Number(l.qty || l.quantity || 1),
+          hargaSatuan: Number(l.hargaSatuan || l.price || l.unit_price || 0),
+          diskon: Number(l.diskon || l.discount || 0),
+          ppnRate: Number(l.ppnRate || l.ppn_rate || l.tax_rate || 0),
+          akunPendapatanId: l.akunPendapatanId || l.revenue_account_id || null,
+          dimensions: l.dimensions || undefined,
+          sourceLineType,
+          sourceLineId,
+        };
+      }),
+    );
 
     // 5. Buat Draft Faktur
     const draft = await this.salesInvoiceService.createDraft(
