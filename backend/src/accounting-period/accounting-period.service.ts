@@ -246,8 +246,16 @@ export class AccountingPeriodService {
     const periodInfo = {
       id: period.id,
       name: `Periode ${period.nomor_periode} (${fiscalYear.nama_tahun_buku})`,
-      start_date: period.tanggal_mulai.toISOString().slice(0, 10),
-      end_date: period.tanggal_selesai.toISOString().slice(0, 10),
+      start_date: period.tanggal_mulai
+        ? (period.tanggal_mulai instanceof Date
+            ? period.tanggal_mulai.toISOString().slice(0, 10)
+            : new Date(period.tanggal_mulai).toISOString().slice(0, 10))
+        : '',
+      end_date: period.tanggal_selesai
+        ? (period.tanggal_selesai instanceof Date
+            ? period.tanggal_selesai.toISOString().slice(0, 10)
+            : new Date(period.tanggal_selesai).toISOString().slice(0, 10))
+        : '',
     };
 
     if (period.status === PeriodStatus.CLOSED) {

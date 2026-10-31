@@ -49,11 +49,11 @@ export class UserManagementService {
       });
     }
 
-    // Admin Tenant hanya bisa melihat staf di tenant-nya sendiri
+    // Admin Tenant hanya bisa melihat staf di tenant-nya sendiri (STAF_AKUNTANSI dan PETUGAS_ASET)
     return this.prisma.user.findMany({
       where: {
         tenantId: callerTenantId,
-        role: UserRole.STAF_AKUNTANSI,
+        role: { in: [UserRole.STAF_AKUNTANSI, UserRole.PETUGAS_ASET] },
       },
       select: {
         id: true,
@@ -71,23 +71,23 @@ export class UserManagementService {
 
   // Buat user baru (dengan validasi eskalasi hak akses)
   async createUser(callerRole: string, callerTenantId: string | null, dto: CreateUserDto) {
-    // Validasi: ADMIN_TENANT hanya boleh membuat STAF_AKUNTANSI
+    // Validasi: ADMIN_TENANT hanya boleh membuat STAF_AKUNTANSI atau PETUGAS_ASET
     if (callerRole === 'ADMIN_TENANT') {
-      if (dto.role !== UserRole.STAF_AKUNTANSI) {
-        throw new ForbiddenException('ADMIN_TENANT hanya diizinkan membuat akun STAF_AKUNTANSI');
+      if (dto.role !== UserRole.STAF_AKUNTANSI && dto.role !== UserRole.PETUGAS_ASET) {
+        throw new ForbiddenException('ADMIN_TENANT hanya diizinkan membuat akun STAF_AKUNTANSI atau PETUGAS_ASET');
       }
       // Paksa tenantId sesuai caller
       dto.tenantId = callerTenantId;
     }
 
-    // STAF_AKUNTANSI tidak boleh membuat user
-    if (callerRole === 'STAF_AKUNTANSI') {
-      throw new ForbiddenException('Staf Akuntansi tidak memiliki hak untuk manajemen user');
+    // STAF_AKUNTANSI dan PETUGAS_ASET tidak boleh membuat user
+    if (callerRole === 'STAF_AKUNTANSI' || callerRole === 'PETUGAS_ASET') {
+      throw new ForbiddenException('Staf operasional tidak memiliki hak untuk manajemen user');
     }
 
     // Validasi: user dengan role tenant WAJIB punya tenantId
     if (dto.role !== UserRole.SUPER_ADMIN && !dto.tenantId) {
-      throw new BadRequestException('tenantId wajib diisi untuk role STAF_AKUNTANSI dan ADMIN_TENANT');
+      throw new BadRequestException('tenantId wajib diisi untuk role STAF_AKUNTANSI, PETUGAS_ASET, dan ADMIN_TENANT');
     }
 
     // Validasi: SUPER_ADMIN tidak boleh punya tenantId
@@ -134,10 +134,13 @@ export class UserManagementService {
     const targetUser = await this.prisma.user.findUnique({ where: { id: targetUserId } });
     if (!targetUser) throw new NotFoundException('User tidak ditemukan');
 
-    // Admin Tenant hanya boleh update user di tenantnya sendiri dan hanya STAF_AKUNTANSI
+    // Admin Tenant hanya boleh update user di tenantnya sendiri dan hanya STAF_AKUNTANSI / PETUGAS_ASET
     if (callerRole === 'ADMIN_TENANT') {
-      if (targetUser.tenantId !== callerTenantId || targetUser.role !== UserRole.STAF_AKUNTANSI) {
-        throw new ForbiddenException('Anda hanya bisa mengedit Staf Akuntansi di tenant Anda sendiri');
+      if (
+        targetUser.tenantId !== callerTenantId ||
+        (targetUser.role !== UserRole.STAF_AKUNTANSI && targetUser.role !== UserRole.PETUGAS_ASET)
+      ) {
+        throw new ForbiddenException('Anda hanya bisa mengedit Staf Akuntansi atau Petugas Aset di tenant Anda sendiri');
       }
     }
 
@@ -177,8 +180,11 @@ export class UserManagementService {
     if (!targetUser) throw new NotFoundException('User tidak ditemukan');
 
     if (callerRole === 'ADMIN_TENANT') {
-      if (targetUser.tenantId !== callerTenantId || targetUser.role !== UserRole.STAF_AKUNTANSI) {
-        throw new ForbiddenException('Anda hanya bisa menonaktifkan Staf Akuntansi di tenant Anda sendiri');
+      if (
+        targetUser.tenantId !== callerTenantId ||
+        (targetUser.role !== UserRole.STAF_AKUNTANSI && targetUser.role !== UserRole.PETUGAS_ASET)
+      ) {
+        throw new ForbiddenException('Anda hanya bisa menonaktifkan Staf Akuntansi atau Petugas Aset di tenant Anda sendiri');
       }
     }
 

@@ -220,18 +220,38 @@ export class V1AccountsPayableController {
       throw new BadRequestException('Vendor tidak ditemukan.');
     }
 
-    // 3. Resolusi Akun Kas/Bank
-    let akunKasBankId = body.akunKasBankId || body.cash_bank_account_id;
-    if (!akunKasBankId && (body.kodeAkunKas || body.cash_bank_code)) {
-      const kode = body.kodeAkunKas || body.cash_bank_code;
-      const acc = await this.prisma.chartOfAccount.findUnique({
-        where: { tenantId_kode_akun: { tenantId, kode_akun: kode } },
+    // 3. Resolusi Rekening Kas/Bank & Akun GL
+    let akunKasBankId = body.akunKasBankId || body.akun_kas_bank_id || body.akun_kas_bank;
+    let cashBankAccountId = body.cashBankAccountId || body.cash_bank_account_id || body.rekening_id;
+
+    // Jika rekening_kode / rekening_id diberikan, cari CashBankAccount dulu
+    const rekKodeOrId = body.rekening_kode || body.rekeningKode || cashBankAccountId;
+    if (rekKodeOrId) {
+      const cba = await this.prisma.cashBankAccount.findFirst({
+        where: {
+          tenantId,
+          OR: [{ id: rekKodeOrId }, { kode: rekKodeOrId }],
+        },
+      });
+      if (cba) {
+        cashBankAccountId = cba.id;
+        akunKasBankId = cba.chartOfAccountId;
+      }
+    }
+
+    if (!akunKasBankId && (body.kodeAkunKas || body.cash_bank_code || body.akun_kas_bank)) {
+      const kode = body.kodeAkunKas || body.cash_bank_code || body.akun_kas_bank;
+      const acc = await this.prisma.chartOfAccount.findFirst({
+        where: {
+          tenantId,
+          OR: [{ id: kode }, { kode_akun: kode }],
+        },
       });
       if (acc) akunKasBankId = acc.id;
     }
 
     if (!akunKasBankId) {
-      throw new BadRequestException('Akun kas/bank wajib diisi (akunKasBankId atau kodeAkunKas).');
+      throw new BadRequestException('Akun kas/bank wajib diisi (rekening_kode, akunKasBankId, atau kodeAkunKas).');
     }
 
     // 4. Resolusi Alokasi Faktur (bisa via billId atau noDokumen / external_ref faktur)
@@ -270,6 +290,7 @@ export class V1AccountsPayableController {
         tanggal: body.tanggal || body.date || new Date().toISOString().slice(0, 10),
         partnerId,
         akunKasBankId,
+        cashBankAccountId,
         jumlah: Number(body.jumlah || body.amount || 0),
         mata_uang: body.mata_uang || body.currency || undefined,
         kurs: body.kurs ? Number(body.kurs) : undefined,

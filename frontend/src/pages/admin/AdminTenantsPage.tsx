@@ -183,10 +183,22 @@ export function AdminTenantsPage({ onSelectTenant }: { onSelectTenant: (tenant: 
                           ORDER
                         </span>
                       )}
+                      {t.subledgerSetting?.cashBankEnabled && (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-teal-500/20 text-teal-300 border border-teal-500/30">
+                          KAS & BANK
+                        </span>
+                      )}
+                      {t.subledgerSetting?.fixedAssetEnabled && (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                          ASET TETAP
+                        </span>
+                      )}
                       {!t.subledgerSetting?.arEnabled &&
                         !t.subledgerSetting?.apEnabled &&
                         !t.subledgerSetting?.inventoryEnabled &&
-                        !t.subledgerSetting?.orderManagementEnabled && (
+                        !t.subledgerSetting?.orderManagementEnabled &&
+                        !t.subledgerSetting?.cashBankEnabled &&
+                        !t.subledgerSetting?.fixedAssetEnabled && (
                           <span className="text-xs text-slate-500">-</span>
                         )}
                     </div>

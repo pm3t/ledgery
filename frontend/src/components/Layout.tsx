@@ -36,6 +36,11 @@ import {
   ShoppingCart,
   Truck,
   Scale,
+  QrCode,
+  Landmark,
+  ArrowDownLeft,
+  ArrowUpRight,
+  ArrowRightLeft,
 } from 'lucide-react';
 import { Tenant, api, AppNotification } from '../services/api';
 import { AuthUser } from '../context/AuthContext';
@@ -79,7 +84,14 @@ export type TenantTab =
   | 'om-do'
   | 'om-po'
   | 'om-gr'
-  | 'om-reports';
+  | 'om-reports'
+  | 'cash-accounts'
+  | 'cash-receipts'
+  | 'cash-disbursements'
+  | 'cash-transfers'
+  | 'cash-reports'
+  | 'cash-opening-balance'
+  | 'asset-scan';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -128,6 +140,20 @@ export const Layout: React.FC<LayoutProps> = ({
   // Definisi Pengelompokan Menu (Terorganisir Sesuai Domain Fungsional)
   const menuGroups: MenuGroup[] = useMemo(() => {
     return [
+      {
+        id: 'cash-bank',
+        label: 'Kas & Bank',
+        icon: Landmark,
+        colorClass: 'text-emerald-400',
+        items: [
+          { id: 'cash-accounts', label: 'Master Rekening', icon: Landmark },
+          { id: 'cash-receipts', label: 'Penerimaan Kas/Bank', icon: ArrowDownLeft },
+          { id: 'cash-disbursements', label: 'Pengeluaran & Voucher', icon: ArrowUpRight },
+          { id: 'cash-transfers', label: 'Transfer & Kas Kecil', icon: ArrowRightLeft },
+          { id: 'cash-reports', label: 'Buku & Posisi Kas', icon: FileSpreadsheet },
+          { id: 'cash-opening-balance', label: 'Saldo Awal Kas/Bank', icon: UploadCloud },
+        ],
+      },
       {
         id: 'ar',
         label: 'Piutang & Penjualan (AR)',
@@ -242,6 +268,15 @@ export const Layout: React.FC<LayoutProps> = ({
           },
         ],
       },
+      {
+        id: 'fixed-asset',
+        label: 'Aset Tetap (Fixed Assets)',
+        icon: QrCode,
+        colorClass: 'text-teal-400',
+        items: [
+          { id: 'asset-scan', label: 'Scan & Verifikasi Fisik', icon: QrCode },
+        ],
+      },
     ];
   }, [pendingApprovalCount]);
 
@@ -324,8 +359,18 @@ export const Layout: React.FC<LayoutProps> = ({
     }
   };
 
-  // Filter Menu Berdasarkan Pencarian
+  // Filter Menu Berdasarkan Role & Pencarian
   const filteredGroups = useMemo(() => {
+    // Petugas Aset hanya diizinkan melihat modul operasional aset lapangan
+    if (currentUser?.role === 'PETUGAS_ASET') {
+      return menuGroups
+        .filter((g) => g.id === 'fixed-asset')
+        .map((g) => ({
+          ...g,
+          items: g.items.filter((item) => item.id === 'asset-scan'),
+        }));
+    }
+
     if (!searchQuery.trim()) return menuGroups;
     const q = searchQuery.toLowerCase();
     return menuGroups

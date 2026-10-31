@@ -3,6 +3,7 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PrismaService } from '../prisma/prisma.service';
 import {
   UpdateSubledgerSettingDto,
@@ -16,7 +17,10 @@ import {
 
 @Injectable()
 export class SubledgerSettingService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly eventEmitter: EventEmitter2,
+  ) {}
 
   /**
    * Mengambil setting subledger tenant. Jika belum ada, buat default.
@@ -43,7 +47,7 @@ export class SubledgerSettingService {
   async updateSettings(tenantId: string, dto: UpdateSubledgerSettingDto) {
     await this.getSettings(tenantId); // pastikan sudah ada record-nya
 
-    return this.prisma.subledgerSetting.update({
+    const updated = await this.prisma.subledgerSetting.update({
       where: { tenantId },
       data: {
         ...(dto.arEnabled !== undefined && { arEnabled: dto.arEnabled }),
@@ -53,6 +57,12 @@ export class SubledgerSettingService {
         }),
         ...(dto.orderManagementEnabled !== undefined && {
           orderManagementEnabled: dto.orderManagementEnabled,
+        }),
+        ...(dto.cashBankEnabled !== undefined && {
+          cashBankEnabled: dto.cashBankEnabled,
+        }),
+        ...(dto.fixedAssetEnabled !== undefined && {
+          fixedAssetEnabled: dto.fixedAssetEnabled,
         }),
         ...(dto.defaultValuationMethod !== undefined && {
           defaultValuationMethod: dto.defaultValuationMethod,
@@ -72,8 +82,42 @@ export class SubledgerSettingService {
         ...(dto.blockPeriodCloseOnRecon !== undefined && {
           blockPeriodCloseOnRecon: dto.blockPeriodCloseOnRecon,
         }),
+        ...(dto.pettyCashOverLimitMode !== undefined && {
+          pettyCashOverLimitMode: dto.pettyCashOverLimitMode,
+        }),
+        ...(dto.bankReconAutoMatchDays !== undefined && {
+          bankReconAutoMatchDays: dto.bankReconAutoMatchDays,
+        }),
+        ...(dto.blockPeriodCloseOnBankRecon !== undefined && {
+          blockPeriodCloseOnBankRecon: dto.blockPeriodCloseOnBankRecon,
+        }),
+        ...(dto.blockPeriodCloseOnDepreciation !== undefined && {
+          blockPeriodCloseOnDepreciation: dto.blockPeriodCloseOnDepreciation,
+        }),
+        ...(dto.depreciationConvention !== undefined && {
+          depreciationConvention: dto.depreciationConvention,
+        }),
+        ...(dto.autoDepreciationRun !== undefined && {
+          autoDepreciationRun: dto.autoDepreciationRun,
+        }),
+        ...(dto.tagCodePrefix !== undefined && {
+          tagCodePrefix: dto.tagCodePrefix,
+        }),
+        ...(dto.tagCodeFormat !== undefined && {
+          tagCodeFormat: dto.tagCodeFormat,
+        }),
+        ...(dto.labelSymbology !== undefined && {
+          labelSymbology: dto.labelSymbology,
+        }),
       },
     });
+
+    // Jika subledger Kas & Bank diaktifkan, otomatis backfill rekening & entri historis
+    if (dto.cashBankEnabled === true) {
+      this.eventEmitter.emit('subledger.cashBankEnabled', { tenantId });
+    }
+
+    return updated;
   }
 
   /**
@@ -225,6 +269,7 @@ export class SubledgerSettingService {
         KategoriAkun.PENDAPATAN,
       ],
       [PostingSetupKey.CASH_DEFAULT]: [KategoriAkun.ASET],
+      [PostingSetupKey.BANK_CHARGE_EXPENSE]: [KategoriAkun.BEBAN],
     };
 
     const allowed = validRules[key];
@@ -237,17 +282,38 @@ export class SubledgerSettingService {
 
   /**
    * Memeriksa saldo GL akun kontrol saat aktivasi subledger atau penetapan akun kontrol.
-   * Mengembalikan status dan peringatan jika saldo saat ini tidak nol.
+   * Mengembalikan status dan peringatan jika saldo saat ini tidak nol ("Belum rekonsiliasi").
    */
-  async checkControlAccountBalances(tenantId: string) {
+  async checkControlAccountBalances(tenantId: string, moduleFilter?: string) {
+    const whereCondition: any = {
+      tenantId,
+      OR: [
+        { controlType: { not: ControlAccountType.NONE } },
+        { isControlAccount: true },
+      ],
+    };
+
+    if (moduleFilter) {
+      if (moduleFilter === 'CASH_BANK') {
+        whereCondition.controlType = ControlAccountType.CASH_BANK;
+        delete whereCondition.OR;
+      } else if (moduleFilter === 'FIXED_ASSET') {
+        whereCondition.controlType = ControlAccountType.FIXED_ASSET;
+        delete whereCondition.OR;
+      } else if (moduleFilter === 'AR') {
+        whereCondition.controlType = ControlAccountType.AR;
+        delete whereCondition.OR;
+      } else if (moduleFilter === 'AP') {
+        whereCondition.controlType = ControlAccountType.AP;
+        delete whereCondition.OR;
+      } else if (moduleFilter === 'INVENTORY') {
+        whereCondition.controlType = ControlAccountType.INVENTORY;
+        delete whereCondition.OR;
+      }
+    }
+
     const controlAccounts = await this.prisma.chartOfAccount.findMany({
-      where: {
-        tenantId,
-        OR: [
-          { controlType: { not: ControlAccountType.NONE } },
-          { isControlAccount: true },
-        ],
-      },
+      where: whereCondition,
     });
 
     if (controlAccounts.length === 0) {

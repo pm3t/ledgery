@@ -1,5 +1,5 @@
 import { IsBoolean, IsEnum, IsOptional, IsString } from 'class-validator';
-import { KategoriAkun, ControlAccountType } from '@prisma/client';
+import { KategoriAkun, ControlAccountType, CashFlowCategory } from '@prisma/client';
 
 // DTO untuk mengubah data kode akun
 export class UpdateAccountDto {
@@ -31,7 +31,13 @@ export class UpdateAccountDto {
 
   @IsOptional()
   @IsEnum(ControlAccountType, {
-    message: 'Tipe akun kontrol harus NONE, AR, AP, atau INVENTORY',
+    message: 'Tipe akun kontrol harus NONE, AR, AP, INVENTORY, CASH_BANK, atau FIXED_ASSET',
   })
   controlType?: ControlAccountType;
+
+  @IsOptional()
+  @IsEnum(CashFlowCategory, {
+    message: 'Kategori arus kas harus salah satu dari: OPERASI, INVESTASI, PENDANAAN',
+  })
+  cashFlowCategory?: CashFlowCategory | null;
 }

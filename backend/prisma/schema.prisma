@@ -25,6 +25,15 @@ enum ControlAccountType {
   AR
   AP
   INVENTORY
+  CASH_BANK
+  FIXED_ASSET
+}
+
+// Enum Kategori Arus Kas untuk Laporan Arus Kas Metode Langsung
+enum CashFlowCategory {
+  OPERASI
+  INVESTASI
+  PENDANAAN
 }
 
 // Enum untuk Kebijakan Posting Jurnal
@@ -52,6 +61,7 @@ enum UserRole {
   SUPER_ADMIN
   STAF_AKUNTANSI
   ADMIN_TENANT
+  PETUGAS_ASET
 }
 
 // Model Tenant (Entitas Perusahaan / Pelanggan SaaS)
@@ -101,6 +111,11 @@ model Tenant {
   goodsReceipts      GoodsReceipt[]
   salesOrders        SalesOrder[]
   deliveryOrders     DeliveryOrder[]
+  cashBankAccounts   CashBankAccount[]
+  cashBankEntries    CashBankEntry[]
+  cashReceipts       CashReceipt[]
+  cashDisbursements  CashDisbursement[]
+  cashTransfers      CashTransfer[]
 }
 
 // Model Chart of Accounts (Daftar Kode Akun)
@@ -114,6 +129,7 @@ model ChartOfAccount {
   isActive         Boolean            @default(true)
   isControlAccount Boolean            @default(false)
   controlType      ControlAccountType @default(NONE)
+  cashFlowCategory CashFlowCategory?
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
 
@@ -137,6 +153,10 @@ model ChartOfAccount {
   itemsHpp           Item[]             @relation("ItemAkunHpp")
   itemsPendapatan    Item[]             @relation("ItemAkunPendapatan")
   stockReceiptOthers StockReceiptOther[]
+  cashBankAccounts      CashBankAccount[]
+  cashReceiptLines      CashReceiptLine[]
+  cashDisbursementLines CashDisbursementLine[]
+  cashTransfersBiaya    CashTransfer[]
 
   @@unique([tenantId, kode_akun])
 }
@@ -225,6 +245,10 @@ model Journal {
   voidGoodsReceipts      GoodsReceipt[]         @relation("GoodsReceiptVoidJournal")
   deliveryOrders         DeliveryOrder[]        @relation("DeliveryOrderJournal")
   voidDeliveryOrders     DeliveryOrder[]        @relation("DeliveryOrderVoidJournal")
+  cashBankEntries        CashBankEntry[]
+  cashReceipts           CashReceipt[]          @relation("CashReceiptJournal")
+  cashDisbursements      CashDisbursement[]     @relation("CashDisbursementJournal")
+  cashTransfers          CashTransfer[]         @relation("CashTransferJournal")
 
   // Constraint
   @@unique([tenantId, no_voucher])
@@ -245,6 +269,7 @@ model JournalEntry {
   journal        Journal        @relation(fields: [journalId], references: [id], onDelete: Cascade)
   chartOfAccount ChartOfAccount @relation(fields: [chartOfAccountId], references: [id], onDelete: Restrict)
   dimensions     JournalEntryDimension[]
+  cashBankEntry  CashBankEntry?
 }
 
 // Enum Aksi Approval
@@ -505,23 +530,54 @@ enum PostingSetupKey {
   PURCHASE_PRICE_VARIANCE
   FX_GAIN_LOSS
   CASH_DEFAULT
+  BANK_CHARGE_EXPENSE
+}
+
+// Enum Opsi Penanganan Kas Kecil Melebihi Plafon
+enum PettyCashOverLimitMode {
+  WARN
+  BLOCK
+}
+
+// Enum Konvensi Awal Penyusutan Aset Tetap
+enum DepreciationConvention {
+  BULAN_PENUH
+  BULAN_BERIKUTNYA
+}
+
+// Enum Simbologi Barcode / Label Aset Tetap
+enum LabelSymbology {
+  QR
+  CODE128
+  BOTH
 }
 
 model SubledgerSetting {
-  id                       String                   @id @default(uuid())
-  tenantId                 String                   @unique
-  arEnabled                Boolean                  @default(false)
-  apEnabled                Boolean                  @default(false)
-  inventoryEnabled         Boolean                  @default(false)
-  orderManagementEnabled   Boolean                  @default(false)
-  defaultValuationMethod   InventoryValuationMethod @default(MOVING_AVERAGE)
-  overDeliveryTolerancePct Float                    @default(0)
-  allowNegativeStock       Boolean                  @default(false)
-  creditLimitMode          CreditLimitMode          @default(WARN)
-  agingBuckets             Json                     @default("[30, 60, 90]")
-  blockPeriodCloseOnRecon  Boolean                  @default(false)
-  createdAt                DateTime                 @default(now())
-  updatedAt                DateTime                 @updatedAt
+  id                             String                   @id @default(uuid())
+  tenantId                       String                   @unique
+  arEnabled                      Boolean                  @default(false)
+  apEnabled                      Boolean                  @default(false)
+  inventoryEnabled               Boolean                  @default(false)
+  orderManagementEnabled         Boolean                  @default(false)
+  cashBankEnabled                Boolean                  @default(false)
+  fixedAssetEnabled              Boolean                  @default(false)
+  defaultValuationMethod         InventoryValuationMethod @default(MOVING_AVERAGE)
+  overDeliveryTolerancePct       Float                    @default(0)
+  allowNegativeStock             Boolean                  @default(false)
+  creditLimitMode                CreditLimitMode          @default(WARN)
+  agingBuckets                   Json                     @default("[30, 60, 90]")
+  blockPeriodCloseOnRecon        Boolean                  @default(false)
+  pettyCashOverLimitMode         PettyCashOverLimitMode   @default(WARN)
+  bankReconAutoMatchDays         Int                      @default(3)
+  blockPeriodCloseOnBankRecon    Boolean                  @default(false)
+  blockPeriodCloseOnDepreciation Boolean                  @default(false)
+  depreciationConvention         DepreciationConvention   @default(BULAN_PENUH)
+  autoDepreciationRun            Boolean                  @default(false)
+  tagCodePrefix                  String?
+  tagCodeFormat                  String                   @default("{NO_ASET}")
+  labelSymbology                 LabelSymbology           @default(QR)
+  createdAt                      DateTime                 @default(now())
+  updatedAt                      DateTime                 @updatedAt
 
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 }
@@ -778,6 +834,7 @@ model CustomerReceipt {
   tanggal           DateTime
   partnerId         String
   akunKasBankId     String
+  cashBankAccountId String?
   jumlah            Decimal               @db.Decimal(19, 4)
   jumlahFungsional  Decimal               @default(0) @db.Decimal(19, 4)
   mata_uang         String
@@ -801,8 +858,9 @@ model CustomerReceipt {
 
   tenant      Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   partner     BusinessPartner     @relation(fields: [partnerId], references: [id], onDelete: Restrict)
-  akunKasBank ChartOfAccount      @relation(fields: [akunKasBankId], references: [id], onDelete: Restrict)
-  journal     Journal?            @relation("ReceiptJournal", fields: [journalId], references: [id], onDelete: SetNull)
+  akunKasBank     ChartOfAccount      @relation(fields: [akunKasBankId], references: [id], onDelete: Restrict)
+  cashBankAccount CashBankAccount?    @relation(fields: [cashBankAccountId], references: [id], onDelete: SetNull)
+  journal         Journal?            @relation("ReceiptJournal", fields: [journalId], references: [id], onDelete: SetNull)
   voidJournal Journal?            @relation("ReceiptVoidJournal", fields: [voidJournalId], references: [id], onDelete: SetNull)
   allocations ReceiptAllocation[]
 
@@ -1019,6 +1077,7 @@ model VendorPayment {
   tanggal           DateTime
   partnerId         String
   akunKasBankId     String
+  cashBankAccountId String?
   jumlah            Decimal             @db.Decimal(19, 4)
   jumlahFungsional  Decimal             @default(0) @db.Decimal(19, 4)
   mata_uang         String
@@ -1042,8 +1101,9 @@ model VendorPayment {
 
   tenant      Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   partner     BusinessPartner     @relation(fields: [partnerId], references: [id], onDelete: Restrict)
-  akunKasBank ChartOfAccount      @relation(fields: [akunKasBankId], references: [id], onDelete: Restrict)
-  journal     Journal?            @relation("VendorPaymentJournal", fields: [journalId], references: [id], onDelete: SetNull)
+  akunKasBank     ChartOfAccount      @relation(fields: [akunKasBankId], references: [id], onDelete: Restrict)
+  cashBankAccount CashBankAccount?    @relation(fields: [cashBankAccountId], references: [id], onDelete: SetNull)
+  journal         Journal?            @relation("VendorPaymentJournal", fields: [journalId], references: [id], onDelete: SetNull)
   voidJournal Journal?            @relation("VendorPaymentVoidJournal", fields: [voidJournalId], references: [id], onDelete: SetNull)
   allocations PaymentAllocation[]
 
@@ -1658,6 +1718,230 @@ model DeliveryOrderLine {
   item        Item            @relation(fields: [itemId], references: [id], onDelete: Restrict)
 
   @@index([deliveryId])
+}
+
+// ==========================================
+// MODUL 19: SUB LEDGER KAS & BANK (V4)
+// ==========================================
+
+enum CashBankAccountType {
+  KAS_TUNAI
+  KAS_KECIL
+  BANK
+  DOMPET_DIGITAL
+}
+
+enum CashBankEntryDirection {
+  MASUK
+  KELUAR
+}
+
+enum CashBankSourceType {
+  CASH_RECEIPT
+  CASH_DISBURSEMENT
+  CASH_TRANSFER
+  PETTY_REPLENISH
+  PETTY_VOUCHER
+  CUSTOMER_RECEIPT
+  VENDOR_PAYMENT
+  JOURNAL_CAPTURE
+  OPENING
+  OTHER
+}
+
+enum CashDocStatus {
+  DRAFT
+  POSTED
+  VOID
+}
+
+enum CashTransferVariant {
+  TRANSFER
+  PENGISIAN_KAS_KECIL
+}
+
+model CashBankAccount {
+  id               String               @id @default(uuid())
+  tenantId         String
+  kode             String
+  nama             String
+  jenis            CashBankAccountType
+  chartOfAccountId String
+  mata_uang        String
+  namaBank         String?
+  noRekening       String?
+  namaPemilik      String?
+  plafonKasKecil   Decimal?             @db.Decimal(19, 4)
+  externalRef      String?
+  isActive         Boolean              @default(true)
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+
+  tenant           Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  chartOfAccount   ChartOfAccount       @relation(fields: [chartOfAccountId], references: [id])
+  entries          CashBankEntry[]
+  receipts         CashReceipt[]
+  disbursements    CashDisbursement[]
+  transfersFrom    CashTransfer[]       @relation("TransferDari")
+  transfersTo      CashTransfer[]       @relation("TransferKe")
+  customerReceipts CustomerReceipt[]
+  vendorPayments   VendorPayment[]
+
+  @@unique([tenantId, kode])
+  @@unique([tenantId, chartOfAccountId])
+  @@index([tenantId, isActive])
+}
+
+model CashBankEntry {
+  id                 String                 @id @default(uuid())
+  tenantId           String
+  cashBankAccountId  String
+  tanggal            DateTime
+  arah               CashBankEntryDirection
+  jumlah             Decimal                @db.Decimal(19, 4)
+  jumlahFungsional   Decimal                @db.Decimal(19, 4)
+  journalEntryId     String?                @unique
+  journalId          String?
+  sourceType         CashBankSourceType
+  sourceDocId        String?
+  keterangan         String
+  reconciliationId   String?
+  clearedAt          DateTime?
+  createdAt          DateTime               @default(now())
+
+  tenant             Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  cashBankAccount    CashBankAccount        @relation(fields: [cashBankAccountId], references: [id], onDelete: Cascade)
+  journalEntry       JournalEntry?          @relation(fields: [journalEntryId], references: [id], onDelete: SetNull)
+  journal            Journal?               @relation(fields: [journalId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, cashBankAccountId, tanggal])
+  @@index([tenantId, sourceType])
+}
+
+model CashReceipt {
+  id                String             @id @default(uuid())
+  tenantId          String
+  noDokumen         String
+  tanggal           DateTime
+  cashBankAccountId String
+  mata_uang         String
+  kurs              Decimal            @default(1.0) @db.Decimal(19, 6)
+  status            CashDocStatus      @default(DRAFT)
+  total             Decimal            @db.Decimal(19, 4)
+  journalId         String?
+  externalRef       String?
+  idempotencyKey    String?
+  catatan           String?
+  createdBy         String?
+  postedAt          DateTime?
+  docVariant        String             @default("STANDARD")
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  tenant            Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  cashBankAccount   CashBankAccount    @relation(fields: [cashBankAccountId], references: [id])
+  journal           Journal?           @relation("CashReceiptJournal", fields: [journalId], references: [id], onDelete: SetNull)
+  lines             CashReceiptLine[]
+
+  @@unique([tenantId, noDokumen])
+  @@unique([tenantId, idempotencyKey])
+  @@index([tenantId, tanggal])
+}
+
+model CashReceiptLine {
+  id          String         @id @default(uuid())
+  headerId    String
+  akunLawanId String
+  deskripsi   String
+  jumlah      Decimal        @db.Decimal(19, 4)
+  dimensions  Json?
+  createdAt   DateTime       @default(now())
+
+  header      CashReceipt    @relation(fields: [headerId], references: [id], onDelete: Cascade)
+  akunLawan   ChartOfAccount @relation(fields: [akunLawanId], references: [id])
+
+  @@index([headerId])
+}
+
+model CashDisbursement {
+  id                String                 @id @default(uuid())
+  tenantId          String
+  noDokumen         String
+  tanggal           DateTime
+  cashBankAccountId String
+  mata_uang         String
+  kurs              Decimal                @default(1.0) @db.Decimal(19, 6)
+  status            CashDocStatus          @default(DRAFT)
+  total             Decimal                @db.Decimal(19, 4)
+  journalId         String?
+  externalRef       String?
+  idempotencyKey    String?
+  catatan           String?
+  createdBy         String?
+  postedAt          DateTime?
+  docVariant        String                 @default("STANDARD")
+  replenishmentId   String?
+  createdAt         DateTime               @default(now())
+  updatedAt         DateTime               @updatedAt
+
+  tenant            Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  cashBankAccount   CashBankAccount        @relation(fields: [cashBankAccountId], references: [id])
+  journal           Journal?               @relation("CashDisbursementJournal", fields: [journalId], references: [id], onDelete: SetNull)
+  lines             CashDisbursementLine[]
+
+  @@unique([tenantId, noDokumen])
+  @@unique([tenantId, idempotencyKey])
+  @@index([tenantId, tanggal])
+  @@index([tenantId, replenishmentId])
+}
+
+model CashDisbursementLine {
+  id          String           @id @default(uuid())
+  headerId    String
+  akunLawanId String
+  deskripsi   String
+  jumlah      Decimal          @db.Decimal(19, 4)
+  dimensions  Json?
+  createdAt   DateTime         @default(now())
+
+  header      CashDisbursement @relation(fields: [headerId], references: [id], onDelete: Cascade)
+  akunLawan   ChartOfAccount   @relation(fields: [akunLawanId], references: [id])
+
+  @@index([headerId])
+}
+
+model CashTransfer {
+  id             String              @id @default(uuid())
+  tenantId       String
+  noDokumen      String
+  tanggal        DateTime
+  dariAccountId  String
+  keAccountId    String
+  jumlahKeluar   Decimal             @db.Decimal(19, 4)
+  jumlahMasuk    Decimal             @db.Decimal(19, 4)
+  kurs           Decimal             @default(1.0) @db.Decimal(19, 6)
+  biayaTransfer  Decimal?            @db.Decimal(19, 4)
+  akunBiayaId    String?
+  variant        CashTransferVariant @default(TRANSFER)
+  status         CashDocStatus       @default(DRAFT)
+  journalId      String?
+  externalRef    String?
+  idempotencyKey String?
+  catatan        String?
+  createdBy      String?
+  postedAt       DateTime?
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  tenant         Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  dariAccount    CashBankAccount     @relation("TransferDari", fields: [dariAccountId], references: [id])
+  keAccount      CashBankAccount     @relation("TransferKe", fields: [keAccountId], references: [id])
+  akunBiaya      ChartOfAccount?     @relation(fields: [akunBiayaId], references: [id])
+  journal        Journal?            @relation("CashTransferJournal", fields: [journalId], references: [id], onDelete: SetNull)
+
+  @@unique([tenantId, noDokumen])
+  @@unique([tenantId, idempotencyKey])
+  @@index([tenantId, tanggal])
 }
 
 

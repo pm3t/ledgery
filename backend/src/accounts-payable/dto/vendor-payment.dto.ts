@@ -41,6 +41,10 @@ export class CreateVendorPaymentDto {
   @IsNotEmpty()
   akunKasBankId: string;
 
+  @IsOptional()
+  @IsString()
+  cashBankAccountId?: string;
+
   @IsNumber()
   @Min(0.01)
   jumlah: number;

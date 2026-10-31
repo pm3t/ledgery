@@ -221,15 +221,31 @@ export class V1AccountsReceivableController {
       throw new BadRequestException('Pelanggan tidak valid.');
     }
 
-    // 3. Resolusi Akun Kas/Bank
-    let akunKasBankId = body.akunKasBankId;
-    if (!akunKasBankId && (body.akunKasBankKode || body.account_code)) {
-      const acc = await this.prisma.chartOfAccount.findUnique({
+    // 3. Resolusi Rekening Kas/Bank & Akun GL
+    let akunKasBankId = body.akunKasBankId || body.akun_kas_bank_id || body.akun_kas_bank;
+    let cashBankAccountId = body.cashBankAccountId || body.cash_bank_account_id || body.rekening_id;
+
+    // Jika rekening_kode / rekening_id diberikan, cari CashBankAccount dulu
+    const rekKodeOrId = body.rekening_kode || body.rekeningKode || cashBankAccountId;
+    if (rekKodeOrId) {
+      const cba = await this.prisma.cashBankAccount.findFirst({
         where: {
-          tenantId_kode_akun: {
-            tenantId,
-            kode_akun: body.akunKasBankKode || body.account_code,
-          },
+          tenantId,
+          OR: [{ id: rekKodeOrId }, { kode: rekKodeOrId }],
+        },
+      });
+      if (cba) {
+        cashBankAccountId = cba.id;
+        akunKasBankId = cba.chartOfAccountId;
+      }
+    }
+
+    if (!akunKasBankId && (body.akunKasBankKode || body.account_code || body.akun_kas_bank)) {
+      const kodeTarget = body.akunKasBankKode || body.account_code || body.akun_kas_bank;
+      const acc = await this.prisma.chartOfAccount.findFirst({
+        where: {
+          tenantId,
+          OR: [{ id: kodeTarget }, { kode_akun: kodeTarget }],
         },
       });
       if (acc) akunKasBankId = acc.id;
@@ -243,7 +259,7 @@ export class V1AccountsReceivableController {
     }
     if (!akunKasBankId) {
       throw new BadRequestException(
-        'Akun Kas/Bank tidak ditemukan. Tentukan akunKasBankId, akunKasBankKode, atau atur CASH_DEFAULT di Posting Setup.',
+        'Akun Kas/Bank tidak ditemukan. Tentukan rekening_kode, akunKasBankId, akun_kas_bank, atau atur CASH_DEFAULT di Posting Setup.',
       );
     }
 
@@ -289,6 +305,7 @@ export class V1AccountsReceivableController {
         tanggal: body.tanggal || body.date || new Date().toISOString().slice(0, 10),
         partnerId,
         akunKasBankId,
+        cashBankAccountId,
         jumlah: Number(body.jumlah || body.amount || 0),
         mata_uang: body.mata_uang || body.currency,
         kurs: body.kurs ? Number(body.kurs) : undefined,

@@ -21,6 +21,8 @@ export interface Tenant {
     apEnabled: boolean;
     inventoryEnabled: boolean;
     orderManagementEnabled: boolean;
+    cashBankEnabled?: boolean;
+    fixedAssetEnabled?: boolean;
   };
   _count?: {
     chartOfAccounts: number;
@@ -28,7 +30,8 @@ export interface Tenant {
   };
 }
 
-export type ControlAccountType = 'NONE' | 'AR' | 'AP' | 'INVENTORY';
+export type ControlAccountType = 'NONE' | 'AR' | 'AP' | 'INVENTORY' | 'CASH_BANK' | 'FIXED_ASSET';
+export type CashFlowCategory = 'OPERASI' | 'INVESTASI' | 'PENDANAAN';
 
 export interface ChartOfAccount {
   id: string;
@@ -40,6 +43,7 @@ export interface ChartOfAccount {
   isActive: boolean;
   isControlAccount?: boolean;
   controlType?: ControlAccountType;
+  cashFlowCategory?: CashFlowCategory | null;
   createdAt: string;
   updatedAt: string;
   parent?: {
@@ -64,7 +68,8 @@ export type PostingSetupKey =
   | 'GR_IR_CLEARING'
   | 'PURCHASE_PRICE_VARIANCE'
   | 'FX_GAIN_LOSS'
-  | 'CASH_DEFAULT';
+  | 'CASH_DEFAULT'
+  | 'BANK_CHARGE_EXPENSE';
 
 export interface SubledgerSetting {
   id?: string;
@@ -73,12 +78,23 @@ export interface SubledgerSetting {
   apEnabled: boolean;
   inventoryEnabled: boolean;
   orderManagementEnabled: boolean;
+  cashBankEnabled?: boolean;
+  fixedAssetEnabled?: boolean;
   defaultValuationMethod: 'MOVING_AVERAGE' | 'FIFO';
   overDeliveryTolerancePct: number;
   allowNegativeStock: boolean;
   creditLimitMode: 'WARN' | 'BLOCK';
   agingBuckets: number[];
   blockPeriodCloseOnRecon: boolean;
+  pettyCashOverLimitMode?: 'WARN' | 'BLOCK';
+  bankReconAutoMatchDays?: number;
+  blockPeriodCloseOnBankRecon?: boolean;
+  blockPeriodCloseOnDepreciation?: boolean;
+  depreciationConvention?: 'BULAN_PENUH' | 'BULAN_BERIKUTNYA';
+  autoDepreciationRun?: boolean;
+  tagCodePrefix?: string | null;
+  tagCodeFormat?: string;
+  labelSymbology?: 'QR' | 'CODE128' | 'BOTH';
   createdAt?: string;
   updatedAt?: string;
 }
@@ -126,6 +142,18 @@ export interface ActivationCheckResult {
     reconciled: boolean;
   };
   inventory: {
+    enabled: boolean;
+    controlAccounts: Array<{ id: string; kode_akun: string; nama_akun: string; saldo: number }>;
+    warnings: string[];
+    reconciled: boolean;
+  };
+  cashBank?: {
+    enabled: boolean;
+    controlAccounts: Array<{ id: string; kode_akun: string; nama_akun: string; saldo: number }>;
+    warnings: string[];
+    reconciled: boolean;
+  };
+  fixedAsset?: {
     enabled: boolean;
     controlAccounts: Array<{ id: string; kode_akun: string; nama_akun: string; saldo: number }>;
     warnings: string[];
@@ -464,6 +492,14 @@ export const api = {
 
   // --- CHART OF ACCOUNTS API ---
   getCoaByTenant: (tenantId: string, kategori?: string, search?: string) => {
+    const params = new URLSearchParams();
+    if (kategori && kategori !== 'ALL') params.append('kategori', kategori);
+    if (search) params.append('search', search);
+    const queryString = params.toString() ? `?${params.toString()}` : '';
+    return request<ChartOfAccount[]>(`/chart-of-accounts/tenant/${tenantId}${queryString}`);
+  },
+  getCoa: (kategori?: string, search?: string) => {
+    const tenantId = localStorage.getItem('ledgery_current_tenant_id') || '';
     const params = new URLSearchParams();
     if (kategori && kategori !== 'ALL') params.append('kategori', kategori);
     if (search) params.append('search', search);
@@ -1113,6 +1149,91 @@ export const api = {
   },
   getAccountantDashboardSummary: (tenantId: string) =>
     request<any>(`/subledger/dashboard-summary/${tenantId}`).then((res: any) => res.data || res),
+
+  // --- CASH & BANK SUBLEDGER API (MODUL 19) ---
+  getCashAccounts: (includeInactive?: boolean) => {
+    const q = includeInactive ? '?includeInactive=true' : '';
+    return request<CashBankAccount[]>(`/cash-bank/accounts${q}`);
+  },
+  getCashAccountById: (id: string) => request<CashBankAccount>(`/cash-bank/accounts/${id}`),
+  createCashAccount: (data: Partial<CashBankAccount>) =>
+    request<CashBankAccount>('/cash-bank/accounts', { method: 'POST', body: JSON.stringify(data) }),
+  updateCashAccount: (id: string, data: Partial<CashBankAccount>) =>
+    request<CashBankAccount>(`/cash-bank/accounts/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deactivateCashAccount: (id: string) =>
+    request<CashBankAccount>(`/cash-bank/accounts/${id}`, { method: 'DELETE' }),
+  getCashAccountBalance: (id: string, tanggal?: string) => {
+    const q = tanggal ? `?tanggal=${encodeURIComponent(tanggal)}` : '';
+    return request<any>(`/cash-bank/accounts/${id}/balance${q}`);
+  },
+
+  // Penerimaan (Cash Receipts)
+  getCashReceipts: () => request<CashReceipt[]>('/cash-bank/receipts'),
+  getCashReceiptById: (id: string) => request<CashReceipt>(`/cash-bank/receipts/${id}`),
+  createCashReceipt: (data: any) =>
+    request<CashReceipt>('/cash-bank/receipts', { method: 'POST', body: JSON.stringify(data) }),
+  postCashReceipt: (id: string) =>
+    request<CashReceipt>(`/cash-bank/receipts/${id}/post`, { method: 'POST' }),
+  voidCashReceipt: (id: string, reason?: string) =>
+    request<CashReceipt>(`/cash-bank/receipts/${id}/void`, { method: 'POST', body: JSON.stringify({ reason }) }),
+
+  // Pengeluaran & Voucher Kas Kecil (Cash Disbursements)
+  getCashDisbursements: (docVariant?: string) => {
+    const q = docVariant ? `?docVariant=${encodeURIComponent(docVariant)}` : '';
+    return request<CashDisbursement[]>(`/cash-bank/disbursements${q}`);
+  },
+  getCashDisbursementById: (id: string) => request<CashDisbursement>(`/cash-bank/disbursements/${id}`),
+  createCashDisbursement: (data: any) =>
+    request<CashDisbursement>('/cash-bank/disbursements', { method: 'POST', body: JSON.stringify(data) }),
+  postCashDisbursement: (id: string) =>
+    request<CashDisbursement>(`/cash-bank/disbursements/${id}/post`, { method: 'POST' }),
+  voidCashDisbursement: (id: string, reason?: string) =>
+    request<CashDisbursement>(`/cash-bank/disbursements/${id}/void`, { method: 'POST', body: JSON.stringify({ reason }) }),
+  getPettyCashReplenishmentSuggestion: (accountId: string) =>
+    request<any>(`/cash-bank/disbursements/replenishment-suggestion?accountId=${encodeURIComponent(accountId)}`),
+
+  // Transfer & Pengisian Kas Kecil (Cash Transfers)
+  getCashTransfers: (variant?: string) => {
+    const q = variant ? `?variant=${encodeURIComponent(variant)}` : '';
+    return request<CashTransfer[]>(`/cash-bank/transfers${q}`);
+  },
+  getCashTransferById: (id: string) => request<CashTransfer>(`/cash-bank/transfers/${id}`),
+  createCashTransfer: (data: any) =>
+    request<CashTransfer>('/cash-bank/transfers', { method: 'POST', body: JSON.stringify(data) }),
+  postCashTransfer: (id: string) =>
+    request<CashTransfer>(`/cash-bank/transfers/${id}/post`, { method: 'POST' }),
+  voidCashTransfer: (id: string, reason?: string) =>
+    request<CashTransfer>(`/cash-bank/transfers/${id}/void`, { method: 'POST', body: JSON.stringify({ reason }) }),
+
+  // Import Saldo Awal (Cut-off)
+  getCashOpeningBalanceStatus: () => request<any>('/cash-bank/opening-balance/status'),
+  importCashOpeningBalance: (data: any) =>
+    request<any>('/cash-bank/opening-balance', { method: 'POST', body: JSON.stringify(data) }),
+
+  // Laporan Kas & Bank
+  getCashBookReport: (accountId: string, filter?: { startDate?: string; endDate?: string }) => {
+    const q = new URLSearchParams();
+    q.append('accountId', accountId);
+    if (filter?.startDate) q.append('startDate', filter.startDate);
+    if (filter?.endDate) q.append('endDate', filter.endDate);
+    return request<any>(`/cash-bank/reports/cash-book?${q.toString()}`);
+  },
+  getCashPositionReport: (asOfDate?: string) => {
+    const q = asOfDate ? `?asOfDate=${encodeURIComponent(asOfDate)}` : '';
+    return request<any>(`/cash-bank/reports/position${q}`);
+  },
+  getCashProjectionReport: (horizonDays?: number, bucketMode?: 'WEEKLY' | 'MONTHLY') => {
+    const q = new URLSearchParams();
+    if (horizonDays) q.append('horizonDays', String(horizonDays));
+    if (bucketMode) q.append('bucketMode', bucketMode);
+    return request<any>(`/cash-bank/reports/projection?${q.toString()}`);
+  },
+  getDirectCashFlowReport: (filter?: { startDate?: string; endDate?: string }) => {
+    const q = new URLSearchParams();
+    if (filter?.startDate) q.append('startDate', filter.startDate);
+    if (filter?.endDate) q.append('endDate', filter.endDate);
+    return request<any>(`/cash-bank/reports/cash-flow-direct?${q.toString()}`);
+  },
 };
 
 export type SalesInvoiceStatus = 'DRAFT' | 'POSTED' | 'PARTIAL' | 'PAID' | 'VOID';
@@ -1907,6 +2028,159 @@ export interface AccountantDashboardSummary {
     grIrClearing: { status: 'OK' | 'SELISIH'; selisih: number };
   };
 }
+
+// =========================================================================
+// CASH & BANK SUBLEDGER INTERFACES (MODUL 19)
+// =========================================================================
+
+export type CashBankAccountType = 'KAS_TUNAI' | 'KAS_KECIL' | 'BANK' | 'DOMPET_DIGITAL';
+export type CashBankEntryDirection = 'MASUK' | 'KELUAR';
+export type CashBankSourceType =
+  | 'CASH_RECEIPT'
+  | 'CASH_DISBURSEMENT'
+  | 'CASH_TRANSFER'
+  | 'PETTY_REPLENISH'
+  | 'PETTY_VOUCHER'
+  | 'CUSTOMER_RECEIPT'
+  | 'VENDOR_PAYMENT'
+  | 'JOURNAL_CAPTURE'
+  | 'OPENING'
+  | 'OTHER';
+export type CashDocStatus = 'DRAFT' | 'POSTED' | 'VOID';
+export type CashTransferVariant = 'TRANSFER' | 'PENGISIAN_KAS_KECIL';
+
+export interface CashBankAccount {
+  id: string;
+  tenantId: string;
+  kode: string;
+  nama: string;
+  jenis: CashBankAccountType;
+  chartOfAccountId: string;
+  mata_uang: string;
+  namaBank: string | null;
+  noRekening: string | null;
+  namaPemilik: string | null;
+  plafonKasKecil: number | null;
+  externalRef: string | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  chartOfAccount?: ChartOfAccount;
+  currentBalance?: number;
+  currentBalanceFungsional?: number;
+}
+
+export interface CashReceiptLine {
+  id?: string;
+  headerId?: string;
+  akunLawanId: string;
+  deskripsi: string;
+  jumlah: number;
+  dimensions?: any;
+  akunLawan?: ChartOfAccount;
+}
+
+export interface CashReceipt {
+  id: string;
+  tenantId: string;
+  noDokumen: string;
+  tanggal: string;
+  cashBankAccountId: string;
+  mata_uang: string;
+  kurs: number;
+  status: CashDocStatus;
+  total: number;
+  journalId?: string | null;
+  externalRef?: string | null;
+  idempotencyKey?: string | null;
+  catatan?: string | null;
+  createdBy?: string | null;
+  postedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  cashBankAccount?: CashBankAccount;
+  lines: CashReceiptLine[];
+}
+
+export interface CashDisbursementLine {
+  id?: string;
+  headerId?: string;
+  akunLawanId: string;
+  deskripsi: string;
+  jumlah: number;
+  dimensions?: any;
+  akunLawan?: ChartOfAccount;
+}
+
+export interface CashDisbursement {
+  id: string;
+  tenantId: string;
+  noDokumen: string;
+  tanggal: string;
+  cashBankAccountId: string;
+  mata_uang: string;
+  kurs: number;
+  status: CashDocStatus;
+  total: number;
+  journalId?: string | null;
+  externalRef?: string | null;
+  idempotencyKey?: string | null;
+  catatan?: string | null;
+  createdBy?: string | null;
+  postedAt?: string | null;
+  docVariant: 'STANDARD' | 'PETTY_VOUCHER';
+  replenishmentId?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  cashBankAccount?: CashBankAccount;
+  lines: CashDisbursementLine[];
+}
+
+export interface CashTransfer {
+  id: string;
+  tenantId: string;
+  noDokumen: string;
+  tanggal: string;
+  dariAccountId: string;
+  keAccountId: string;
+  jumlahKeluar: number;
+  jumlahMasuk: number;
+  kurs: number;
+  biayaTransfer?: number | null;
+  akunBiayaId?: string | null;
+  variant: CashTransferVariant;
+  status: CashDocStatus;
+  journalId?: string | null;
+  externalRef?: string | null;
+  idempotencyKey?: string | null;
+  catatan?: string | null;
+  createdBy?: string | null;
+  postedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  dariAccount?: CashBankAccount;
+  keAccount?: CashBankAccount;
+}
+
+export interface CashBankEntry {
+  id: string;
+  tenantId: string;
+  cashBankAccountId: string;
+  tanggal: string;
+  arah: CashBankEntryDirection;
+  jumlah: number;
+  jumlahFungsional: number;
+  journalEntryId: string | null;
+  journalId: string | null;
+  sourceType: CashBankSourceType;
+  sourceDocId: string | null;
+  keterangan: string | null;
+  reconciliationId: string | null;
+  clearedAt: string | null;
+  createdAt: string;
+  cashBankAccount?: CashBankAccount;
+}
+
 
 
 

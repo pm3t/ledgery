@@ -283,6 +283,15 @@ export class CustomerReceiptService {
         });
       }
 
+      // Cari rekening CashBankAccount terkait jika ada
+      let cbaId = dto.cashBankAccountId || null;
+      if (!cbaId && (tx as any).cashBankAccount) {
+        const cba = await (tx as any).cashBankAccount.findFirst({
+          where: { tenantId, chartOfAccountId: dto.akunKasBankId },
+        });
+        if (cba) cbaId = cba.id;
+      }
+
       // Buat record CustomerReceipt
       return await tx.customerReceipt.create({
         data: {
@@ -291,6 +300,7 @@ export class CustomerReceiptService {
           tanggal: new Date(dto.tanggal),
           partnerId: dto.partnerId,
           akunKasBankId: dto.akunKasBankId,
+          cashBankAccountId: cbaId,
           jumlah,
           jumlahFungsional,
           mata_uang: mataUang,

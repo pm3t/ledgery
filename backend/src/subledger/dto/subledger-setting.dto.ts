@@ -12,6 +12,9 @@ import {
   InventoryValuationMethod,
   CreditLimitMode,
   PostingSetupKey,
+  PettyCashOverLimitMode,
+  DepreciationConvention,
+  LabelSymbology,
 } from '@prisma/client';
 
 export class UpdateSubledgerSettingDto {
@@ -30,6 +33,14 @@ export class UpdateSubledgerSettingDto {
   @IsOptional()
   @IsBoolean()
   orderManagementEnabled?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  cashBankEnabled?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  fixedAssetEnabled?: boolean;
 
   @IsOptional()
   @IsEnum(InventoryValuationMethod)
@@ -56,6 +67,44 @@ export class UpdateSubledgerSettingDto {
   @IsOptional()
   @IsBoolean()
   blockPeriodCloseOnRecon?: boolean;
+
+  @IsOptional()
+  @IsEnum(PettyCashOverLimitMode)
+  pettyCashOverLimitMode?: PettyCashOverLimitMode;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  @Max(30)
+  bankReconAutoMatchDays?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  blockPeriodCloseOnBankRecon?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  blockPeriodCloseOnDepreciation?: boolean;
+
+  @IsOptional()
+  @IsEnum(DepreciationConvention)
+  depreciationConvention?: DepreciationConvention;
+
+  @IsOptional()
+  @IsBoolean()
+  autoDepreciationRun?: boolean;
+
+  @IsOptional()
+  @IsString()
+  tagCodePrefix?: string | null;
+
+  @IsOptional()
+  @IsString()
+  tagCodeFormat?: string;
+
+  @IsOptional()
+  @IsEnum(LabelSymbology)
+  labelSymbology?: LabelSymbology;
 }
 
 export class UpsertPostingSetupItemDto {

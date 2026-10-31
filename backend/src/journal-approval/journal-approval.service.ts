@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PrismaService } from '../prisma/prisma.service';
 import { JournalStatus, ApprovalAction } from '@prisma/client';
 
@@ -9,6 +10,7 @@ export class JournalApprovalService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly accountingPeriodService: AccountingPeriodService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   // Ambil daftar jurnal PENDING untuk direview
@@ -52,6 +54,9 @@ export class JournalApprovalService {
         where: { id: journalId },
         data: { status: JournalStatus.APPROVED },
       });
+
+      // Hook otomatis penangkapan ke sub ledger Kas & Bank
+      this.eventEmitter.emit('journal.approved', { tenantId, journalId });
 
       await tx.journalApprovalLog.create({
         data: {

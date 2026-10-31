@@ -7,7 +7,11 @@ import { CurrencyModule } from '../currency/currency.module';
 import { AccountingPeriodModule } from '../accounting-period/accounting-period.module';
 
 @Module({
-  imports: [PrismaModule, CurrencyModule, AccountingPeriodModule],
+  imports: [
+    PrismaModule,
+    CurrencyModule,
+    AccountingPeriodModule,
+  ],
   controllers: [JournalController],
   providers: [JournalService],
   exports: [JournalService],

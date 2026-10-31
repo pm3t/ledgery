@@ -63,6 +63,8 @@ export class SuperAdminService {
             apEnabled: true,
             inventoryEnabled: true,
             orderManagementEnabled: true,
+            cashBankEnabled: true,
+            fixedAssetEnabled: true,
           },
         },
       },

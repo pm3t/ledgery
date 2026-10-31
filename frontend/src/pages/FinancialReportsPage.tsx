@@ -5,6 +5,7 @@ import { TrialBalanceReport } from '../components/reports/TrialBalanceReport';
 import { BalanceSheetReport } from '../components/reports/BalanceSheetReport';
 import { IncomeStatementReport } from '../components/reports/IncomeStatementReport';
 import { CashFlowReport } from '../components/reports/CashFlowReport';
+import { DirectCashFlowReport } from '../components/reports/DirectCashFlowReport';
 import {
   exportTrialBalanceToExcel,
   exportBalanceSheetToExcel,
@@ -17,7 +18,7 @@ interface Props {
   currentTenant: Tenant | null;
 }
 
-type ReportTab = 'trial-balance' | 'balance-sheet' | 'income-statement' | 'cash-flow';
+type ReportTab = 'trial-balance' | 'balance-sheet' | 'income-statement' | 'cash-flow' | 'cash-flow-direct';
 
 export const FinancialReportsPage: React.FC<Props> = ({ currentTenant }) => {
   const [activeTab, setActiveTab] = useState<ReportTab>('trial-balance');
@@ -35,6 +36,7 @@ export const FinancialReportsPage: React.FC<Props> = ({ currentTenant }) => {
   const [balanceSheetData, setBalanceSheetData] = useState<IBalanceSheetReport | null>(null);
   const [incomeStatementData, setIncomeStatementData] = useState<IIncomeStatementReport | null>(null);
   const [cashFlowData, setCashFlowData] = useState<ICashFlowReport | null>(null);
+  const [directCashFlowData, setDirectCashFlowData] = useState<any | null>(null);
   
   // Dimensi
   const [dimensions, setDimensions] = useState<Dimension[]>([]);
@@ -72,6 +74,9 @@ export const FinancialReportsPage: React.FC<Props> = ({ currentTenant }) => {
       } else if (activeTab === 'cash-flow') {
         const data = await api.getCashFlow(currentTenant.id, startDate, endDate);
         setCashFlowData(data);
+      } else if (activeTab === 'cash-flow-direct') {
+        const data = await api.getDirectCashFlowReport({ startDate, endDate });
+        setDirectCashFlowData(data);
       }
     } catch (err: any) {
       alert(`Gagal mengambil laporan: ${err.message}`);
@@ -96,7 +101,8 @@ export const FinancialReportsPage: React.FC<Props> = ({ currentTenant }) => {
       'trial-balance': 'Neraca Saldo',
       'balance-sheet': 'Neraca (Balance Sheet)',
       'income-statement': 'Laporan Laba Rugi',
-      'cash-flow': 'Laporan Arus Kas',
+      'cash-flow': 'Laporan Arus Kas (Metode Tidak Langsung)',
+      'cash-flow-direct': 'Laporan Arus Kas (Metode Langsung)',
     };
 
     if (format === 'pdf') {
@@ -165,7 +171,8 @@ export const FinancialReportsPage: React.FC<Props> = ({ currentTenant }) => {
             { id: 'trial-balance', label: 'Neraca Saldo', icon: <FileText className="w-4 h-4" /> },
             { id: 'balance-sheet', label: 'Neraca (Balance Sheet)', icon: <Layers className="w-4 h-4" /> },
             { id: 'income-statement', label: 'Laba Rugi', icon: <TrendingUp className="w-4 h-4" /> },
-            { id: 'cash-flow', label: 'Arus Kas', icon: <RefreshCw className="w-4 h-4" /> },
+            { id: 'cash-flow', label: 'Arus Kas (Tidak Langsung)', icon: <RefreshCw className="w-4 h-4" /> },
+            { id: 'cash-flow-direct', label: 'Arus Kas (Langsung)', icon: <RefreshCw className="w-4 h-4 text-emerald-400" /> },
           ].map(tab => (
             <button
               key={tab.id}
@@ -301,6 +308,9 @@ export const FinancialReportsPage: React.FC<Props> = ({ currentTenant }) => {
               </div>
             )}
             {activeTab === 'cash-flow' && cashFlowData && <CashFlowReport data={cashFlowData} />}
+            {activeTab === 'cash-flow-direct' && directCashFlowData && (
+              <DirectCashFlowReport data={directCashFlowData} mataUang={currentTenant?.mata_uang || 'IDR'} />
+            )}
           </>
         )}
       </div>

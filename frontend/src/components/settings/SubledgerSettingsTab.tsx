@@ -59,6 +59,7 @@ const POSTING_SETUP_KEYS: KeyDescriptor[] = [
   // General Keys
   { key: 'FX_GAIN_LOSS', label: 'Selisih Kurs Valuta Asing (FX Gain/Loss)', categoryHint: 'BEBAN / PENDAPATAN', allowedCategories: ['BEBAN', 'PENDAPATAN'], module: 'GENERAL' },
   { key: 'CASH_DEFAULT', label: 'Kas / Bank Penerimaan & Pembayaran Default', categoryHint: 'ASET', allowedCategories: ['ASET'], module: 'GENERAL' },
+  { key: 'BANK_CHARGE_EXPENSE', label: 'Beban Administrasi Bank Default', categoryHint: 'BEBAN', allowedCategories: ['BEBAN'], module: 'GENERAL' },
 ];
 
 export const SubledgerSettingsTab: React.FC<SubledgerSettingsTabProps> = ({ currentTenant }) => {
@@ -74,12 +75,23 @@ export const SubledgerSettingsTab: React.FC<SubledgerSettingsTabProps> = ({ curr
     apEnabled: false,
     inventoryEnabled: false,
     orderManagementEnabled: false,
+    cashBankEnabled: false,
+    fixedAssetEnabled: false,
     defaultValuationMethod: 'MOVING_AVERAGE',
     overDeliveryTolerancePct: 0,
     allowNegativeStock: false,
     creditLimitMode: 'WARN',
     agingBuckets: [30, 60, 90],
     blockPeriodCloseOnRecon: false,
+    pettyCashOverLimitMode: 'WARN',
+    bankReconAutoMatchDays: 3,
+    blockPeriodCloseOnBankRecon: false,
+    blockPeriodCloseOnDepreciation: false,
+    depreciationConvention: 'BULAN_PENUH',
+    autoDepreciationRun: false,
+    tagCodePrefix: '',
+    tagCodeFormat: '{NO_ASET}',
+    labelSymbology: 'QR',
   });
 
   // Aging buckets text representation for easy editing
@@ -150,12 +162,23 @@ export const SubledgerSettingsTab: React.FC<SubledgerSettingsTabProps> = ({ curr
         apEnabled: settings.apEnabled,
         inventoryEnabled: settings.inventoryEnabled,
         orderManagementEnabled: settings.orderManagementEnabled,
+        cashBankEnabled: settings.cashBankEnabled,
+        fixedAssetEnabled: settings.fixedAssetEnabled,
         defaultValuationMethod: settings.defaultValuationMethod,
         overDeliveryTolerancePct: Number(settings.overDeliveryTolerancePct),
         allowNegativeStock: settings.allowNegativeStock,
         creditLimitMode: settings.creditLimitMode,
         agingBuckets: parsedBuckets.length > 0 ? parsedBuckets : [30, 60, 90],
         blockPeriodCloseOnRecon: settings.blockPeriodCloseOnRecon,
+        pettyCashOverLimitMode: settings.pettyCashOverLimitMode,
+        bankReconAutoMatchDays: Number(settings.bankReconAutoMatchDays) || 3,
+        blockPeriodCloseOnBankRecon: settings.blockPeriodCloseOnBankRecon,
+        blockPeriodCloseOnDepreciation: settings.blockPeriodCloseOnDepreciation,
+        depreciationConvention: settings.depreciationConvention,
+        autoDepreciationRun: settings.autoDepreciationRun,
+        tagCodePrefix: settings.tagCodePrefix || null,
+        tagCodeFormat: settings.tagCodeFormat || '{NO_ASET}',
+        labelSymbology: settings.labelSymbology,
       });
 
       // 2. Simpan Posting Setups (batch)
@@ -362,6 +385,58 @@ export const SubledgerSettingsTab: React.FC<SubledgerSettingsTabProps> = ({ curr
               <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
             </label>
           </div>
+
+          {/* Kas & Bank Toggle */}
+          <div className="p-4 bg-slate-950/60 border border-slate-800 rounded-xl flex items-start justify-between gap-4">
+            <div>
+              <div className="text-sm font-semibold text-white flex items-center gap-2">
+                Kas & Bank (Cash & Bank)
+                {settings.cashBankEnabled && (
+                  <span className="text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold">
+                    AKTIF
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-slate-400 mt-1">
+                Buku kas & bank harian, transfer dana, kas kecil (petty cash imprest), dan impor rekening koran rekonsiliasi.
+              </p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer flex-shrink-0">
+              <input
+                type="checkbox"
+                checked={settings.cashBankEnabled || false}
+                onChange={(e) => setSettings({ ...settings, cashBankEnabled: e.target.checked })}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-600"></div>
+            </label>
+          </div>
+
+          {/* Aset Tetap Toggle */}
+          <div className="p-4 bg-slate-950/60 border border-slate-800 rounded-xl flex items-start justify-between gap-4">
+            <div>
+              <div className="text-sm font-semibold text-white flex items-center gap-2">
+                Aset Tetap (Fixed Assets)
+                {settings.fixedAssetEnabled && (
+                  <span className="text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold">
+                    AKTIF
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-slate-400 mt-1">
+                Registrasi aset, kapitalisasi, penyusutan otomatis komersial & fiskal, label QR/Barcode, dan verifikasi fisik.
+              </p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer flex-shrink-0">
+              <input
+                type="checkbox"
+                checked={settings.fixedAssetEnabled || false}
+                onChange={(e) => setSettings({ ...settings, fixedAssetEnabled: e.target.checked })}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+            </label>
+          </div>
         </div>
       </div>
 
@@ -495,6 +570,190 @@ export const SubledgerSettingsTab: React.FC<SubledgerSettingsTabProps> = ({ curr
                 type="checkbox"
                 checked={settings.blockPeriodCloseOnRecon}
                 onChange={(e) => setSettings({ ...settings, blockPeriodCloseOnRecon: e.target.checked })}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-rose-600"></div>
+            </label>
+          </div>
+
+          {/* Mode Saldo Kas Kecil Melebihi Plafon */}
+          <div>
+            <label className="block text-xs font-medium text-slate-300 mb-2">
+              Validasi Pengeluaran Kas Kecil Melebihi Plafon
+            </label>
+            <select
+              value={settings.pettyCashOverLimitMode || 'WARN'}
+              onChange={(e) =>
+                setSettings({
+                  ...settings,
+                  pettyCashOverLimitMode: e.target.value as 'WARN' | 'BLOCK',
+                })
+              }
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:border-indigo-500 outline-none"
+            >
+              <option value="WARN">Peringatan (WARN) - Tampilkan peringatan namun izinkan voucher kas kecil</option>
+              <option value="BLOCK">Kunci Keras (BLOCK) - Tolak pembuatan voucher melebihi sisa dana kas kecil</option>
+            </select>
+            <p className="text-[11px] text-slate-500 mt-1.5">
+              Kebijakan kontrol sistem saat total pengeluaran voucher kas kecil melampaui plafon kas imprest.
+            </p>
+          </div>
+
+          {/* Rentang Hari Pencocokan Rekonsiliasi Bank */}
+          <div>
+            <label className="block text-xs font-medium text-slate-300 mb-2">
+              Toleransi Hari Auto-Match Rekonsiliasi Bank (± Hari)
+            </label>
+            <input
+              type="number"
+              min="1"
+              max="30"
+              value={settings.bankReconAutoMatchDays ?? 3}
+              onChange={(e) =>
+                setSettings({
+                  ...settings,
+                  bankReconAutoMatchDays: parseInt(e.target.value, 10) || 3,
+                })
+              }
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:border-indigo-500 outline-none"
+            />
+            <p className="text-[11px] text-slate-500 mt-1.5">
+              Toleransi perbedaan tanggal mutasi bank vs tanggal jurnal saat auto-reconcile mutasi rekening koran.
+            </p>
+          </div>
+
+          {/* Blokir Tutup Periode pada Rekon Bank */}
+          <div className="p-4 bg-slate-950/60 border border-slate-800 rounded-xl flex items-center justify-between">
+            <div>
+              <div className="text-sm font-semibold text-white">Blokir Tutup Periode Bila Rekonsiliasi Bank Belum Selesai</div>
+              <p className="text-xs text-slate-400 mt-1">
+                Mencegah tutup buku bulanan bila terdapat mutasi rekening koran aktif yang belum terekonsiliasi.
+              </p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer flex-shrink-0">
+              <input
+                type="checkbox"
+                checked={settings.blockPeriodCloseOnBankRecon || false}
+                onChange={(e) => setSettings({ ...settings, blockPeriodCloseOnBankRecon: e.target.checked })}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-rose-600"></div>
+            </label>
+          </div>
+
+          {/* Konvensi Penyusutan Aset */}
+          <div>
+            <label className="block text-xs font-medium text-slate-300 mb-2">
+              Konvensi Perhitungan Penyusutan Aset Tetap
+            </label>
+            <select
+              value={settings.depreciationConvention || 'BULAN_PENUH'}
+              onChange={(e) =>
+                setSettings({
+                  ...settings,
+                  depreciationConvention: e.target.value as 'BULAN_PENUH' | 'BULAN_BERIKUTNYA',
+                })
+              }
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:border-indigo-500 outline-none"
+            >
+              <option value="BULAN_PENUH">Bulan Penuh (Penyusutan dihitung penuh pada bulan perolehan aset)</option>
+              <option value="BULAN_BERIKUTNYA">Bulan Berikutnya (Penyusutan mulai dihitung pada bulan setelah perolehan)</option>
+            </select>
+            <p className="text-[11px] text-slate-500 mt-1.5">
+              Konvensi tanggal mulai amortisasi & depresiasi nilai aset tetap.
+            </p>
+          </div>
+
+          {/* Simbologi Label Cetak Aset */}
+          <div>
+            <label className="block text-xs font-medium text-slate-300 mb-2">
+              Simbologi Label Aset (QR / Barcode 128)
+            </label>
+            <select
+              value={settings.labelSymbology || 'QR'}
+              onChange={(e) =>
+                setSettings({
+                  ...settings,
+                  labelSymbology: e.target.value as 'QR' | 'CODE128' | 'BOTH',
+                })
+              }
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:border-indigo-500 outline-none"
+            >
+              <option value="QR">QR Code (Rekomendasi - Kompak & cepat dipindai kamera smartphone)</option>
+              <option value="CODE128">Barcode Code 128 (Kompatibel dengan pemindai laser industri 1D)</option>
+              <option value="BOTH">Keduanya (QR Code + Code 128 berdampingan)</option>
+            </select>
+            <p className="text-[11px] text-slate-500 mt-1.5">
+              Format kode visual yang dicetak pada stiker fisik label aset tetap.
+            </p>
+          </div>
+
+          {/* Prefix Kode Tag Aset */}
+          <div>
+            <label className="block text-xs font-medium text-slate-300 mb-2">
+              Prefix Kode Tag Aset (Opsional)
+            </label>
+            <input
+              type="text"
+              value={settings.tagCodePrefix || ''}
+              onChange={(e) => setSettings({ ...settings, tagCodePrefix: e.target.value })}
+              placeholder="Misal: AST-, PT-DEMO-"
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:border-indigo-500 outline-none"
+            />
+            <p className="text-[11px] text-slate-500 mt-1.5">
+              Awalan kode tag fisik pada barcode / QR scanner lapangan.
+            </p>
+          </div>
+
+          {/* Format Pola Kode Tag */}
+          <div>
+            <label className="block text-xs font-medium text-slate-300 mb-2">
+              Format Pola Kode Tag Aset
+            </label>
+            <input
+              type="text"
+              value={settings.tagCodeFormat || '{NO_ASET}'}
+              onChange={(e) => setSettings({ ...settings, tagCodeFormat: e.target.value })}
+              placeholder="{NO_ASET}"
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:border-indigo-500 outline-none"
+            />
+            <p className="text-[11px] text-slate-500 mt-1.5">
+              Variabel tersedia: &#123;NO_ASET&#125;, &#123;PREFIX&#125;, &#123;YYYY&#125;. Default: &#123;NO_ASET&#125;
+            </p>
+          </div>
+
+          {/* Eksekusi Penyusutan Otomatis Bulanan */}
+          <div className="p-4 bg-slate-950/60 border border-slate-800 rounded-xl flex items-center justify-between">
+            <div>
+              <div className="text-sm font-semibold text-white">Penjadwalan Eksekusi Penyusutan Otomatis Bulanan</div>
+              <p className="text-xs text-slate-400 mt-1">
+                Otomatis menghasilkan jurnal penyusutan aset tetap pada hari terakhir setiap bulan.
+              </p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer flex-shrink-0">
+              <input
+                type="checkbox"
+                checked={settings.autoDepreciationRun || false}
+                onChange={(e) => setSettings({ ...settings, autoDepreciationRun: e.target.checked })}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-600"></div>
+            </label>
+          </div>
+
+          {/* Blokir Tutup Periode pada Penyusutan Aset */}
+          <div className="p-4 bg-slate-950/60 border border-slate-800 rounded-xl flex items-center justify-between">
+            <div>
+              <div className="text-sm font-semibold text-white">Blokir Tutup Periode Bila Penyusutan Belum Dijalankan</div>
+              <p className="text-xs text-slate-400 mt-1">
+                Mencegah penutupan periode akuntansi sebelum penyusutan aset tetap bulan berjalan dieksekusi.
+              </p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer flex-shrink-0">
+              <input
+                type="checkbox"
+                checked={settings.blockPeriodCloseOnDepreciation || false}
+                onChange={(e) => setSettings({ ...settings, blockPeriodCloseOnDepreciation: e.target.checked })}
                 className="sr-only peer"
               />
               <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-rose-600"></div>

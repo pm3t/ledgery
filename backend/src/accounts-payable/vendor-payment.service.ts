@@ -273,6 +273,15 @@ export class VendorPaymentService {
 
     // 11. Simpan Pembayaran, Alokasi, dan Update Saldo Faktur dalam Transaksi DB
     return await this.prisma.$transaction(async (tx) => {
+      // Cari rekening CashBankAccount terkait jika ada
+      let cbaId = dto.cashBankAccountId || null;
+      if (!cbaId && (tx as any).cashBankAccount) {
+        const cba = await (tx as any).cashBankAccount.findFirst({
+          where: { tenantId, chartOfAccountId: dto.akunKasBankId },
+        });
+        if (cba) cbaId = cba.id;
+      }
+
       // Buat dokumen pembayaran
       const payment = await tx.vendorPayment.create({
         data: {
@@ -281,6 +290,7 @@ export class VendorPaymentService {
           tanggal: docDate,
           partnerId: dto.partnerId,
           akunKasBankId: dto.akunKasBankId,
+          cashBankAccountId: cbaId,
           jumlah,
           jumlahFungsional,
           mata_uang: mataUang,

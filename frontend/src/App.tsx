@@ -46,6 +46,14 @@ import { DeliveryOrdersPage } from './pages/order-management/DeliveryOrdersPage'
 import { OrderReportsPage } from './pages/order-management/OrderReportsPage';
 import { SubledgerReconciliationPage } from './pages/SubledgerReconciliationPage';
 
+// Cash & Bank Pages (Modul 19)
+import { CashAccountsPage } from './pages/cash-bank/CashAccountsPage';
+import { CashReceiptsPage } from './pages/cash-bank/CashReceiptsPage';
+import { CashDisbursementsPage } from './pages/cash-bank/CashDisbursementsPage';
+import { CashTransfersPage } from './pages/cash-bank/CashTransfersPage';
+import { CashReportsPage } from './pages/cash-bank/CashReportsPage';
+import { CashOpeningBalancePage } from './pages/cash-bank/CashOpeningBalancePage';
+
 // Admin Pages
 import { AdminLayout } from './layouts/AdminLayout';
 import { AdminTenantsPage } from './pages/admin/AdminTenantsPage';
@@ -54,7 +62,7 @@ import { AdminBillingPage } from './pages/admin/AdminBillingPage';
 
 // Auth Context
 import { useAuth } from './context/AuthContext';
-import { Loader2 } from 'lucide-react';
+import { Loader2, QrCode } from 'lucide-react';
 
 type TenantTab =
   | 'coa'
@@ -95,7 +103,14 @@ type TenantTab =
   | 'om-do'
   | 'om-po'
   | 'om-gr'
-  | 'om-reports';
+  | 'om-reports'
+  | 'cash-accounts'
+  | 'cash-receipts'
+  | 'cash-disbursements'
+  | 'cash-transfers'
+  | 'cash-reports'
+  | 'cash-opening-balance'
+  | 'asset-scan';
 type AdminTab = 'tenants' | 'billing' | 'audit' | 'api-keys' | 'user-management';
 
 export function App() {
@@ -114,15 +129,16 @@ export function App() {
   const [tenantLoading, setTenantLoading] = useState(false);
   const [tenantError, setTenantError] = useState<string | null>(null);
 
-  // Deteksi mode dari URL param (setelah redirect login)
+  // Deteksi mode & tab dari URL param (setelah redirect login)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const mode = params.get('mode');
-    if (mode === 'admin' && user?.role === 'SUPER_ADMIN') {
-      // Tidak perlu melakukan apapun, render kondisi di bawah sudah menentukan
+    const tab = params.get('tab');
+    if (tab === 'asset-scan' || user?.role === 'PETUGAS_ASET') {
+      setActiveTab('asset-scan');
     }
     // Bersihkan URL param
-    if (mode) {
+    if (mode || tab) {
       window.history.replaceState({}, '', '/');
     }
   }, [user]);
@@ -336,6 +352,26 @@ export function App() {
         />
       )}
       {activeTab === 'om-reports' && <OrderReportsPage currentTenant={currentTenant} />}
+      {activeTab === 'cash-accounts' && <CashAccountsPage />}
+      {activeTab === 'cash-receipts' && <CashReceiptsPage />}
+      {activeTab === 'cash-disbursements' && <CashDisbursementsPage />}
+      {activeTab === 'cash-transfers' && <CashTransfersPage />}
+      {activeTab === 'cash-reports' && <CashReportsPage />}
+      {activeTab === 'cash-opening-balance' && <CashOpeningBalancePage />}
+      {activeTab === 'asset-scan' && (
+        <div className="max-w-4xl mx-auto p-6 space-y-6">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center space-y-4">
+            <div className="w-16 h-16 bg-teal-500/10 text-teal-400 rounded-2xl flex items-center justify-center mx-auto border border-teal-500/20">
+              <QrCode className="w-8 h-8" />
+            </div>
+            <h2 className="text-xl font-bold text-white">Pemindaian & Verifikasi Fisik Aset Tetap</h2>
+            <p className="text-slate-400 text-sm max-w-md mx-auto">
+              Portal operasional pemindaian QR / Barcode dan verifikasi fisik aset di lapangan (Disiapkan di Modul 24).
+              Peran Petugas Aset hanya memiliki hak verifikasi fisik dan audit inventaris tanpa akses nilai finansial.
+            </p>
+          </div>
+        </div>
+      )}
     </Layout>
   );
 }

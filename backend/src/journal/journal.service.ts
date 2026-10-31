@@ -277,7 +277,8 @@ export class JournalService {
               details: { kode_akun: acc.kode_akun, isActive: acc.isActive },
             });
           }
-          if (acc.isControlAccount || (acc.controlType && acc.controlType !== 'NONE')) {
+          // Proteksi Akun Kontrol: CASH_BANK dikecualikan dari pemblokiran otomatis agar integrasi lama (payroll/rekan) tetap berjalan
+          if (acc.isControlAccount || (acc.controlType && acc.controlType !== 'NONE' && acc.controlType !== 'CASH_BANK')) {
             const tipe = acc.controlType && acc.controlType !== 'NONE' ? acc.controlType : 'Subledger';
             throw new BadRequestException({
               errorCode: 'CONTROL_ACCOUNT_MANUAL_POSTING_BLOCKED',
@@ -390,6 +391,12 @@ export class JournalService {
             journalId: newJournal.id,
             no_voucher: newJournal.no_voucher,
           });
+        } else if (statusToSave === JournalStatus.POSTED) {
+          this.eventEmitter.emit('journal.posted', {
+            tenantId,
+            journalId: newJournal.id,
+            no_voucher: newJournal.no_voucher,
+          });
         }
 
         return newJournal;
@@ -469,9 +476,9 @@ export class JournalService {
 
       const validAccountMap = new Map(validAccounts.map((acc) => [acc.kode_akun, acc.id]));
       
-      // Proteksi Akun Kontrol: Blokir jurnal manual langsung pada akun kontrol subledger
+      // Proteksi Akun Kontrol: Blokir jurnal manual langsung pada akun kontrol subledger (kecuali CASH_BANK jika isControlAccount false)
       for (const acc of validAccounts) {
-        if (acc.isControlAccount || (acc.controlType && acc.controlType !== 'NONE')) {
+        if (acc.isControlAccount || (acc.controlType && acc.controlType !== 'NONE' && acc.controlType !== 'CASH_BANK')) {
           const tipe = acc.controlType && acc.controlType !== 'NONE' ? acc.controlType : 'Subledger';
           throw new BadRequestException({
             errorCode: 'CONTROL_ACCOUNT_MANUAL_POSTING_BLOCKED',
@@ -567,6 +574,12 @@ export class JournalService {
             },
           },
         },
+      });
+
+      this.eventEmitter.emit('journal.posted', {
+        tenantId,
+        journalId: newJournal.id,
+        no_voucher: newJournal.no_voucher,
       });
 
       return newJournal;
@@ -703,6 +716,19 @@ export class JournalService {
     await this.accountingPeriodService.validateJournalDate(tenantId, reversalDate);
 
     return this.prisma.$transaction(async (tx) => {
+      // Validasi: tolak void jika entri kas/bank sudah direkonsiliasi
+      if (tx.cashBankEntry) {
+        const cleared = await tx.cashBankEntry.findFirst({
+          where: { journalId: original.id, clearedAt: { not: null } },
+        });
+        if (cleared) {
+          throw new BadRequestException({
+            errorCode: 'ENTRY_ALREADY_CLEARED',
+            message: 'Jurnal tidak dapat dibalik karena transaksi kas/bank sudah direkonsiliasi (cleared).',
+          });
+        }
+      }
+
       // 4. Generate no voucher baru
       const no_voucher = await this.generateVoucherNumber(tenantId, reversalDateStr);
 
@@ -878,7 +904,7 @@ export class JournalService {
       const no_voucher = dto.no_voucher || (await this.generateVoucherNumber(tenantId, dto.tanggal));
 
       // 7. Simpan Jurnal dengan status POSTED langsung
-      return await tx.journal.create({
+      const createdJournal = await tx.journal.create({
         data: {
           tenantId,
           no_voucher,
@@ -904,6 +930,14 @@ export class JournalService {
           },
         },
       });
+
+      this.eventEmitter.emit('journal.posted', {
+        tenantId,
+        journalId: createdJournal.id,
+        no_voucher: createdJournal.no_voucher,
+      });
+
+      return createdJournal;
     });
   }
 
@@ -941,6 +975,19 @@ export class JournalService {
     await this.accountingPeriodService.validateJournalDate(tenantId, reversalDate);
 
     return this.prisma.$transaction(async (tx) => {
+      // Tolak void jika transaksi kas/bank sudah direkonsiliasi (cleared)
+      if (tx.cashBankEntry) {
+        const clearedEntry = await tx.cashBankEntry.findFirst({
+          where: { journalId: original.id, clearedAt: { not: null } },
+        });
+        if (clearedEntry) {
+          throw new BadRequestException({
+            errorCode: 'ENTRY_ALREADY_CLEARED',
+            message: 'Jurnal tidak dapat dibalik karena transaksi kas/bank sudah direkonsiliasi (cleared).',
+          });
+        }
+      }
+
       const no_voucher = await this.generateVoucherNumber(tenantId, reversalDateStr);
 
       const reversedEntries = original.entries.map((entry) => {
@@ -964,7 +1011,7 @@ export class JournalService {
         ? `[REVERSAL] Reversal ${original.no_voucher}: ${alasan}`
         : `[REVERSAL] Reversal voucher ${original.no_voucher}: ${original.deskripsi}`;
 
-      return await tx.journal.create({
+      const reversalJournal = await tx.journal.create({
         data: {
           tenantId,
           no_voucher,
@@ -989,6 +1036,14 @@ export class JournalService {
           },
         },
       });
+
+      this.eventEmitter.emit('journal.posted', {
+        tenantId,
+        journalId: reversalJournal.id,
+        no_voucher: reversalJournal.no_voucher,
+      });
+
+      return reversalJournal;
     });
   }
 }

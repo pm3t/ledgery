@@ -153,9 +153,12 @@ export class SubledgerSettingController {
   }
 
   @Get('activation-check/:tenantId')
-  async checkActivation(@Param('tenantId') tenantId: string) {
+  async checkActivation(
+    @Param('tenantId') tenantId: string,
+    @Query('module') module?: string,
+  ) {
     const data =
-      await this.subledgerSettingService.checkControlAccountBalances(tenantId);
+      await this.subledgerSettingService.checkControlAccountBalances(tenantId, module);
     return {
       statusCode: HttpStatus.OK,
       message: 'Pemeriksaan saldo akun kontrol berhasil dihitung',

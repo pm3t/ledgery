@@ -86,13 +86,24 @@ export function UserManagementPage() {
   const isSuperAdmin = user?.role === 'SUPER_ADMIN';
 
   const roleOptions = isSuperAdmin
-    ? ['SUPER_ADMIN', 'ADMIN_TENANT', 'STAF_AKUNTANSI']
-    : ['STAF_AKUNTANSI'];
+    ? ['SUPER_ADMIN', 'ADMIN_TENANT', 'STAF_AKUNTANSI', 'PETUGAS_ASET']
+    : ['STAF_AKUNTANSI', 'PETUGAS_ASET'];
+
+  const getRoleLabel = (r: string) => {
+    switch (r) {
+      case 'SUPER_ADMIN': return 'SUPER_ADMIN (Platform)';
+      case 'ADMIN_TENANT': return 'ADMIN_TENANT (Admin Perusahaan)';
+      case 'STAF_AKUNTANSI': return 'STAF_AKUNTANSI (Akuntansi & Keuangan)';
+      case 'PETUGAS_ASET': return 'PETUGAS_ASET (Petugas Lapangan / Scan Non-Finansial)';
+      default: return r;
+    }
+  };
 
   const getRoleBadge = (role: string) => {
     switch (role) {
       case 'SUPER_ADMIN': return 'bg-rose-500/20 text-rose-400 border border-rose-500/30';
       case 'ADMIN_TENANT': return 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30';
+      case 'PETUGAS_ASET': return 'bg-teal-500/20 text-teal-300 border border-teal-500/30';
       default: return 'bg-slate-500/20 text-slate-300 border border-slate-500/30';
     }
   };
@@ -103,7 +114,7 @@ export function UserManagementPage() {
         <div>
           <h1 className="text-2xl font-bold text-white">Manajemen User</h1>
           <p className="text-sm text-slate-400 mt-1">
-            {isSuperAdmin ? 'Kelola semua user lintas tenant.' : 'Kelola Staf Akuntansi di tenant Anda.'}
+            {isSuperAdmin ? 'Kelola semua user lintas tenant.' : 'Kelola Staf Akuntansi & Petugas Aset di tenant Anda.'}
           </p>
         </div>
         <button
@@ -142,7 +153,7 @@ export function UserManagementPage() {
               <label className="text-xs font-medium text-slate-400 mb-1 block">Role</label>
               <select value={form.role} onChange={e => setForm({ ...form, role: e.target.value })}
                 className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-white focus:border-indigo-500 outline-none">
-                {roleOptions.map(r => <option key={r} value={r}>{r}</option>)}
+                {roleOptions.map(r => <option key={r} value={r}>{getRoleLabel(r)}</option>)}
               </select>
             </div>
             {isSuperAdmin && form.role !== 'SUPER_ADMIN' && (

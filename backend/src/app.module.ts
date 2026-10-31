@@ -29,6 +29,7 @@ import { AccountsReceivableModule } from './accounts-receivable/accounts-receiva
 import { AccountsPayableModule } from './accounts-payable/accounts-payable.module';
 import { InventoryModule } from './inventory/inventory.module';
 import { OrderManagementModule } from './order-management/order-management.module';
+import { CashBankModule } from './cash-bank/cash-bank.module';
 
 // Modul Utama Aplikasi Backend Ledgery
 @Module({
@@ -63,6 +64,7 @@ import { OrderManagementModule } from './order-management/order-management.modul
     AccountsPayableModule,
     InventoryModule,
     OrderManagementModule,
+    CashBankModule,
   ],
 })
 export class AppModule {}

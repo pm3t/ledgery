@@ -6,7 +6,7 @@ import { api } from '../services/api';
 export interface AuthUser {
   userId: string;
   email: string;
-  role: 'SUPER_ADMIN' | 'ADMIN_TENANT' | 'STAF_AKUNTANSI';
+  role: 'SUPER_ADMIN' | 'ADMIN_TENANT' | 'STAF_AKUNTANSI' | 'PETUGAS_ASET';
   tenantId: string | null;
   nama: string;
 }

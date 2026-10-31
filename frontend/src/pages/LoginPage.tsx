@@ -26,6 +26,8 @@ export function LoginPage() {
       // Redirect berdasarkan role
       if (user.role === 'SUPER_ADMIN') {
         window.location.href = '/?mode=admin';
+      } else if (user.role === 'PETUGAS_ASET') {
+        window.location.href = '/?tab=asset-scan';
       } else {
         window.location.href = '/?mode=tenant';
       }
@@ -46,6 +48,8 @@ export function LoginPage() {
       const user = await login(demoEmail, demoPassword);
       if (user.role === 'SUPER_ADMIN') {
         window.location.href = '/?mode=admin';
+      } else if (user.role === 'PETUGAS_ASET') {
+        window.location.href = '/?tab=asset-scan';
       } else {
         window.location.href = '/?mode=tenant';
       }

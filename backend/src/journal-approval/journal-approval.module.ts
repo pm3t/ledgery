@@ -6,8 +6,12 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { AccountingPeriodModule } from '../accounting-period/accounting-period.module';
 
 @Module({
-  imports: [PrismaModule, AccountingPeriodModule],
+  imports: [
+    PrismaModule,
+    AccountingPeriodModule,
+  ],
   controllers: [JournalApprovalController],
   providers: [JournalApprovalService],
+  exports: [JournalApprovalService],
 })
 export class JournalApprovalModule {}

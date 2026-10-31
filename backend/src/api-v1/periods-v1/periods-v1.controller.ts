@@ -81,10 +81,42 @@ export class PeriodsV1Controller {
   @Get()
   async getPeriods(
     @Req() req: any,
-    @Query('from') from?: string,
-    @Query('to') to?: string,
-    @Query('status') status?: string,
+    @Query('from') fromQuery?: string,
+    @Query('to') toQuery?: string,
+    @Query('status') statusQuery?: string,
+    @Query('tanggal') tanggalQuery?: string,
   ) {
+    const tenantId = req.tenantId;
+
+    let from = fromQuery;
+    let to = toQuery;
+    let status = statusQuery;
+    let tanggal = tanggalQuery;
+
+    // Kompatibilitas unit test: jika dipanggil langsung dengan (req, 'YYYY-MM-DD')
+    if (fromQuery && !toQuery && !statusQuery && !tanggalQuery) {
+      tanggal = fromQuery;
+      from = undefined;
+    }
+
+    // Prasyarat integrasi V4: GET /v1/periods?tanggal=YYYY-MM-DD
+    if (tanggal) {
+      validateCalendarDate(tanggal);
+      const targetDate = new Date(`${tanggal}T00:00:00.000Z`);
+      const evaluation = await this.periodService.evaluatePostingDate(
+        tenantId,
+        targetDate,
+      );
+
+      return {
+        tanggal,
+        date: tanggal,
+        status: evaluation.status,
+        can_post: evaluation.can_post,
+        period: evaluation.period,
+      };
+    }
+
     if (from) {
       validateCalendarDate(from);
     }
@@ -105,7 +137,6 @@ export class PeriodsV1Controller {
       parsedStatus = status as PeriodStatus;
     }
 
-    const tenantId = req.tenantId;
     const periods = await this.periodService.getPeriodsV1(tenantId, {
       from,
       to,

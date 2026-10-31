@@ -20,6 +20,7 @@ import {
   Building2,
   ArrowRightLeft,
   Columns3,
+  Info,
 } from 'lucide-react';
 import {
   api,
@@ -37,6 +38,7 @@ interface ColumnVisibility {
   kode_akun: boolean;
   nama_akun: boolean;
   kategori: boolean;
+  cashFlowCategory: boolean;
   controlType: boolean;
   parent: boolean;
   saldo: boolean;
@@ -48,6 +50,7 @@ const DEFAULT_COLUMNS: ColumnVisibility = {
   kode_akun: true,
   nama_akun: true,
   kategori: true,
+  cashFlowCategory: true,
   controlType: true,
   parent: true,
   saldo: true,
@@ -59,6 +62,7 @@ const COLUMN_DEFINITIONS: { key: keyof ColumnVisibility; label: string }[] = [
   { key: 'kode_akun', label: 'Kode Akun' },
   { key: 'nama_akun', label: 'Nama Akun' },
   { key: 'kategori', label: 'Kategori' },
+  { key: 'cashFlowCategory', label: 'Kategori Arus Kas' },
   { key: 'controlType', label: 'Tipe Kontrol' },
   { key: 'parent', label: 'Akun Induk' },
   { key: 'saldo', label: 'Saldo' },
@@ -167,7 +171,8 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
     parentId: string;
     isActive: boolean;
     isControlAccount: boolean;
-    controlType: 'NONE' | 'AR' | 'AP' | 'INVENTORY';
+    controlType: 'NONE' | 'AR' | 'AP' | 'INVENTORY' | 'CASH_BANK' | 'FIXED_ASSET';
+    cashFlowCategory: '' | 'OPERASI' | 'INVESTASI' | 'PENDANAAN';
   }>({
     kode_akun: '',
     nama_akun: '',
@@ -176,6 +181,7 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
     isActive: true,
     isControlAccount: false,
     controlType: 'NONE',
+    cashFlowCategory: '',
   });
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState<boolean>(false);
@@ -287,6 +293,7 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
       isActive: true,
       isControlAccount: false,
       controlType: 'NONE',
+      cashFlowCategory: '',
     });
     setFormError(null);
     setIsModalOpen(true);
@@ -302,7 +309,8 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
       parentId: acc.parentId || '',
       isActive: acc.isActive,
       isControlAccount: !!acc.isControlAccount,
-      controlType: (acc.controlType || 'NONE') as 'NONE' | 'AR' | 'AP' | 'INVENTORY',
+      controlType: (acc.controlType || 'NONE') as 'NONE' | 'AR' | 'AP' | 'INVENTORY' | 'CASH_BANK' | 'FIXED_ASSET',
+      cashFlowCategory: (acc.cashFlowCategory || '') as '' | 'OPERASI' | 'INVESTASI' | 'PENDANAAN',
     });
     setFormError(null);
     setIsModalOpen(true);
@@ -326,29 +334,32 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
     setFormError(null);
 
     try {
-      const isCtrl = formData.controlType !== 'NONE' ? true : formData.isControlAccount;
+      // CASH_BANK tidak menonaktifkan direct posting secara paksa (isControlAccount fleksibel)
+      const isCtrl = formData.controlType === 'CASH_BANK'
+        ? formData.isControlAccount
+        : formData.controlType !== 'NONE'
+        ? true
+        : formData.isControlAccount;
+
+      const payload = {
+        kode_akun: formData.kode_akun,
+        nama_akun: formData.nama_akun,
+        kategori: formData.kategori,
+        parentId: formData.parentId || null,
+        isActive: formData.isActive,
+        isControlAccount: isCtrl,
+        controlType: formData.controlType,
+        cashFlowCategory: formData.cashFlowCategory ? (formData.cashFlowCategory as any) : null,
+      };
+
       if (editingAccount) {
         // Mode Update
-        await api.updateCoa(editingAccount.id, {
-          kode_akun: formData.kode_akun,
-          nama_akun: formData.nama_akun,
-          kategori: formData.kategori,
-          parentId: formData.parentId || null,
-          isActive: formData.isActive,
-          isControlAccount: isCtrl,
-          controlType: formData.controlType,
-        });
+        await api.updateCoa(editingAccount.id, payload);
       } else {
         // Mode Create
         await api.createCoa({
           tenantId: currentTenant.id,
-          kode_akun: formData.kode_akun,
-          nama_akun: formData.nama_akun,
-          kategori: formData.kategori,
-          parentId: formData.parentId || null,
-          isActive: formData.isActive,
-          isControlAccount: isCtrl,
-          controlType: formData.controlType,
+          ...payload,
         });
       }
       setIsModalOpen(false);
@@ -624,6 +635,9 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
                   {visibleColumns.kategori && (
                     <th className="py-3.5 px-4 font-bold text-[#142e20]">Kategori</th>
                   )}
+                  {visibleColumns.cashFlowCategory && (
+                    <th className="py-3.5 px-4 font-bold text-[#142e20]">Arus Kas</th>
+                  )}
                   {visibleColumns.controlType && (
                     <th className="py-3.5 px-4 font-bold text-[#142e20]">Tipe Kontrol</th>
                   )}
@@ -696,23 +710,46 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
                           </span>
                         </td>
                       )}
+                      {visibleColumns.cashFlowCategory && (
+                        <td className="py-3 px-4">
+                          {acc.cashFlowCategory ? (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-700 border border-emerald-500/20">
+                              {acc.cashFlowCategory}
+                            </span>
+                          ) : (
+                            <span className="text-slate-400 text-xs">-</span>
+                          )}
+                        </td>
+                      )}
                       {visibleColumns.controlType && (
                         <td className="py-3 px-4">
                           {acc.controlType && acc.controlType !== 'NONE' ? (
                             <span
                               className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${
                                 acc.controlType === 'AR'
-                                  ? 'bg-blue-500/15 text-blue-300 border-blue-500/30'
+                                  ? 'bg-blue-500/15 text-blue-700 border-blue-500/30'
                                   : acc.controlType === 'AP'
-                                  ? 'bg-amber-500/15 text-amber-300 border-amber-500/30'
-                                  : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+                                  ? 'bg-amber-500/15 text-amber-700 border-amber-500/30'
+                                  : acc.controlType === 'INVENTORY'
+                                  ? 'bg-emerald-500/15 text-emerald-700 border-emerald-500/30'
+                                  : acc.controlType === 'CASH_BANK'
+                                  ? 'bg-teal-500/15 text-teal-700 border-teal-500/30'
+                                  : 'bg-indigo-500/15 text-indigo-700 border-indigo-500/30'
                               }`}
                             >
                               <ShieldAlert className="w-3 h-3" />
-                              {acc.controlType === 'AR' ? 'AR (Piutang)' : acc.controlType === 'AP' ? 'AP (Hutang)' : 'Persediaan'}
+                              {acc.controlType === 'AR'
+                                ? 'AR (Piutang)'
+                                : acc.controlType === 'AP'
+                                ? 'AP (Hutang)'
+                                : acc.controlType === 'INVENTORY'
+                                ? 'Persediaan'
+                                : acc.controlType === 'CASH_BANK'
+                                ? 'Kas & Bank'
+                                : 'Aset Tetap'}
                             </span>
                           ) : (
-                            <span className="text-slate-600 text-xs">-</span>
+                            <span className="text-slate-400 text-xs">-</span>
                           )}
                         </td>
                       )}
@@ -948,6 +985,31 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
                 </label>
               </div>
 
+              {/* Field Kategori Arus Kas (Metode Langsung) */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                  Kategori Arus Kas (Metode Langsung)
+                </label>
+                <select
+                  value={formData.cashFlowCategory}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      cashFlowCategory: e.target.value as '' | 'OPERASI' | 'INVESTASI' | 'PENDANAAN',
+                    })
+                  }
+                  className="w-full bg-slate-950 border border-slate-800 text-white rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500"
+                >
+                  <option value="">- Tidak Ditentukan (Bukan Akun Kas/Lawan Arus Kas) -</option>
+                  <option value="OPERASI">OPERASI (Aktivitas Operasional)</option>
+                  <option value="INVESTASI">INVESTASI (Aktivitas Investasi / Perolehan Aset Tetap)</option>
+                  <option value="PENDANAAN">PENDANAAN (Aktivitas Pendanaan / Modal / Pinjaman)</option>
+                </select>
+                <p className="text-[11px] text-slate-500 mt-1">
+                  Digunakan untuk mengklasifikasikan akun lawan pada laporan arus kas metode langsung.
+                </p>
+              </div>
+
               {/* Field Tipe Akun Kontrol Subledger */}
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center gap-1.5">
@@ -957,11 +1019,16 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
                 <select
                   value={formData.controlType}
                   onChange={(e) => {
-                    const ct = e.target.value as 'NONE' | 'AR' | 'AP' | 'INVENTORY';
+                    const ct = e.target.value as 'NONE' | 'AR' | 'AP' | 'INVENTORY' | 'CASH_BANK' | 'FIXED_ASSET';
                     setFormData({
                       ...formData,
                       controlType: ct,
-                      isControlAccount: ct !== 'NONE' ? true : formData.isControlAccount,
+                      isControlAccount:
+                        ct === 'CASH_BANK'
+                          ? formData.isControlAccount
+                          : ct !== 'NONE'
+                          ? true
+                          : formData.isControlAccount,
                     });
                   }}
                   className="w-full bg-slate-950 border border-slate-800 text-white rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500"
@@ -970,14 +1037,29 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
                   <option value="AR">AR (Akun Kontrol Piutang Usaha)</option>
                   <option value="AP">AP (Akun Kontrol Hutang Usaha)</option>
                   <option value="INVENTORY">INVENTORY (Akun Kontrol Persediaan Barang)</option>
+                  <option value="CASH_BANK">CASH_BANK (Akun Kas & Bank)</option>
+                  <option value="FIXED_ASSET">FIXED_ASSET (Akun Harga Perolehan, Akumulasi, & CIP Aset Tetap)</option>
                 </select>
                 <p className="text-[11px] text-slate-500 mt-1">
                   Menetapkan tipe akun kontrol akan mengarahkan posting otomatis dari modul subledger bersangkutan.
                 </p>
               </div>
 
-              {/* Banner Peringatan Dampak Akun Kontrol */}
-              {formData.controlType !== 'NONE' && (
+              {/* Banner Info untuk Akun CASH_BANK */}
+              {formData.controlType === 'CASH_BANK' && (
+                <div className="p-3 bg-teal-950/40 border border-teal-500/40 rounded-xl text-teal-200 text-xs space-y-1 animate-in fade-in">
+                  <div className="font-semibold text-teal-300 flex items-center gap-1.5">
+                    <Info className="w-4 h-4 text-teal-400" />
+                    Informasi Akun Kas & Bank (Auto-Capture)
+                  </div>
+                  <p className="leading-relaxed text-teal-200/90">
+                    Direct posting tetap diizinkan agar integrasi jurnal mentah (seperti payroll Rekan HRIS) tetap berjalan lancar. Baris jurnal manual ke akun ini akan otomatis ditangkap ke buku kas. Anda tetap dapat mengunci direct posting secara manual bila diinginkan.
+                  </p>
+                </div>
+              )}
+
+              {/* Banner Peringatan Dampak Akun Kontrol Non-Cash */}
+              {formData.controlType !== 'NONE' && formData.controlType !== 'CASH_BANK' && (
                 <div className="p-3 bg-amber-950/40 border border-amber-500/40 rounded-xl text-amber-200 text-xs space-y-1 animate-in fade-in">
                   <div className="font-semibold text-amber-300 flex items-center gap-1.5">
                     <AlertCircle className="w-4 h-4 text-amber-400" />
@@ -994,14 +1076,20 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
                 <label
                   htmlFor="isControlAccountToggle"
                   className={`flex items-start gap-2.5 ${
-                    formData.controlType !== 'NONE' ? 'cursor-not-allowed opacity-80' : 'cursor-pointer'
+                    formData.controlType !== 'NONE' && formData.controlType !== 'CASH_BANK'
+                      ? 'cursor-not-allowed opacity-80'
+                      : 'cursor-pointer'
                   }`}
                 >
                   <input
                     type="checkbox"
                     id="isControlAccountToggle"
-                    checked={formData.controlType !== 'NONE' ? true : formData.isControlAccount}
-                    disabled={formData.controlType !== 'NONE'}
+                    checked={
+                      formData.controlType !== 'NONE' && formData.controlType !== 'CASH_BANK'
+                        ? true
+                        : formData.isControlAccount
+                    }
+                    disabled={formData.controlType !== 'NONE' && formData.controlType !== 'CASH_BANK'}
                     onChange={(e) => setFormData({ ...formData, isControlAccount: e.target.checked })}
                     className="rounded border-slate-700 bg-slate-900 text-amber-500 focus:ring-amber-500 w-4 h-4 mt-0.5 disabled:opacity-50"
                   />
@@ -1009,7 +1097,7 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
                     <span className="text-xs font-semibold text-white flex items-center gap-1.5">
                       <ShieldAlert className="w-3.5 h-3.5 text-amber-400" />
                       Kunci Direct Posting (Akun Kontrol — Tolak Jurnal Mentah)
-                      {formData.controlType !== 'NONE' && (
+                      {formData.controlType !== 'NONE' && formData.controlType !== 'CASH_BANK' && (
                         <span className="text-[10px] text-amber-400 font-normal italic">
                           (Terkunci otomatis oleh Tipe Kontrol {formData.controlType})
                         </span>

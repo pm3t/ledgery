@@ -55,7 +55,16 @@ export class ChartOfAccountService {
     }
 
     const controlType = createAccountDto.controlType ?? ControlAccountType.NONE;
-    const isControlAccount = controlType !== ControlAccountType.NONE ? true : (createAccountDto.isControlAccount ?? false);
+    // Untuk FIXED_ASSET dan tipe subledger V3 (AR, AP, INVENTORY), otomatis aktifkan isControlAccount (menonaktifkan direct posting)
+    // Untuk CASH_BANK, direct posting tetap diizinkan (isControlAccount = false secara default) untuk auto-capture jurnal payroll/legacy
+    let isControlAccount = false;
+    if (controlType === ControlAccountType.CASH_BANK) {
+      isControlAccount = createAccountDto.isControlAccount ?? false;
+    } else if (controlType !== ControlAccountType.NONE) {
+      isControlAccount = true;
+    } else {
+      isControlAccount = createAccountDto.isControlAccount ?? false;
+    }
 
     // 4. Menyimpan kode akun ke database
     return this.prisma.chartOfAccount.create({
@@ -68,6 +77,7 @@ export class ChartOfAccountService {
         isActive: createAccountDto.isActive ?? true,
         isControlAccount,
         controlType,
+        cashFlowCategory: createAccountDto.cashFlowCategory || null,
       },
       include: {
         parent: true,
@@ -176,8 +186,17 @@ export class ChartOfAccountService {
         ...(updateAccountDto.controlType !== undefined && {
           controlType: updateAccountDto.controlType,
         }),
-        ...(updateAccountDto.controlType !== undefined && updateAccountDto.controlType !== ControlAccountType.NONE
-          ? { isControlAccount: true }
+        ...(updateAccountDto.cashFlowCategory !== undefined && {
+          cashFlowCategory: updateAccountDto.cashFlowCategory,
+        }),
+        ...(updateAccountDto.controlType !== undefined
+          ? updateAccountDto.controlType === ControlAccountType.CASH_BANK
+            ? (updateAccountDto.isControlAccount !== undefined
+                ? { isControlAccount: updateAccountDto.isControlAccount }
+                : {})
+            : updateAccountDto.controlType !== ControlAccountType.NONE
+            ? { isControlAccount: true }
+            : { isControlAccount: updateAccountDto.isControlAccount ?? false }
           : updateAccountDto.isControlAccount !== undefined
           ? { isControlAccount: updateAccountDto.isControlAccount }
           : {}),
