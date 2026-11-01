@@ -100,7 +100,8 @@ export type TenantTab =
   | 'fiscal-groups'
   | 'asset-capitalization'
   | 'asset-opening-balance'
-  | 'asset-scan';
+  | 'asset-scan'
+  | 'fixed-asset-reports';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -167,7 +168,7 @@ export const Layout: React.FC<LayoutProps> = ({
       },
       {
         id: 'ar',
-        label: 'Piutang & Penjualan (AR)',
+        label: 'Piutang & Penjualan',
         icon: Receipt,
         colorClass: 'text-blue-400',
         items: [
@@ -180,7 +181,7 @@ export const Layout: React.FC<LayoutProps> = ({
       },
       {
         id: 'ap',
-        label: 'Hutang & Pembelian (AP)',
+        label: 'Hutang & Pembelian',
         icon: CreditCard,
         colorClass: 'text-amber-400',
         items: [
@@ -194,7 +195,7 @@ export const Layout: React.FC<LayoutProps> = ({
       },
       {
         id: 'inventory',
-        label: 'Persediaan & Gudang (Inventory)',
+        label: 'Persediaan',
         icon: Boxes,
         colorClass: 'text-purple-400',
         items: [
@@ -209,7 +210,7 @@ export const Layout: React.FC<LayoutProps> = ({
       },
       {
         id: 'order-management',
-        label: 'Pesanan & Logistik (Orders)',
+        label: 'Pesanan & Logistik',
         icon: ShoppingCart,
         colorClass: 'text-teal-400',
         items: [
@@ -218,6 +219,22 @@ export const Layout: React.FC<LayoutProps> = ({
           { id: 'om-po', label: 'Pesanan Pembelian (PO)', icon: Package },
           { id: 'om-gr', label: 'Penerimaan Barang (GR)', icon: Truck },
           { id: 'om-reports', label: 'Laporan & Rekonsiliasi OM', icon: BarChart3 },
+        ],
+      },
+      {
+        id: 'fixed-asset',
+        label: 'Aktiva Tetap',
+        icon: Package,
+        colorClass: 'text-emerald-400',
+        items: [
+          { id: 'fixed-assets', label: 'Daftar Aset Tetap', icon: Package },
+          { id: 'depreciation-run', label: 'Proses Penyusutan', icon: Calculator },
+          { id: 'fixed-asset-reports', label: 'Laporan Aset & Fiskal', icon: FileSpreadsheet },
+          { id: 'asset-categories', label: 'Kategori Aset', icon: Layers },
+          { id: 'fiscal-groups', label: 'Kelompok Fiskal (Pajak)', icon: Percent },
+          { id: 'asset-capitalization', label: 'Kapitalisasi CIP', icon: Building2 },
+          { id: 'asset-opening-balance', label: 'Saldo Awal Aset', icon: UploadCloud },
+          { id: 'asset-scan', label: 'Scan & Verifikasi Fisik', icon: QrCode },
         ],
       },
       {
@@ -279,21 +296,6 @@ export const Layout: React.FC<LayoutProps> = ({
           },
         ],
       },
-      {
-        id: 'fixed-asset',
-        label: 'Aset Tetap (Fixed Assets)',
-        icon: Package,
-        colorClass: 'text-emerald-400',
-        items: [
-          { id: 'fixed-assets', label: 'Daftar Aset Tetap', icon: Package },
-          { id: 'depreciation-run', label: 'Proses Penyusutan', icon: Calculator },
-          { id: 'asset-categories', label: 'Kategori Aset', icon: Layers },
-          { id: 'fiscal-groups', label: 'Kelompok Fiskal (Pajak)', icon: Percent },
-          { id: 'asset-capitalization', label: 'Kapitalisasi CIP', icon: Building2 },
-          { id: 'asset-opening-balance', label: 'Saldo Awal Aset', icon: UploadCloud },
-          { id: 'asset-scan', label: 'Scan & Verifikasi Fisik', icon: QrCode },
-        ],
-      },
     ];
   }, [pendingApprovalCount]);
 
@@ -304,9 +306,12 @@ export const Layout: React.FC<LayoutProps> = ({
       if (saved) return JSON.parse(saved);
     } catch (e) {}
     return {
+      'cash-bank': true,
       ar: true,
       ap: true,
       inventory: true,
+      'order-management': true,
+      'fixed-asset': true,
       gl: true,
       reports: true,
       master: true,
@@ -605,32 +610,36 @@ export const Layout: React.FC<LayoutProps> = ({
 
             return (
               <div key={group.id} className="space-y-1">
-                {/* Header Kategori Menu */}
+                {/* Header Kategori Menu: Elevated Card Button */}
                 <button
                   type="button"
                   onClick={() => toggleGroup(group.id)}
-                  className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-left text-emerald-300/70 hover:text-emerald-100 hover:bg-emerald-900/30 transition-colors group select-none"
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-left transition-all select-none border ${
+                    isExpanded
+                      ? 'bg-[#18392c] text-emerald-100 border-emerald-700/60 shadow-sm'
+                      : 'bg-[#142d23]/70 hover:bg-[#18392c]/80 text-emerald-300/90 border-emerald-800/40'
+                  }`}
                 >
-                  <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-emerald-400/80 group-hover:text-emerald-200">
-                    <GroupIcon className={`w-3.5 h-3.5 ${group.colorClass || 'text-emerald-400'}`} />
-                    <span>{group.label}</span>
+                  <span className="flex items-center gap-2.5 text-xs font-semibold tracking-wide">
+                    <GroupIcon className={`w-4 h-4 ${group.colorClass || 'text-emerald-400'}`} />
+                    <span className="truncate">{group.label}</span>
                   </span>
 
-                  <div className="flex items-center gap-1.5">
-                    {hasActiveItem && !isExpanded && (
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    {hasActiveItem && (
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 ring-2 ring-emerald-500/20" />
                     )}
                     <ChevronDown
-                      className={`w-3.5 h-3.5 text-emerald-500 transition-transform duration-200 ${
+                      className={`w-3.5 h-3.5 text-emerald-400/80 transition-transform duration-200 ${
                         isExpanded ? 'rotate-0' : '-rotate-90'
                       }`}
                     />
                   </div>
                 </button>
 
-                {/* Sub Menu Items */}
+                {/* Sub Menu Items: Sunken Drawer Container (Kotak Cekung) */}
                 {isExpanded && (
-                  <div className="space-y-0.5 pl-1.5 pr-0.5">
+                  <div className="bg-[#0b1712] border border-emerald-900/70 rounded-xl p-1.5 space-y-0.5 mt-1 shadow-inner">
                     {group.items.map((item) => {
                       if (item.adminOnly && currentUser?.role !== 'ADMIN_TENANT') return null;
                       const isActive = activeTab === item.id;
@@ -644,21 +653,16 @@ export const Layout: React.FC<LayoutProps> = ({
                             setActiveTab(item.id);
                             setMobileMenuOpen(false);
                           }}
-                          className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all relative group ${
+                          className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition-all relative group ${
                             isActive
-                              ? 'bg-emerald-800/40 text-emerald-100 border border-emerald-600/50 shadow-sm font-semibold'
-                              : 'text-emerald-200/70 hover:text-white hover:bg-emerald-900/30 border border-transparent'
+                              ? 'bg-emerald-600 text-white font-semibold shadow-sm shadow-emerald-950/60'
+                              : 'text-emerald-100/75 hover:text-white hover:bg-emerald-900/40 font-normal'
                           }`}
                         >
-                          {/* Accent Bar Left for Active State */}
-                          {isActive && (
-                            <span className="absolute left-0 top-2 bottom-2 w-1 bg-emerald-400 rounded-r" />
-                          )}
-
-                          <div className="flex items-center gap-2.5 truncate">
+                          <div className="flex items-center gap-2 truncate">
                             <ItemIcon
-                              className={`w-4 h-4 shrink-0 transition-colors ${
-                                isActive ? 'text-emerald-400' : 'text-emerald-400/70 group-hover:text-emerald-300'
+                              className={`w-3.5 h-3.5 shrink-0 transition-colors ${
+                                isActive ? 'text-white' : 'text-emerald-400/60 group-hover:text-emerald-200'
                               }`}
                             />
                             <span className="truncate">{item.label}</span>
@@ -670,7 +674,9 @@ export const Layout: React.FC<LayoutProps> = ({
                               className={`text-[10px] font-bold px-1.5 py-0.2 rounded-full shrink-0 ${
                                 item.badgeVariant === 'amber'
                                   ? 'bg-amber-500 text-slate-950 font-mono shadow-sm'
-                                  : 'bg-emerald-600 text-white'
+                                  : isActive
+                                    ? 'bg-emerald-800 text-emerald-100'
+                                    : 'bg-emerald-600 text-white'
                               }`}
                             >
                               {item.badge}

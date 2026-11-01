@@ -44,6 +44,12 @@ export function IntegrationLogPage({ currentTenant }: Props) {
     if (ep.includes('/orders') || ep.includes('/purchase-order') || ep.includes('/sales-order') || ep.includes('/goods-receipt') || ep.includes('/delivery-order')) {
       return { name: 'ORDERS', color: 'bg-purple-500/20 text-purple-400 border-purple-500/30' };
     }
+    if (ep.includes('/cash') || ep.includes('/bank')) {
+      return { name: 'KAS/BANK', color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' };
+    }
+    if (ep.includes('/fixed-asset') || ep.includes('/asset')) {
+      return { name: 'AKTIVA TETAP', color: 'bg-teal-500/20 text-teal-400 border-teal-500/30' };
+    }
     if (ep.includes('/journals')) {
       return { name: 'JOURNAL', color: 'bg-sky-500/20 text-sky-400 border-sky-500/30' };
     }
@@ -114,6 +120,8 @@ export function IntegrationLogPage({ currentTenant }: Props) {
             className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
           >
             <option value="ALL">Semua Modul</option>
+            <option value="CASH_BANK">Modul Kas & Bank</option>
+            <option value="FIXED_ASSET">Modul Aktiva Tetap</option>
             <option value="AR">Modul AR (Piutang)</option>
             <option value="AP">Modul AP (Hutang)</option>
             <option value="INVENTORY">Modul Inventory</option>

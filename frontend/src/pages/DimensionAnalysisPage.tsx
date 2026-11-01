@@ -442,9 +442,9 @@ export const DimensionAnalysisPage: React.FC<Props> = ({ currentTenant }) => {
 
                 {/* Unassigned Dimension Column */}
                 {reportData?.hasUnassigned && (
-                  <th className="py-3 px-3.5 text-right min-w-[130px] border-r border-[#cbdcd0] bg-[#fef3c7] text-[#92400e]">
-                    <div className="font-bold truncate text-[#92400e]">Tanpa Dimensi</div>
-                    <div className="text-[10px] text-[#b45309] font-mono tracking-normal font-bold">UNASSIGNED</div>
+                  <th className="py-3 px-3.5 text-right min-w-[130px] border-r border-[#cbdcd0] bg-[#fef3c7] text-[#78350f]">
+                    <div className="font-bold truncate text-[#78350f]">Tanpa Dimensi</div>
+                    <div className="text-[10px] text-[#92400e] font-mono tracking-normal font-bold">UNASSIGNED</div>
                   </th>
                 )}
 
@@ -552,7 +552,7 @@ export const DimensionAnalysisPage: React.FC<Props> = ({ currentTenant }) => {
                             key={col.id}
                             className={`py-2.5 px-3.5 text-right font-mono border-r border-[#cbdcd0] ${
                               val === 0
-                                ? 'text-slate-400'
+                                ? 'text-slate-400 font-normal'
                                 : val < 0
                                 ? 'text-rose-700 font-bold'
                                 : 'text-[#142820] font-bold'
@@ -568,10 +568,10 @@ export const DimensionAnalysisPage: React.FC<Props> = ({ currentTenant }) => {
                         <td
                           className={`py-2.5 px-3.5 text-right font-mono border-r border-[#cbdcd0] bg-[#fffbeb] ${
                             (row.values['UNASSIGNED'] || 0) === 0
-                              ? 'text-slate-400'
+                              ? 'text-slate-400 font-normal'
                               : (row.values['UNASSIGNED'] || 0) < 0
                               ? 'text-rose-700 font-bold'
-                              : 'text-[#92400e] font-bold'
+                              : 'text-[#78350f] font-bold'
                           }`}
                         >
                           {formatRupiah(row.values['UNASSIGNED'] || 0)}
@@ -631,7 +631,7 @@ export const DimensionAnalysisPage: React.FC<Props> = ({ currentTenant }) => {
                       className={`py-3 px-3.5 text-right font-mono border-r border-[#cbdcd0] bg-[#fef3c7] font-bold ${
                         (reportData.columnTotals['UNASSIGNED'] || 0) < 0
                           ? 'text-rose-700'
-                          : 'text-[#92400e]'
+                          : 'text-[#78350f]'
                       }`}
                     >
                       {formatRupiah(reportData.columnTotals['UNASSIGNED'] || 0)}

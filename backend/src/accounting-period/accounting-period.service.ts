@@ -91,7 +91,9 @@ export class AccountingPeriodService {
       (subledgerSetting.arEnabled ||
         subledgerSetting.apEnabled ||
         subledgerSetting.inventoryEnabled ||
-        subledgerSetting.orderManagementEnabled);
+        subledgerSetting.orderManagementEnabled ||
+        (subledgerSetting as any).cashBankEnabled ||
+        (subledgerSetting as any).fixedAssetEnabled);
 
     let reconciliationWarning: any = null;
 
@@ -112,6 +114,12 @@ export class AccountingPeriodService {
         }
         if (recon.accounts.grIrClearing.status === 'SELISIH') {
           discrepantAccounts.push(`Kliring GR/IR: Selisih Rp ${Math.abs(recon.accounts.grIrClearing.selisih).toLocaleString('id-ID')}`);
+        }
+        if ((recon.accounts as any).cashBank && (recon.accounts as any).cashBank.status === 'SELISIH') {
+          discrepantAccounts.push(`Kas & Bank: Selisih Rp ${Math.abs((recon.accounts as any).cashBank.totalSelisih).toLocaleString('id-ID')}`);
+        }
+        if ((recon.accounts as any).fixedAsset && (recon.accounts as any).fixedAsset.status === 'SELISIH') {
+          discrepantAccounts.push(`Aset Tetap: Selisih Rp ${Math.abs((recon.accounts as any).fixedAsset.totalSelisih).toLocaleString('id-ID')}`);
         }
 
         const detailsMsg = discrepantAccounts.join('; ');

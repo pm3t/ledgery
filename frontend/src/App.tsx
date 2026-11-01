@@ -62,6 +62,7 @@ import { AssetCategoriesPage } from './pages/fixed-asset/AssetCategoriesPage';
 import { FiscalGroupsPage } from './pages/fixed-asset/FiscalGroupsPage';
 import { AssetCapitalizationPage } from './pages/fixed-asset/AssetCapitalizationPage';
 import { AssetOpeningBalancePage } from './pages/fixed-asset/AssetOpeningBalancePage';
+import { FixedAssetReportsPage } from './pages/fixed-asset/FixedAssetReportsPage';
 import { DepreciationRunPage } from './pages/fixed-asset/DepreciationRunPage';
 
 // Admin Pages
@@ -128,7 +129,8 @@ type TenantTab =
   | 'fiscal-groups'
   | 'asset-capitalization'
   | 'asset-opening-balance'
-  | 'asset-scan';
+  | 'asset-scan'
+  | 'fixed-asset-reports';
 type AdminTab = 'tenants' | 'billing' | 'audit' | 'api-keys' | 'user-management';
 
 export function App() {
@@ -278,7 +280,7 @@ export function App() {
       {activeTab === 'approval-history' && <JournalApprovalHistoryPage currentTenant={currentTenant} />}
       {activeTab === 'reports' && <FinancialReportsPage currentTenant={currentTenant} />}
       {activeTab === 'dimension-analysis' && <DimensionAnalysisPage currentTenant={currentTenant} />}
-      {activeTab === 'tax' && <TaxPage currentTenant={currentTenant} />}
+      {activeTab === 'tax' && <TaxPage currentTenant={currentTenant} onNavigate={(tab) => setActiveTab(tab as TenantTab)} />}
       {activeTab === 'subledger-reconciliation' && (
         <SubledgerReconciliationPage
           currentTenant={currentTenant}
@@ -379,6 +381,7 @@ export function App() {
       {activeTab === 'cash-reports' && <CashReportsPage />}
       {activeTab === 'cash-opening-balance' && <CashOpeningBalancePage />}
       {activeTab === 'fixed-assets' && <FixedAssetsListPage />}
+      {activeTab === 'fixed-asset-reports' && <FixedAssetReportsPage currentTenant={currentTenant} onNavigate={(tab) => setActiveTab(tab as TenantTab)} />}
       {activeTab === 'depreciation-run' && <DepreciationRunPage currentTenant={currentTenant} />}
       {activeTab === 'asset-categories' && <AssetCategoriesPage />}
       {activeTab === 'fiscal-groups' && <FiscalGroupsPage />}

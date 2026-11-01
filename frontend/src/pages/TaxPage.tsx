@@ -4,10 +4,11 @@ import { Calculator, Save, FileText, Download } from 'lucide-react';
 
 interface Props {
   currentTenant: Tenant | null;
+  onNavigate?: (tab: string) => void;
 }
 
-export function TaxPage({ currentTenant }: Props) {
-  const [activeTab, setActiveTab] = useState<'setting' | 'recap'>('setting');
+export function TaxPage({ currentTenant, onNavigate }: Props) {
+  const [activeTab, setActiveTab] = useState<'setting' | 'recap' | 'fiscalAsset'>('setting');
   
   // States for Settings
   const [taxSetting, setTaxSetting] = useState<TaxSetting | null>(null);
@@ -152,7 +153,47 @@ export function TaxPage({ currentTenant }: Props) {
         >
           Rekap Pajak Periodik
         </button>
+        <button
+          onClick={() => setActiveTab('fiscalAsset')}
+          className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
+            activeTab === 'fiscalAsset' 
+              ? 'border-emerald-500 text-emerald-600 font-bold' 
+              : 'border-transparent text-slate-400 hover:text-slate-200'
+          }`}
+        >
+          Lampiran Fiskal Aset Tetap (PMK 72)
+        </button>
       </div>
+
+      {/* Tab Content: Lampiran Fiskal Aset Tetap */}
+      {activeTab === 'fiscalAsset' && (
+        <div className="bg-white border border-[#cbdcd0] rounded-2xl p-6 space-y-4 shadow-sm">
+          <div className="flex items-start justify-between">
+            <div>
+              <h3 className="text-base font-bold text-[#142820]">
+                Rekonsiliasi Penyusutan Komersial vs Fiskal (Lampiran SPT PPh Badan)
+              </h3>
+              <p className="text-xs text-[#556c5e] mt-1 max-w-xl">
+                Buku penyusutan fiskal adalah buku paralel tanpa jurnal GL yang digunakan untuk menghitung koreksi fiskal positif/negatif dan perbedaan temporer nilai buku sesuai PMK 72/2023 dan UU PPh Pasal 11.
+              </p>
+            </div>
+            {onNavigate && (
+              <button
+                onClick={() => onNavigate('fixed-asset-reports')}
+                className="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold shadow-sm transition-colors"
+              >
+                Buka Laporan Lengkap
+              </button>
+            )}
+          </div>
+          <div className="p-4 rounded-xl border border-emerald-200 bg-[#f0fdf4] text-xs text-emerald-900 space-y-1">
+            <p className="font-bold">Informasi Kebijakan Fiskal:</p>
+            <p>1. Penyusutan fiskal memakai metode Garis Lurus (Kelompok 1-4 & Bangunan) dan Saldo Menurun (Bukan Bangunan).</p>
+            <p>2. Konvensi Bulan Penuh (PMK 72/2023) diterapkan secara default mulai bulan perolehan.</p>
+            <p>3. Selisih antara beban komersial dan fiskal dilaporkan sebagai koreksi fiskal pada formulir 1771 Lampiran I.</p>
+          </div>
+        </div>
+      )}
 
       {/* Tab Content */}
       {activeTab === 'setting' && (

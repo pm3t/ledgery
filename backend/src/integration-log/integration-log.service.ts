@@ -35,6 +35,16 @@ export class IntegrationLogService {
         where.endpoint = { contains: '/periods', mode: 'insensitive' };
       } else if (m === 'COA') {
         where.endpoint = { contains: '/chart-of-accounts', mode: 'insensitive' };
+      } else if (m === 'CASH_BANK' || m === 'CASH' || m === 'BANK') {
+        where.OR = [
+          { endpoint: { contains: '/cash', mode: 'insensitive' } },
+          { endpoint: { contains: '/bank', mode: 'insensitive' } },
+        ];
+      } else if (m === 'FIXED_ASSET' || m === 'ASSETS' || m === 'ASSET') {
+        where.OR = [
+          { endpoint: { contains: '/fixed-asset', mode: 'insensitive' } },
+          { endpoint: { contains: '/assets', mode: 'insensitive' } },
+        ];
       }
     }
 

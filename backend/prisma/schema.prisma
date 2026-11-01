@@ -131,6 +131,9 @@ model Tenant {
   assetTransfers           AssetTransfer[]
   assetImpairments         AssetImpairment[]
   assetDisposals           AssetDisposal[]
+  labelTemplates           AssetLabelTemplate[]
+  labelPrintLogs           AssetLabelPrintLog[]
+  verificationSessions     AssetVerificationSession[]
 }
 
 // Model Chart of Accounts (Daftar Kode Akun)
@@ -2302,6 +2305,7 @@ model FixedAsset {
   impairments             AssetImpairment[]
   disposals               AssetDisposal[]
   salesInvoiceLines       SalesInvoiceLine[]
+  verificationScans       AssetVerificationScan[]
 
   @@unique([tenantId, noAset])
   @@unique([tenantId, tagCode])
@@ -2618,6 +2622,102 @@ model AssetDisposal {
   @@unique([tenantId, noDokumen])
   @@index([tenantId, assetId])
 }
+
+// ==========================================
+// MODUL 24: BARCODE LABELLING & READING ASET
+// ==========================================
+
+enum VerificationSessionStatus {
+  BERLANGSUNG
+  DITUTUP
+}
+
+enum VerificationScanResult {
+  DITEMUKAN
+  LOKASI_BERBEDA
+  TIDAK_TERDAFTAR
+}
+
+// Template Desain Label Barcode/QR Aset Tetap
+model AssetLabelTemplate {
+  id        String             @id @default(uuid())
+  tenantId  String
+  nama      String
+  lebarMm   Float
+  tinggiMm  Float
+  layout    Json               // Elemen dicetak: logo/nama perusahaan, nama aset, noAset, kategori, lokasi/Cost Center, tahun, QR/barcode & posisinya
+  simbologi LabelSymbology     @default(QR)
+  lembar    Json?              // Untuk lembar A4 multi-label: kolom, baris, margin, jarak
+  isDefault Boolean            @default(false)
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+
+  tenant    Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  printLogs AssetLabelPrintLog[]
+
+  @@index([tenantId])
+}
+
+// Log / Riwayat Cetak Label Aset Tetap
+model AssetLabelPrintLog {
+  id         String              @id @default(uuid())
+  tenantId   String
+  templateId String?
+  assetIds   Json                // Daftar assetId yang dicetak
+  jumlah     Int
+  alasan     String?             // Wajib jika cetak ulang
+  printedBy  String
+  printedAt  DateTime            @default(now())
+
+  tenant     Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  template   AssetLabelTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId])
+}
+
+// Sesi Verifikasi Fisik (Stock Opname Aset Ringkas)
+model AssetVerificationSession {
+  id            String                    @id @default(uuid())
+  tenantId      String
+  noDokumen     String
+  nama          String
+  tanggal       DateTime
+  cakupan       Json                      // Filter cakupan: lokasi/Cost Center/kategori
+  status        VerificationSessionStatus @default(BERLANGSUNG)
+  snapshotHasil Json?                     // Snapshot hasil final saat sesi ditutup (termasuk BELUM_DITEMUKAN)
+  createdBy     String
+  closedBy      String?
+  closedAt      DateTime?
+  createdAt     DateTime                  @default(now())
+  updatedAt     DateTime                  @updatedAt
+
+  tenant        Tenant                    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  scans         AssetVerificationScan[]
+
+  @@unique([tenantId, noDokumen])
+  @@index([tenantId, status])
+}
+
+// Hasil Pemindaian dalam Sesi Verifikasi
+model AssetVerificationScan {
+  id             String                   @id @default(uuid())
+  sessionId      String
+  assetId        String?
+  tagCodeScanned String
+  hasil          VerificationScanResult
+  lokasiSesi     Json?                    // Lokasi saat scan berlangsung (mis. Dimension)
+  device         String?
+  scannedBy      String
+  scannedAt      DateTime                 @default(now())
+
+  session        AssetVerificationSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  asset          FixedAsset?              @relation(fields: [assetId], references: [id], onDelete: SetNull)
+
+  @@unique([sessionId, assetId])
+  @@index([sessionId])
+  @@index([assetId])
+}
+
 
 
 

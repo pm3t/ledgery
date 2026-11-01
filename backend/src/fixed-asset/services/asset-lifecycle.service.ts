@@ -824,18 +824,27 @@ export class AssetLifecycleService {
     }
 
     // 3. Batalkan entri catchup jika ada
-    await this.prisma.assetDepreciationEntry.updateMany({
+    const catchupJournals = await this.prisma.journal.findMany({
       where: {
-        assetId: disposal.assetId,
-        journal: {
-          sourceDocType: 'ASSET_DEPRECIATION_CATCHUP',
-          sourceDocId: disposal.asset.noAset,
-        },
+        tenantId,
+        sourceDocType: 'ASSET_DEPRECIATION_CATCHUP',
+        sourceDocId: disposal.asset.noAset,
       },
-      data: {
-        status: DepreciationEntryStatus.REVERSED,
-      },
+      select: { id: true },
     });
+    const catchupJournalIds = catchupJournals.map((j) => j.id);
+
+    if (catchupJournalIds.length > 0) {
+      await this.prisma.assetDepreciationEntry.updateMany({
+        where: {
+          assetId: disposal.assetId,
+          journalId: { in: catchupJournalIds },
+        },
+        data: {
+          status: DepreciationEntryStatus.REVERSED,
+        },
+      });
+    }
 
     // 4. Update status dokumen dan kartu aset
     await this.prisma.$transaction(async (tx) => {

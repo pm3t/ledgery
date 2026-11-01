@@ -1369,6 +1369,53 @@ export const api = {
     request<any>(`/fixed-assets/${assetId}/estimate-changes`, { method: 'POST', body: JSON.stringify(payload) }),
   verifyAndSyncAssetBalances: (assetId?: string) =>
     request<any>(`/fixed-assets/verify-sync${assetId ? `?assetId=${assetId}` : ''}`, { method: 'POST' }),
+
+  // ==========================================
+  // MODUL 25: LAPORAN FINANSIAL ASET TETAP
+  // ==========================================
+  getFixedAssetListReport: (params?: { asOfDate?: string; categoryId?: string; dimensionValueId?: string }) => {
+    const qs = new URLSearchParams();
+    if (params?.asOfDate) qs.append('asOfDate', params.asOfDate);
+    if (params?.categoryId) qs.append('categoryId', params.categoryId);
+    if (params?.dimensionValueId) qs.append('dimensionValueId', params.dimensionValueId);
+    return request<any>(`/fixed-assets/reports/list?${qs.toString()}`);
+  },
+  getFixedAssetRollForwardReport: (params: { startDate: string; endDate: string; categoryId?: string }) => {
+    const qs = new URLSearchParams({ startDate: params.startDate, endDate: params.endDate });
+    if (params.categoryId) qs.append('categoryId', params.categoryId);
+    return request<any>(`/fixed-assets/reports/roll-forward?${qs.toString()}`);
+  },
+  getFixedAssetDepreciationByDimension: (params?: { periodId?: string; startDate?: string; endDate?: string; dimensionId?: string }) => {
+    const qs = new URLSearchParams();
+    if (params?.periodId) qs.append('periodId', params.periodId);
+    if (params?.startDate) qs.append('startDate', params.startDate);
+    if (params?.endDate) qs.append('endDate', params.endDate);
+    if (params?.dimensionId) qs.append('dimensionId', params.dimensionId);
+    return request<any>(`/fixed-assets/reports/by-dimension?${qs.toString()}`);
+  },
+  getFixedAssetProjectionReport: (params?: { categoryId?: string; assetId?: string; years?: number }) => {
+    const qs = new URLSearchParams();
+    if (params?.categoryId) qs.append('categoryId', params.categoryId);
+    if (params?.assetId) qs.append('assetId', params.assetId);
+    if (params?.years) qs.append('years', params.years.toString());
+    return request<any>(`/fixed-assets/reports/projection?${qs.toString()}`);
+  },
+  getFixedAssetCommercialVsFiscal: (params?: { fiscalYear?: number; categoryId?: string }) => {
+    const qs = new URLSearchParams();
+    if (params?.fiscalYear) qs.append('fiscalYear', params.fiscalYear.toString());
+    if (params?.categoryId) qs.append('categoryId', params.categoryId);
+    return request<any>(`/fixed-assets/reports/commercial-vs-fiscal?${qs.toString()}`);
+  },
+  getFixedAssetFullyDepreciated: (params?: { categoryId?: string }) => {
+    const qs = new URLSearchParams();
+    if (params?.categoryId) qs.append('categoryId', params.categoryId);
+    return request<any>(`/fixed-assets/reports/fully-depreciated?${qs.toString()}`);
+  },
+  getFixedAssetDisposalGainLoss: (params: { startDate: string; endDate: string; categoryId?: string }) => {
+    const qs = new URLSearchParams({ startDate: params.startDate, endDate: params.endDate });
+    if (params.categoryId) qs.append('categoryId', params.categoryId);
+    return request<any>(`/fixed-assets/reports/disposal-gain-loss?${qs.toString()}`);
+  },
 };
 
 export type SalesInvoiceStatus = 'DRAFT' | 'POSTED' | 'PARTIAL' | 'PAID' | 'VOID';
@@ -2123,6 +2170,106 @@ export interface ReconciliationAccountResult {
   };
 }
 
+export interface CashBankAccountReconItem {
+  id: string;
+  kode: string;
+  nama: string;
+  jenis: string;
+  mata_uang: string;
+  chartOfAccount: {
+    id: string;
+    kode_akun: string;
+    nama_akun: string;
+  };
+  glBalance: number;
+  subledgerBalance: number;
+  selisih: number;
+  status: 'OK' | 'SELISIH';
+  drillDown: {
+    unlinkedEntries: any[];
+    rawJournals: any[];
+  };
+}
+
+export interface ReconciliationCashBankResult {
+  controlType: 'CASH_BANK';
+  status: 'OK' | 'SELISIH';
+  totalGlBalance: number;
+  totalSubledgerBalance: number;
+  totalSelisih: number;
+  selisih: number;
+  accounts: CashBankAccountReconItem[];
+  drillDown: {
+    unpostedOrOrphanDocs: any[];
+    rawOrUnlinkedJournals: any[];
+    summary: {
+      totalOrphanDocs: number;
+      totalRawJournals: number;
+      totalRawJournalValue: number;
+    };
+  };
+}
+
+export interface FixedAssetCategoryReconItem {
+  id: string;
+  kode: string;
+  nama: string;
+  perolehan: {
+    accountId: string;
+    kodeAkun: string;
+    namaAkun: string;
+    glBalance: number;
+    subledgerBalance: number;
+    selisih: number;
+    status: 'OK' | 'SELISIH';
+  };
+  akumulasi: {
+    accountId: string;
+    kodeAkun: string;
+    namaAkun: string;
+    glBalance: number;
+    subledgerBalance: number;
+    selisih: number;
+    status: 'OK' | 'SELISIH';
+  };
+  cip?: {
+    accountId: string;
+    kodeAkun: string;
+    namaAkun: string;
+    glBalance: number;
+    subledgerBalance: number;
+    selisih: number;
+    status: 'OK' | 'SELISIH';
+  } | null;
+  status: 'OK' | 'SELISIH';
+  totalSelisih: number;
+}
+
+export interface ReconciliationFixedAssetResult {
+  controlType: 'FIXED_ASSET';
+  status: 'OK' | 'SELISIH';
+  totalGlPerolehan: number;
+  totalSubledgerPerolehan: number;
+  totalGlAkumulasi: number;
+  totalSubledgerAkumulasi: number;
+  totalGlCip: number;
+  totalSubledgerCip: number;
+  totalSelisih: number;
+  selisih: number;
+  categories: FixedAssetCategoryReconItem[];
+  drillDown: {
+    unpostedOrOrphanDocs: any[];
+    rawOrUnlinkedJournals: any[];
+    mismatchedAssets: any[];
+    summary: {
+      totalOrphanDocs: number;
+      totalRawJournals: number;
+      totalRawJournalValue: number;
+      totalMismatchedAssets: number;
+    };
+  };
+}
+
 export interface SubledgerReconciliationSummary {
   tanggal: string;
   isFullyReconciled: boolean;
@@ -2133,12 +2280,18 @@ export interface SubledgerReconciliationSummary {
     inventoryEnabled: boolean;
     orderManagementEnabled: boolean;
     blockPeriodCloseOnRecon: boolean;
+    cashBankEnabled?: boolean;
+    fixedAssetEnabled?: boolean;
+    blockPeriodCloseOnBankRecon?: boolean;
+    blockPeriodCloseOnDepreciation?: boolean;
   };
   accounts: {
     ar: ReconciliationAccountResult;
     ap: ReconciliationAccountResult;
     inventory: ReconciliationAccountResult;
     grIrClearing: ReconciliationAccountResult;
+    cashBank?: ReconciliationCashBankResult;
+    fixedAsset?: ReconciliationFixedAssetResult;
   };
 }
 
@@ -2147,6 +2300,27 @@ export interface AccountantDashboardSummary {
   totalHutang: number;
   nilaiPersediaan: number;
   totalUnbilledGr: number;
+  totalKasBank?: number;
+  saldoPerRekening?: Array<{
+    id: string;
+    kode: string;
+    nama: string;
+    jenis: string;
+    mata_uang: string;
+    saldo: number;
+    status: 'OK' | 'SELISIH';
+  }>;
+  nilaiTercatatAset?: number;
+  jumlahAsetBelumDilabel?: number;
+  statusRekonsiliasiBank?: Array<{
+    cashBankAccountId: string;
+    kodeRekening: string;
+    namaRekening: string;
+    statusTerakhir: string;
+    tanggalAkhir?: string | null;
+    selisih: number;
+  }>;
+  statusPenyusutanPeriodeBerjalan?: string;
   jumlahFakturJatuhTempo: number;
   detailJatuhTempo: {
     piutangJatuhTempo: number;
@@ -2161,6 +2335,8 @@ export interface AccountantDashboardSummary {
     ap: { status: 'OK' | 'SELISIH'; selisih: number };
     inventory: { status: 'OK' | 'SELISIH'; selisih: number };
     grIrClearing: { status: 'OK' | 'SELISIH'; selisih: number };
+    cashBank?: { status: 'OK' | 'SELISIH'; selisih: number };
+    fixedAsset?: { status: 'OK' | 'SELISIH'; selisih: number };
   };
 }
 

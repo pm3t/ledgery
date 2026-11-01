@@ -25,6 +25,7 @@ import {
 } from '../dto/fixed-asset.dto';
 import { sanitizeAssetForRole } from '../../common/asset-serializer';
 import { AssetStorageService } from './storage.service';
+import { TagCodeService } from './tag-code.service';
 
 @Injectable()
 export class FixedAssetService {
@@ -35,6 +36,7 @@ export class FixedAssetService {
     private readonly numberingService: DocumentNumberingService,
     private readonly subledgerPosting: SubledgerPostingService,
     private readonly storageService: AssetStorageService,
+    private readonly tagCodeService: TagCodeService,
   ) {}
 
   /**
@@ -131,16 +133,8 @@ export class FixedAssetService {
     // 1. Generate noAset unik dari DocumentNumbering
     const noAset = await this.numberingService.getNextNumber(tenantId, SubledgerDocType.ASSET);
 
-    // 2. Tentukan tagCode (default = noAset) dan validasi keunikan ketat
-    const tagCode = dto.tagCode?.trim() || noAset;
-    const existingTag = await this.prisma.fixedAsset.findUnique({
-      where: { tenantId_tagCode: { tenantId, tagCode } },
-    });
-    if (existingTag) {
-      throw new ConflictException(
-        `Kode label / tag "${tagCode}" sudah digunakan oleh aset lain (${existingTag.noAset} - ${existingTag.nama}). Kode label tidak boleh pernah dipakai ulang.`,
-      );
-    }
+    // 2. Tentukan tagCode (default = noAset / format dari SubledgerSetting) dan validasi keunikan ketat
+    const tagCode = await this.tagCodeService.generateOrValidateTagCode(tenantId, noAset, dto.tagCode);
 
     const kurs = dto.kurs && dto.kurs > 0 ? dto.kurs : 1;
     const hargaPerolehanFungsional = dto.hargaPerolehanAsli * kurs;
@@ -250,12 +244,7 @@ export class FixedAssetService {
 
     // Validasi: tagCode tidak boleh bentrok
     if (dto.tagCode && dto.tagCode !== asset.tagCode) {
-      const existing = await this.prisma.fixedAsset.findUnique({
-        where: { tenantId_tagCode: { tenantId, tagCode: dto.tagCode } },
-      });
-      if (existing) {
-        throw new ConflictException(`Kode tag "${dto.tagCode}" sudah digunakan oleh aset lain.`);
-      }
+      await this.tagCodeService.validateTagCodeUnique(tenantId, dto.tagCode, asset.id);
     }
 
     // Catat perubahan estimasi jika umur atau residu berubah

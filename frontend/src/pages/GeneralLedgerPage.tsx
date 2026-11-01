@@ -23,7 +23,26 @@ export const GeneralLedgerPage: React.FC<Props> = ({ currentTenant, onNavigate }
   const handleNavigateToSource = (sourceDocType?: string | null, sourceDocId?: string | null) => {
     if (!sourceDocType || !onNavigate) return;
     const typeUpper = sourceDocType.toUpperCase();
-    if (typeUpper.includes('SALES_INVOICE')) {
+    // Modul V4: Kas & Bank
+    if (typeUpper === 'CASH_RECEIPT') {
+      onNavigate('cash-receipts');
+    } else if (typeUpper === 'CASH_DISBURSEMENT' || typeUpper === 'PETTY_VOUCHER') {
+      onNavigate('cash-disbursements');
+    } else if (typeUpper === 'CASH_TRANSFER' || typeUpper === 'PETTY_REPLENISH') {
+      onNavigate('cash-transfers');
+    } else if (typeUpper === 'BANK_RECON' || typeUpper === 'BANK_STATEMENT') {
+      onNavigate('bank-reconciliation');
+    // Modul V4: Aktiva Tetap
+    } else if (typeUpper === 'ASSET_DEPRECIATION' || typeUpper === 'DEPRECIATION_RUN' || typeUpper === 'DEPRECIATION') {
+      onNavigate('depreciation-run');
+    } else if (typeUpper === 'ASSET_CAPITALIZATION' || typeUpper === 'CAPITALIZATION') {
+      onNavigate('asset-capitalization');
+    } else if (typeUpper === 'ASSET_OPENING' || typeUpper === 'OPENING_FA') {
+      onNavigate('asset-opening-balance');
+    } else if (typeUpper.startsWith('ASSET') || typeUpper.includes('DISPOSAL') || typeUpper.includes('IMPAIRMENT')) {
+      onNavigate('fixed-assets');
+    // Modul V1-V3 Existing
+    } else if (typeUpper.includes('SALES_INVOICE')) {
       onNavigate('ar-invoices');
     } else if (typeUpper.includes('RECEIPT')) {
       onNavigate('ar-receipts');

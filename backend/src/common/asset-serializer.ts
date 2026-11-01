@@ -7,17 +7,29 @@
 
 export const FINANCIAL_ASSET_FIELDS = [
   'hargaPerolehan',
+  'hargaPerolehanAsli',
   'acquisitionCost',
+  'kurs',
+  'mata_uang',
   'nilaiResidu',
+  'nilaiResiduNominal',
+  'nilaiResiduPersen',
   'salvageValue',
   'akumulasiPenyusutan',
+  'akumulasiKomersial',
+  'akumulasiFiskal',
   'accumulatedDepreciation',
   'nilaiBuku',
+  'nilaiTercatat',
+  'nilaiSisaBukuFiskal',
+  'fiskalSisaBuku',
+  'fiskalLabaRugi',
   'bookValue',
   'tarifPenyusutan',
   'depreciationRate',
   'metodePenyusutan',
   'depreciationMethod',
+  'faktorSaldoMenurun',
   'akunAset',
   'akunAkumulasi',
   'akunBebanPenyusutan',
@@ -25,6 +37,10 @@ export const FINANCIAL_ASSET_FIELDS = [
   'purchaseBillId',
   'journalId',
   'journal',
+  'costAdditions',
+  'depreciationEntries',
+  'impairments',
+  'disposals',
 ] as const;
 
 /**
@@ -55,9 +71,25 @@ export function sanitizeAssetForRole<T extends Record<string, any>>(
 
 function stripFinancialFields<T extends Record<string, any>>(item: T): T {
   if (!item || typeof item !== 'object') return item;
-  const clone = { ...item };
+  const clone = { ...item } as any;
   for (const field of FINANCIAL_ASSET_FIELDS) {
     delete clone[field];
+  }
+  if (clone.category && typeof clone.category === 'object') {
+    const cat = { ...clone.category };
+    delete cat.nilaiResiduNominal;
+    delete cat.nilaiResiduPersen;
+    delete cat.faktorSaldoMenurun;
+    delete cat.akunAset;
+    delete cat.akunAkumulasi;
+    delete cat.akunBeban;
+    delete cat.akunCip;
+    delete cat.akunRugiPenurunanNilai;
+    delete cat.akunAkumPenurunanNilai;
+    delete cat.akunLabaPelepasan;
+    delete cat.akunRugiPelepasan;
+    delete cat.akunRugiPenghapusan;
+    clone.category = cat;
   }
   return clone;
 }

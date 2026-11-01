@@ -6,6 +6,7 @@ import { FixedAssetService } from './services/fixed-asset.service';
 import { FixedAssetV1Service } from './services/fixed-asset-v1.service';
 import { AssetStorageService } from './services/storage.service';
 import { AssetDepreciationService } from './services/asset-depreciation.service';
+import { TagCodeService } from './services/tag-code.service';
 import { DocumentNumberingService, SubledgerDocType } from '../subledger/document-numbering.service';
 import { SubledgerPostingService } from '../subledger/subledger-posting.service';
 import {
@@ -68,6 +69,9 @@ describe('Modul 21: Sub Ledger Aset Tetap (Fixed Asset Foundation & CIP)', () =>
         create: jest.fn(),
         findMany: jest.fn(),
       },
+      subledgerSetting: {
+        findUnique: jest.fn().mockResolvedValue(null),
+      },
       chartOfAccount: {
         findFirst: jest.fn(),
         update: jest.fn(),
@@ -101,6 +105,7 @@ describe('Modul 21: Sub Ledger Aset Tetap (Fixed Asset Foundation & CIP)', () =>
         FixedAssetService,
         FixedAssetV1Service,
         AssetStorageService,
+        TagCodeService,
         {
           provide: AssetDepreciationService,
           useValue: {

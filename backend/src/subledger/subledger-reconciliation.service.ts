@@ -27,6 +27,106 @@ export interface ReconciliationAccountResult {
   };
 }
 
+export interface CashBankAccountReconItem {
+  id: string;
+  kode: string;
+  nama: string;
+  jenis: string;
+  mata_uang: string;
+  chartOfAccount: {
+    id: string;
+    kode_akun: string;
+    nama_akun: string;
+  };
+  glBalance: number;
+  subledgerBalance: number;
+  selisih: number;
+  status: 'OK' | 'SELISIH';
+  drillDown: {
+    unlinkedEntries: any[];
+    rawJournals: any[];
+  };
+}
+
+export interface ReconciliationCashBankResult {
+  controlType: 'CASH_BANK';
+  status: 'OK' | 'SELISIH';
+  totalGlBalance: number;
+  totalSubledgerBalance: number;
+  totalSelisih: number;
+  selisih: number;
+  accounts: CashBankAccountReconItem[];
+  drillDown: {
+    unpostedOrOrphanDocs: any[];
+    rawOrUnlinkedJournals: any[];
+    summary: {
+      totalOrphanDocs: number;
+      totalRawJournals: number;
+      totalRawJournalValue: number;
+    };
+  };
+}
+
+export interface FixedAssetCategoryReconItem {
+  id: string;
+  kode: string;
+  nama: string;
+  perolehan: {
+    accountId: string;
+    kodeAkun: string;
+    namaAkun: string;
+    glBalance: number;
+    subledgerBalance: number;
+    selisih: number;
+    status: 'OK' | 'SELISIH';
+  };
+  akumulasi: {
+    accountId: string;
+    kodeAkun: string;
+    namaAkun: string;
+    glBalance: number;
+    subledgerBalance: number;
+    selisih: number;
+    status: 'OK' | 'SELISIH';
+  };
+  cip?: {
+    accountId: string;
+    kodeAkun: string;
+    namaAkun: string;
+    glBalance: number;
+    subledgerBalance: number;
+    selisih: number;
+    status: 'OK' | 'SELISIH';
+  } | null;
+  status: 'OK' | 'SELISIH';
+  totalSelisih: number;
+}
+
+export interface ReconciliationFixedAssetResult {
+  controlType: 'FIXED_ASSET';
+  status: 'OK' | 'SELISIH';
+  totalGlPerolehan: number;
+  totalSubledgerPerolehan: number;
+  totalGlAkumulasi: number;
+  totalSubledgerAkumulasi: number;
+  totalGlCip: number;
+  totalSubledgerCip: number;
+  totalSelisih: number;
+  selisih: number;
+  categories: FixedAssetCategoryReconItem[];
+  drillDown: {
+    unpostedOrOrphanDocs: any[];
+    rawOrUnlinkedJournals: any[];
+    mismatchedAssets: any[];
+    summary: {
+      totalOrphanDocs: number;
+      totalRawJournals: number;
+      totalRawJournalValue: number;
+      totalMismatchedAssets: number;
+    };
+  };
+}
+
 export interface SubledgerReconciliationSummary {
   tanggal: string;
   isFullyReconciled: boolean;
@@ -37,12 +137,18 @@ export interface SubledgerReconciliationSummary {
     inventoryEnabled: boolean;
     orderManagementEnabled: boolean;
     blockPeriodCloseOnRecon: boolean;
+    cashBankEnabled?: boolean;
+    fixedAssetEnabled?: boolean;
+    blockPeriodCloseOnBankRecon?: boolean;
+    blockPeriodCloseOnDepreciation?: boolean;
   };
   accounts: {
     ar: ReconciliationAccountResult;
     ap: ReconciliationAccountResult;
     inventory: ReconciliationAccountResult;
     grIrClearing: ReconciliationAccountResult;
+    cashBank?: ReconciliationCashBankResult;
+    fixedAsset?: ReconciliationFixedAssetResult;
   };
 }
 
@@ -85,11 +191,25 @@ export class SubledgerReconciliationService {
     // 4. REKONSILIASI GR_IR_CLEARING (BARANG DITERIMA BELUM DITAGIH)
     const grIrResult = await this.reconcileGrIr(tenantId, grIrSetup?.account, endOfDay);
 
+    // 5. REKONSILIASI KAS & BANK (V4)
+    let cashBankResult: ReconciliationCashBankResult | undefined;
+    if (setting.cashBankEnabled) {
+      cashBankResult = await this.reconcileCashBank(tenantId, endOfDay);
+    }
+
+    // 6. REKONSILIASI ASET TETAP (V4)
+    let fixedAssetResult: ReconciliationFixedAssetResult | undefined;
+    if (setting.fixedAssetEnabled) {
+      fixedAssetResult = await this.reconcileFixedAsset(tenantId, endOfDay);
+    }
+
     const totalSelisihAbsolut =
       Math.abs(arResult.selisih) +
       Math.abs(apResult.selisih) +
       Math.abs(invResult.selisih) +
-      Math.abs(grIrResult.selisih);
+      Math.abs(grIrResult.selisih) +
+      (cashBankResult ? Math.abs(cashBankResult.totalSelisih) : 0) +
+      (fixedAssetResult ? Math.abs(fixedAssetResult.totalSelisih) : 0);
 
     const isFullyReconciled = totalSelisihAbsolut < 0.01;
 
@@ -103,12 +223,18 @@ export class SubledgerReconciliationService {
         inventoryEnabled: setting.inventoryEnabled,
         orderManagementEnabled: setting.orderManagementEnabled,
         blockPeriodCloseOnRecon: setting.blockPeriodCloseOnRecon,
+        cashBankEnabled: setting.cashBankEnabled,
+        fixedAssetEnabled: setting.fixedAssetEnabled,
+        blockPeriodCloseOnBankRecon: setting.blockPeriodCloseOnBankRecon,
+        blockPeriodCloseOnDepreciation: setting.blockPeriodCloseOnDepreciation,
       },
       accounts: {
         ar: arResult,
         ap: apResult,
         inventory: invResult,
         grIrClearing: grIrResult,
+        cashBank: cashBankResult,
+        fixedAsset: fixedAssetResult,
       },
     };
   }
@@ -643,6 +769,450 @@ export class SubledgerReconciliationService {
     };
   }
 
+  // =========================================================================
+  // 5. REKONSILIASI KAS & BANK (V4)
+  // =========================================================================
+  async reconcileCashBank(
+    tenantId: string,
+    endOfDay: Date,
+  ): Promise<ReconciliationCashBankResult> {
+    const cashBankAccounts = await this.prisma.cashBankAccount.findMany({
+      where: { tenantId, isActive: true },
+      include: { chartOfAccount: true },
+      orderBy: { kode: 'asc' },
+    });
+
+    const accountItems: CashBankAccountReconItem[] = [];
+    let totalGlBalance = 0;
+    let totalSubledgerBalance = 0;
+    const globalUnlinkedEntries: any[] = [];
+    const globalRawJournals: any[] = [];
+
+    for (const acc of cashBankAccounts) {
+      // 1. Saldo GL Buku Besar
+      const glEntries = await this.prisma.journalEntry.findMany({
+        where: {
+          chartOfAccountId: acc.chartOfAccountId,
+          journal: {
+            tenantId,
+            status: { in: ['POSTED', 'APPROVED'] },
+            tanggal: { lte: endOfDay },
+          },
+        },
+        include: { journal: true },
+      });
+
+      let accGlBalance = 0;
+      const linkedJournalIds = new Set<string>();
+
+      // 2. Saldo Subledger CashBankEntry
+      const cbEntries = await this.prisma.cashBankEntry.findMany({
+        where: {
+          cashBankAccountId: acc.id,
+          tanggal: { lte: endOfDay },
+        },
+      });
+
+      let accSubledgerBalance = 0;
+      const itemUnlinkedEntries: any[] = [];
+
+      for (const entry of cbEntries) {
+        const amt = Number(entry.jumlahFungsional || entry.jumlah);
+        if (entry.arah === 'MASUK') accSubledgerBalance += amt;
+        else accSubledgerBalance -= amt;
+
+        if (entry.journalId) {
+          linkedJournalIds.add(entry.journalId);
+        } else {
+          const orphan = {
+            cashBankEntryId: entry.id,
+            tanggal: entry.tanggal,
+            arah: entry.arah,
+            sourceType: entry.sourceType,
+            jumlah: amt,
+            keterangan: entry.keterangan || 'Entri kas tidak tertaut dengan jurnal GL',
+            rekening: `${acc.kode} - ${acc.nama}`,
+          };
+          itemUnlinkedEntries.push(orphan);
+          globalUnlinkedEntries.push(orphan);
+        }
+      }
+
+      // Periksa jurnal langsung ke akun CASH_BANK tanpa CashBankEntry
+      const itemRawJournals: any[] = [];
+      for (const e of glEntries) {
+        const amt = Number(e.jumlah);
+        if (e.tipe === 'DEBIT') accGlBalance += amt;
+        else accGlBalance -= amt;
+
+        if (!linkedJournalIds.has(e.journal.id)) {
+          const rawJ = {
+            journalId: e.journal.id,
+            noVoucher: e.journal.no_voucher,
+            tanggal: e.journal.tanggal,
+            deskripsi: e.journal.deskripsi,
+            sumberAplikasi: e.journal.sumber_aplikasi,
+            tipe: e.tipe,
+            jumlah: amt,
+            rekening: `${acc.kode} - ${acc.nama}`,
+            penyebab: 'Jurnal masuk ke akun kas/bank tanpa entri buku kas (gagal auto-capture atau direct posting)',
+          };
+          itemRawJournals.push(rawJ);
+          globalRawJournals.push(rawJ);
+        }
+      }
+
+      accGlBalance = Math.round(accGlBalance * 100) / 100;
+      accSubledgerBalance = Math.round(accSubledgerBalance * 100) / 100;
+      const accSelisih = Math.round((accGlBalance - accSubledgerBalance) * 100) / 100;
+      const accOk = Math.abs(accSelisih) < 0.01;
+
+      totalGlBalance += accGlBalance;
+      totalSubledgerBalance += accSubledgerBalance;
+
+      accountItems.push({
+        id: acc.id,
+        kode: acc.kode,
+        nama: acc.nama,
+        jenis: acc.jenis,
+        mata_uang: acc.mata_uang,
+        chartOfAccount: {
+          id: acc.chartOfAccount?.id || acc.chartOfAccountId,
+          kode_akun: acc.chartOfAccount?.kode_akun || '',
+          nama_akun: acc.chartOfAccount?.nama_akun || '',
+        },
+        glBalance: accGlBalance,
+        subledgerBalance: accSubledgerBalance,
+        selisih: accSelisih,
+        status: accOk ? 'OK' : 'SELISIH',
+        drillDown: {
+          unlinkedEntries: itemUnlinkedEntries,
+          rawJournals: itemRawJournals,
+        },
+      });
+    }
+
+    totalGlBalance = Math.round(totalGlBalance * 100) / 100;
+    totalSubledgerBalance = Math.round(totalSubledgerBalance * 100) / 100;
+    const totalSelisih = Math.round((totalGlBalance - totalSubledgerBalance) * 100) / 100;
+    const isOk = Math.abs(totalSelisih) < 0.01 && accountItems.every((a) => a.status === 'OK');
+
+    return {
+      controlType: 'CASH_BANK',
+      status: isOk ? 'OK' : 'SELISIH',
+      totalGlBalance,
+      totalSubledgerBalance,
+      totalSelisih,
+      selisih: totalSelisih,
+      accounts: accountItems,
+      drillDown: {
+        unpostedOrOrphanDocs: globalUnlinkedEntries,
+        rawOrUnlinkedJournals: globalRawJournals,
+        summary: {
+          totalOrphanDocs: globalUnlinkedEntries.length,
+          totalRawJournals: globalRawJournals.length,
+          totalRawJournalValue: globalRawJournals.reduce((sum, j) => sum + j.jumlah, 0),
+        },
+      },
+    };
+  }
+
+  // =========================================================================
+  // 6. REKONSILIASI ASET TETAP (V4)
+  // =========================================================================
+  async reconcileFixedAsset(
+    tenantId: string,
+    endOfDay: Date,
+  ): Promise<ReconciliationFixedAssetResult> {
+    const categories = await this.prisma.assetCategory.findMany({
+      where: { tenantId },
+      include: {
+        akunAset: true,
+        akunAkumulasi: true,
+        akunCip: true,
+      },
+      orderBy: { kode: 'asc' },
+    });
+
+    const categoryItems: FixedAssetCategoryReconItem[] = [];
+    let totalGlPerolehan = 0;
+    let totalSubledgerPerolehan = 0;
+    let totalGlAkumulasi = 0;
+    let totalSubledgerAkumulasi = 0;
+    let totalGlCip = 0;
+    let totalSubledgerCip = 0;
+
+    const globalOrphanDocs: any[] = [];
+    const globalRawJournals: any[] = [];
+    const globalMismatchedAssets: any[] = [];
+
+    for (const cat of categories) {
+      // 1. HARGA PEROLEHAN
+      let catGlPerolehan = 0;
+      if (cat.akunAset) {
+        const glEntries = await this.prisma.journalEntry.findMany({
+          where: {
+            chartOfAccountId: cat.akunAset.id,
+            journal: {
+              tenantId,
+              status: { in: ['POSTED', 'APPROVED'] },
+              tanggal: { lte: endOfDay },
+            },
+          },
+          include: { journal: true },
+        });
+        for (const e of glEntries) {
+          const amt = Number(e.jumlah);
+          if (e.tipe === 'DEBIT') catGlPerolehan += amt;
+          else catGlPerolehan -= amt;
+
+          if (!e.journal.sourceDocType || !e.journal.sourceDocType.startsWith('ASSET')) {
+            globalRawJournals.push({
+              journalId: e.journal.id,
+              noVoucher: e.journal.no_voucher,
+              tanggal: e.journal.tanggal,
+              deskripsi: e.journal.deskripsi,
+              tipe: e.tipe,
+              jumlah: amt,
+              kategori: `${cat.kode} - ${cat.nama}`,
+              akun: cat.akunAset.kode_akun,
+              penyebab: 'Jurnal manual masuk langsung ke akun harga perolehan aset tanpa melalui subledger',
+            });
+          }
+        }
+      }
+
+      // Hitung subledger perolehan: aset non-CIP yang diperoleh <= endOfDay dan belum dilepas <= endOfDay
+      const assets = await this.prisma.fixedAsset.findMany({
+        where: {
+          tenantId,
+          categoryId: cat.id,
+          tanggalPerolehan: { lte: endOfDay },
+          status: { in: ['AKTIF', 'DISUSUTKAN_PENUH', 'DIJUAL', 'DIHAPUSKAN'] },
+        },
+        include: {
+          costAdditions: {
+            where: { tanggal: { lte: endOfDay }, status: 'POSTED' },
+          },
+          disposals: {
+            where: { tanggal: { lte: endOfDay }, status: 'POSTED' },
+          },
+          depreciationEntries: {
+            where: {
+              buku: 'KOMERSIAL',
+              status: 'AKTIF',
+              createdAt: { lte: endOfDay },
+            },
+          },
+          impairments: {
+            where: { tanggal: { lte: endOfDay }, status: 'POSTED' },
+          },
+        },
+      });
+
+      let catSubledgerPerolehan = 0;
+      let catSubledgerAkumulasi = 0;
+
+      for (const asset of assets) {
+        const isDisposedOnOrBeforeEndOfDay = asset.disposals.length > 0;
+
+        if (asset.status === 'CIP') {
+          continue;
+        }
+
+        if (!isDisposedOnOrBeforeEndOfDay) {
+          let assetPerolehan = Number(asset.hargaPerolehan);
+          for (const addition of asset.costAdditions) {
+            assetPerolehan += Number(addition.jumlah);
+          }
+          catSubledgerPerolehan += assetPerolehan;
+
+          let assetAkumulasi = asset.depreciationEntries.reduce((sum, dep) => sum + Number(dep.jumlah), 0);
+          for (const imp of asset.impairments) {
+            assetAkumulasi += Number(imp.jumlah);
+          }
+          catSubledgerAkumulasi += assetAkumulasi;
+
+          const recordedAkumulasi = Number(asset.akumulasiKomersial || 0);
+          const calculatedAkumulasi = asset.depreciationEntries.reduce((sum, dep) => sum + Number(dep.jumlah), 0);
+          if (Math.abs(recordedAkumulasi - calculatedAkumulasi) > 0.01) {
+            globalMismatchedAssets.push({
+              assetId: asset.id,
+              noAset: asset.noAset,
+              nama: asset.nama,
+              kategori: cat.nama,
+              akumulasiTercatat: recordedAkumulasi,
+              totalEntriPenyusutan: calculatedAkumulasi,
+              selisih: Math.round((recordedAkumulasi - calculatedAkumulasi) * 100) / 100,
+              keterangan: 'Akumulasi pada kartu aset berbeda dengan jumlah entri penyusutan aktif',
+            });
+          }
+        }
+      }
+
+      // 2. AKUMULASI PENYUSUTAN (GL - Normal KREDIT)
+      let catGlAkumulasi = 0;
+      if (cat.akunAkumulasi) {
+        const glAccEntries = await this.prisma.journalEntry.findMany({
+          where: {
+            chartOfAccountId: cat.akunAkumulasi.id,
+            journal: {
+              tenantId,
+              status: { in: ['POSTED', 'APPROVED'] },
+              tanggal: { lte: endOfDay },
+            },
+          },
+          include: { journal: true },
+        });
+        for (const e of glAccEntries) {
+          const amt = Number(e.jumlah);
+          if (e.tipe === 'KREDIT') catGlAkumulasi += amt;
+          else catGlAkumulasi -= amt;
+
+          if (!e.journal.sourceDocType || !e.journal.sourceDocType.startsWith('ASSET')) {
+            globalRawJournals.push({
+              journalId: e.journal.id,
+              noVoucher: e.journal.no_voucher,
+              tanggal: e.journal.tanggal,
+              deskripsi: e.journal.deskripsi,
+              tipe: e.tipe,
+              jumlah: amt,
+              kategori: `${cat.kode} - ${cat.nama}`,
+              akun: cat.akunAkumulasi.kode_akun,
+              penyebab: 'Jurnal manual masuk langsung ke akun akumulasi penyusutan tanpa melalui proses penyusutan',
+            });
+          }
+        }
+      }
+
+      // 3. CIP (ASET DALAM PENYELESAIAN)
+      let catGlCip = 0;
+      let catSubledgerCip = 0;
+      let cipRecon = null;
+
+      if (cat.akunCip) {
+        const glCipEntries = await this.prisma.journalEntry.findMany({
+          where: {
+            chartOfAccountId: cat.akunCip.id,
+            journal: {
+              tenantId,
+              status: { in: ['POSTED', 'APPROVED'] },
+              tanggal: { lte: endOfDay },
+            },
+          },
+          include: { journal: true },
+        });
+        for (const e of glCipEntries) {
+          const amt = Number(e.jumlah);
+          if (e.tipe === 'DEBIT') catGlCip += amt;
+          else catGlCip -= amt;
+        }
+
+        const cipAssets = await this.prisma.fixedAsset.findMany({
+          where: {
+            tenantId,
+            categoryId: cat.id,
+            status: 'CIP',
+            tanggalPerolehan: { lte: endOfDay },
+          },
+        });
+        catSubledgerCip = cipAssets.reduce((sum, a) => sum + Number(a.hargaPerolehan), 0);
+
+        catGlCip = Math.round(catGlCip * 100) / 100;
+        catSubledgerCip = Math.round(catSubledgerCip * 100) / 100;
+        const cipSelisih = Math.round((catGlCip - catSubledgerCip) * 100) / 100;
+        cipRecon = {
+          accountId: cat.akunCip.id,
+          kodeAkun: cat.akunCip.kode_akun,
+          namaAkun: cat.akunCip.nama_akun,
+          glBalance: catGlCip,
+          subledgerBalance: catSubledgerCip,
+          selisih: cipSelisih,
+          status: (Math.abs(cipSelisih) < 0.01 ? 'OK' : 'SELISIH') as 'OK' | 'SELISIH',
+        };
+        totalGlCip += catGlCip;
+        totalSubledgerCip += catSubledgerCip;
+      }
+
+      catGlPerolehan = Math.round(catGlPerolehan * 100) / 100;
+      catSubledgerPerolehan = Math.round(catSubledgerPerolehan * 100) / 100;
+      const selisihPerolehan = Math.round((catGlPerolehan - catSubledgerPerolehan) * 100) / 100;
+
+      catGlAkumulasi = Math.round(catGlAkumulasi * 100) / 100;
+      catSubledgerAkumulasi = Math.round(catSubledgerAkumulasi * 100) / 100;
+      const selisihAkumulasi = Math.round((catGlAkumulasi - catSubledgerAkumulasi) * 100) / 100;
+
+      totalGlPerolehan += catGlPerolehan;
+      totalSubledgerPerolehan += catSubledgerPerolehan;
+      totalGlAkumulasi += catGlAkumulasi;
+      totalSubledgerAkumulasi += catSubledgerAkumulasi;
+
+      const catTotalSelisih =
+        Math.abs(selisihPerolehan) +
+        Math.abs(selisihAkumulasi) +
+        (cipRecon ? Math.abs(cipRecon.selisih) : 0);
+      const catOk = catTotalSelisih < 0.01;
+
+      categoryItems.push({
+        id: cat.id,
+        kode: cat.kode,
+        nama: cat.nama,
+        perolehan: {
+          accountId: cat.akunAset?.id || '',
+          kodeAkun: cat.akunAset?.kode_akun || '-',
+          namaAkun: cat.akunAset?.nama_akun || '-',
+          glBalance: catGlPerolehan,
+          subledgerBalance: catSubledgerPerolehan,
+          selisih: selisihPerolehan,
+          status: Math.abs(selisihPerolehan) < 0.01 ? 'OK' : 'SELISIH',
+        },
+        akumulasi: {
+          accountId: cat.akunAkumulasi?.id || '',
+          kodeAkun: cat.akunAkumulasi?.kode_akun || '-',
+          namaAkun: cat.akunAkumulasi?.nama_akun || '-',
+          glBalance: catGlAkumulasi,
+          subledgerBalance: catSubledgerAkumulasi,
+          selisih: selisihAkumulasi,
+          status: Math.abs(selisihAkumulasi) < 0.01 ? 'OK' : 'SELISIH',
+        },
+        cip: cipRecon,
+        status: catOk ? 'OK' : 'SELISIH',
+        totalSelisih: Math.round(catTotalSelisih * 100) / 100,
+      });
+    }
+
+    const totalSelisih =
+      Math.abs(totalGlPerolehan - totalSubledgerPerolehan) +
+      Math.abs(totalGlAkumulasi - totalSubledgerAkumulasi) +
+      Math.abs(totalGlCip - totalSubledgerCip);
+    const isOk = totalSelisih < 0.01 && globalMismatchedAssets.length === 0;
+
+    return {
+      controlType: 'FIXED_ASSET',
+      status: isOk ? 'OK' : 'SELISIH',
+      totalGlPerolehan: Math.round(totalGlPerolehan * 100) / 100,
+      totalSubledgerPerolehan: Math.round(totalSubledgerPerolehan * 100) / 100,
+      totalGlAkumulasi: Math.round(totalGlAkumulasi * 100) / 100,
+      totalSubledgerAkumulasi: Math.round(totalSubledgerAkumulasi * 100) / 100,
+      totalGlCip: Math.round(totalGlCip * 100) / 100,
+      totalSubledgerCip: Math.round(totalSubledgerCip * 100) / 100,
+      totalSelisih: Math.round(totalSelisih * 100) / 100,
+      selisih: Math.round(totalSelisih * 100) / 100,
+      categories: categoryItems,
+      drillDown: {
+        unpostedOrOrphanDocs: globalOrphanDocs,
+        rawOrUnlinkedJournals: globalRawJournals,
+        mismatchedAssets: globalMismatchedAssets,
+        summary: {
+          totalOrphanDocs: globalOrphanDocs.length,
+          totalRawJournals: globalRawJournals.length,
+          totalRawJournalValue: globalRawJournals.reduce((sum, j) => sum + j.jumlah, 0),
+          totalMismatchedAssets: globalMismatchedAssets.length,
+        },
+      },
+    };
+  }
+
   private createUnconfiguredResult(
     controlType: any,
     normalBalance: 'DEBIT' | 'KREDIT',
@@ -667,7 +1237,8 @@ export class SubledgerReconciliationService {
 
   /**
    * Mengambil ringkasan metrik lintas modul untuk Dashboard Staf Akuntansi:
-   * Total piutang, total hutang, nilai persediaan, faktur jatuh tempo, PO/SO terbuka, dan status rekonsiliasi.
+   * Total piutang, hutang, persediaan, kas/bank, nilai tercatat aset, aset belum dilabel,
+   * status rekonsiliasi bank terakhir, dan status penyusutan periode berjalan.
    */
   async getDashboardSummary(tenantId: string) {
     const today = new Date();
@@ -710,11 +1281,84 @@ export class SubledgerReconciliationService {
       },
     });
 
+    // 4. Metrik Kas & Bank (V4)
+    const totalKasBank = recon.accounts.cashBank?.totalSubledgerBalance || 0;
+    const saldoPerRekening = recon.accounts.cashBank?.accounts.map((a) => ({
+      id: a.id,
+      kode: a.kode,
+      nama: a.nama,
+      jenis: a.jenis,
+      mata_uang: a.mata_uang,
+      saldo: a.subledgerBalance,
+      status: a.status,
+    })) || [];
+
+    // Status Rekonsiliasi Bank Terakhir per Rekening BANK aktif
+    const bankAccounts = await this.prisma.cashBankAccount.findMany({
+      where: { tenantId, jenis: 'BANK', isActive: true },
+      include: {
+        bankReconciliations: {
+          orderBy: { tanggalAkhir: 'desc' },
+          take: 1,
+        },
+      },
+    });
+    const statusRekonsiliasiBank = bankAccounts.map((b) => ({
+      cashBankAccountId: b.id,
+      kodeRekening: b.kode,
+      namaRekening: b.nama,
+      statusTerakhir: b.bankReconciliations[0]?.status || 'BELUM_PERNAH',
+      tanggalAkhir: b.bankReconciliations[0]?.tanggalAkhir ? b.bankReconciliations[0].tanggalAkhir.toISOString().slice(0, 10) : null,
+      selisih: b.bankReconciliations[0]?.selisih ? Number(b.bankReconciliations[0].selisih) : 0,
+    }));
+
+    // 5. Metrik Aset Tetap (V4)
+    const nilaiTercatatAset = Math.round(
+      ((recon.accounts.fixedAsset?.totalSubledgerPerolehan || 0) -
+       (recon.accounts.fixedAsset?.totalSubledgerAkumulasi || 0)) * 100
+    ) / 100;
+
+    const jumlahAsetBelumDilabel = await this.prisma.fixedAsset.count({
+      where: {
+        tenantId,
+        statusLabel: 'BELUM_DILABEL',
+        status: { in: ['DRAFT', 'AKTIF'] },
+      },
+    });
+
+    // Status Proses Penyusutan Periode Berjalan
+    const currentPeriod = await this.prisma.accountingPeriod.findFirst({
+      where: {
+        fiscalYear: { tenantId },
+        status: 'OPEN',
+        tanggal_mulai: { lte: today },
+        tanggal_selesai: { gte: today },
+      },
+    });
+
+    let statusPenyusutanPeriodeBerjalan = 'TIDAK_ADA_PERIODE_AKTIF';
+    if (currentPeriod) {
+      const postedRun = await this.prisma.assetDepreciationRun.findFirst({
+        where: {
+          tenantId,
+          periodId: currentPeriod.id,
+          status: 'POSTED',
+        },
+      });
+      statusPenyusutanPeriodeBerjalan = postedRun ? 'SUDAH_DIPOSTING' : 'BELUM_DIJALANKAN';
+    }
+
     return {
       totalPiutang: recon.accounts.ar.subledgerBalance,
       totalHutang: recon.accounts.ap.subledgerBalance,
       nilaiPersediaan: recon.accounts.inventory.subledgerBalance,
       totalUnbilledGr: recon.accounts.grIrClearing.subledgerBalance,
+      totalKasBank,
+      saldoPerRekening,
+      nilaiTercatatAset,
+      jumlahAsetBelumDilabel,
+      statusRekonsiliasiBank,
+      statusPenyusutanPeriodeBerjalan,
       jumlahFakturJatuhTempo: overdueInvoices + overdueBills,
       detailJatuhTempo: {
         piutangJatuhTempo: overdueInvoices,
@@ -729,6 +1373,12 @@ export class SubledgerReconciliationService {
         ap: { status: recon.accounts.ap.status, selisih: recon.accounts.ap.selisih },
         inventory: { status: recon.accounts.inventory.status, selisih: recon.accounts.inventory.selisih },
         grIrClearing: { status: recon.accounts.grIrClearing.status, selisih: recon.accounts.grIrClearing.selisih },
+        cashBank: recon.accounts.cashBank
+          ? { status: recon.accounts.cashBank.status, selisih: recon.accounts.cashBank.totalSelisih }
+          : undefined,
+        fixedAsset: recon.accounts.fixedAsset
+          ? { status: recon.accounts.fixedAsset.status, selisih: recon.accounts.fixedAsset.totalSelisih }
+          : undefined,
       },
     };
   }
