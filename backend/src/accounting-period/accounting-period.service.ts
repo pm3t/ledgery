@@ -135,6 +135,96 @@ export class AccountingPeriodService {
       }
     }
 
+    // Pengecekan Rekonsiliasi Bank sampai akhir periode untuk rekening BANK aktif
+    if (subledgerSetting && (subledgerSetting as any).cashBankEnabled) {
+      const activeBankAccounts = await this.prisma.cashBankAccount.findMany({
+        where: {
+          tenantId,
+          isActive: true,
+          jenis: 'BANK',
+        },
+      });
+
+      const uncompletedBankRecons: string[] = [];
+      const tanggalSelesai = period.tanggal_selesai;
+
+      for (const acc of activeBankAccounts) {
+        const completedRecon = await this.prisma.bankReconciliation.findFirst({
+          where: {
+            tenantId,
+            cashBankAccountId: acc.id,
+            status: 'SELESAI',
+            tanggalAkhir: { gte: tanggalSelesai },
+          },
+        });
+
+        if (!completedRecon) {
+          uncompletedBankRecons.push(`${acc.kode} - ${acc.nama}`);
+        }
+      }
+
+      if (uncompletedBankRecons.length > 0) {
+        const bankListMsg = uncompletedBankRecons.join(', ');
+        if ((subledgerSetting as any).blockPeriodCloseOnBankRecon) {
+          throw new BadRequestException({
+            errorCode: 'PERIOD_CLOSE_BLOCKED_ON_BANK_RECON',
+            message: `Penutupan periode dibatalkan: Rekonsiliasi Bank per akhir periode (${period.tanggal_selesai.toISOString().slice(0, 10)}) belum SELESAI untuk rekening: ${bankListMsg}. Pengaturan tenant memblokir closing sebelum rekonsiliasi bank tuntas.`,
+            details: {
+              uncompletedBankAccounts: uncompletedBankRecons,
+            },
+          });
+        } else {
+          reconciliationWarning = {
+            ...(reconciliationWarning || {}),
+            bankReconWarning: `Peringatan: Rekonsiliasi Bank per akhir periode belum SELESAI untuk rekening: ${bankListMsg}.`,
+          };
+        }
+      }
+    }
+
+    // Pengecekan Proses Penyusutan Aset Tetap untuk periode berjalan
+    if (subledgerSetting && (subledgerSetting as any).fixedAssetEnabled) {
+      const activeDepreciableAsset = await this.prisma.fixedAsset.findFirst({
+        where: {
+          tenantId,
+          status: 'AKTIF',
+          category: {
+            dapatDisusutkan: true,
+          },
+        },
+      });
+
+      const periodNama = `${period.fiscalYear.nama_tahun_buku} - Periode ${period.nomor_periode}`;
+
+      if (activeDepreciableAsset) {
+        const postedRun = await this.prisma.assetDepreciationRun.findFirst({
+          where: {
+            tenantId,
+            periodId,
+            status: 'POSTED',
+          },
+        });
+
+        if (!postedRun) {
+          if ((subledgerSetting as any).blockPeriodCloseOnDepreciation) {
+            throw new BadRequestException({
+              errorCode: 'PERIOD_CLOSE_BLOCKED_ON_DEPRECIATION',
+              message: `Penutupan periode dibatalkan: Proses penyusutan aset tetap belum dijalankan (POSTED) untuk periode ${periodNama}. Pengaturan tenant memblokir penutupan periode sebelum penyusutan aset diposting.`,
+              details: {
+                periodId,
+                periodName: periodNama,
+              },
+            });
+          } else {
+            reconciliationWarning = {
+              ...(reconciliationWarning || {}),
+              depreciationWarning: `Peringatan: Proses penyusutan aset tetap belum dijalankan untuk periode ${periodNama}.`,
+            };
+          }
+        }
+      }
+    }
+
     const updated = await this.prisma.accountingPeriod.update({
       where: { id: periodId },
       data: {

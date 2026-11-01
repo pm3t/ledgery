@@ -30,6 +30,8 @@ import {
   BusinessPartner,
   ChartOfAccount,
   Dimension,
+  AssetCategory,
+  FixedAsset,
 } from '../../services/api';
 
 interface PurchaseBillsPageProps {
@@ -40,7 +42,11 @@ interface PurchaseBillsPageProps {
 interface BillLineFormItem {
   id?: string;
   itemId?: string;
-  itemType: 'STOCK' | 'SERVICE';
+  itemType: 'STOCK' | 'SERVICE' | 'ASSET' | string;
+  lineType?: 'BARANG' | 'JASA' | 'BIAYA' | 'ASET';
+  assetCategoryId?: string;
+  kapitalisasiKeCip?: boolean;
+  assetId?: string;
   deskripsi: string;
   qty: number;
   hargaSatuan: number;
@@ -59,6 +65,8 @@ export const PurchaseBillsPage: React.FC<PurchaseBillsPageProps> = ({
   const [vendors, setVendors] = useState<BusinessPartner[]>([]);
   const [accounts, setAccounts] = useState<ChartOfAccount[]>([]);
   const [dimensions, setDimensions] = useState<Dimension[]>([]);
+  const [assetCategories, setAssetCategories] = useState<AssetCategory[]>([]);
+  const [cipAssets, setCipAssets] = useState<FixedAsset[]>([]);
 
   // Filter States
   const [selectedStatus, setSelectedStatus] = useState<string>('ALL');
@@ -106,11 +114,13 @@ export const PurchaseBillsPage: React.FC<PurchaseBillsPageProps> = ({
     setLoading(true);
     setErrorMessage(null);
     try {
-      const [billsData, partnersData, coaData, dimData] = await Promise.all([
+      const [billsData, partnersData, coaData, dimData, catsData, cipData] = await Promise.all([
         api.getPurchaseBills(currentTenant.id),
         api.getBusinessPartners(currentTenant.id, { type: 'vendor', isActive: true }),
         api.getCoaByTenant(currentTenant.id),
         api.getDimensions ? api.getDimensions() : Promise.resolve([]),
+        api.getAssetCategories ? api.getAssetCategories().catch(() => []) : Promise.resolve([]),
+        api.getFixedAssets ? api.getFixedAssets({ status: 'CIP' }).catch(() => []) : Promise.resolve([]),
       ]);
 
       setBills(billsData || []);
@@ -118,6 +128,8 @@ export const PurchaseBillsPage: React.FC<PurchaseBillsPageProps> = ({
       setVendors((partnersData || []).filter((p: BusinessPartner) => p.isVendor));
       setAccounts(coaData || []);
       setDimensions(dimData || []);
+      setAssetCategories(catsData || []);
+      setCipAssets(cipData || []);
     } catch (err: any) {
       console.error('Gagal memuat data faktur pembelian:', err);
       setErrorMessage(err.message || 'Gagal memuat data');
@@ -241,7 +253,11 @@ export const PurchaseBillsPage: React.FC<PurchaseBillsPageProps> = ({
         catatan: formCatatan,
         lines: formLines.map((l) => ({
           itemId: l.itemId || undefined,
-          itemType: l.itemType,
+          itemType: l.itemType === 'ASSET' ? 'SERVICE' : l.itemType,
+          lineType: (l.itemType === 'ASSET' ? 'ASET' : l.lineType) || undefined,
+          assetCategoryId: l.assetCategoryId || undefined,
+          kapitalisasiKeCip: l.kapitalisasiKeCip || undefined,
+          assetId: l.assetId || undefined,
           deskripsi: l.deskripsi,
           qty: Number(l.qty),
           hargaSatuan: Number(l.hargaSatuan),
@@ -418,18 +434,18 @@ export const PurchaseBillsPage: React.FC<PurchaseBillsPageProps> = ({
       </div>
 
       {/* Filter Toolbar */}
-      <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 space-y-3.5 backdrop-blur-md">
+      <div className="bg-white border border-[#cbdcd0] rounded-2xl p-4 space-y-3.5 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3">
           {/* Status Tabs */}
-          <div className="flex flex-wrap gap-1">
+          <div className="flex flex-wrap gap-1.5">
             {['ALL', 'DRAFT', 'POSTED', 'PARTIAL', 'PAID', 'VOID'].map((st) => (
               <button
                 key={st}
                 onClick={() => setSelectedStatus(st)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                   selectedStatus === st
-                    ? 'bg-indigo-600 text-white shadow-sm'
-                    : 'bg-slate-800/80 text-slate-400 hover:text-white hover:bg-slate-800'
+                    ? 'bg-emerald-700 text-white shadow-sm font-bold'
+                    : 'bg-[#edf2ea] text-[#142820] hover:bg-[#dbe7da] border border-[#c9d8c8]'
                 }`}
               >
                 {st === 'ALL'
@@ -447,26 +463,26 @@ export const PurchaseBillsPage: React.FC<PurchaseBillsPageProps> = ({
 
           {/* Search Box */}
           <div className="relative w-full sm:w-64">
-            <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               placeholder="Cari no. faktur / vendor..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 text-slate-200 text-xs rounded-xl pl-9 pr-3 py-1.5 focus:outline-none focus:border-indigo-500"
+              className="w-full bg-white border border-[#cbdcd0] text-[#142820] placeholder:text-[#71887b] text-xs rounded-xl pl-9 pr-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-emerald-600"
             />
           </div>
         </div>
 
         {/* Baris Filter Vendor & Tanggal */}
-        <div className="flex flex-wrap items-center gap-3 pt-3 border-t border-slate-800/70 text-xs text-slate-400">
+        <div className="flex flex-wrap items-center gap-3 pt-3 border-t border-[#edf2ea] text-xs text-[#142820]">
           <div className="flex items-center gap-1.5">
-            <Building2 className="w-3.5 h-3.5 text-slate-500" />
-            <span>Vendor:</span>
+            <Building2 className="w-3.5 h-3.5 text-emerald-700" />
+            <span className="font-semibold">Vendor:</span>
             <select
               value={selectedVendor}
               onChange={(e) => setSelectedVendor(e.target.value)}
-              className="bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1 text-slate-200 text-xs focus:outline-none focus:border-indigo-500"
+              className="bg-white border border-[#cbdcd0] rounded-lg px-2.5 py-1 text-[#142820] text-xs focus:outline-none focus:ring-2 focus:ring-emerald-600"
             >
               <option value="ALL">Semua Vendor</option>
               {vendors.map((v) => (
@@ -478,20 +494,20 @@ export const PurchaseBillsPage: React.FC<PurchaseBillsPageProps> = ({
           </div>
 
           <div className="flex items-center gap-1.5">
-            <Calendar className="w-3.5 h-3.5 text-slate-500" />
-            <span>Periode:</span>
+            <Calendar className="w-3.5 h-3.5 text-emerald-700" />
+            <span className="font-semibold">Periode:</span>
             <input
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-slate-200 text-xs focus:outline-none focus:border-indigo-500"
+              className="bg-white border border-[#cbdcd0] rounded-lg px-2 py-1 text-[#142820] text-xs focus:outline-none focus:ring-2 focus:ring-emerald-600"
             />
             <span>s/d</span>
             <input
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-slate-200 text-xs focus:outline-none focus:border-indigo-500"
+              className="bg-white border border-[#cbdcd0] rounded-lg px-2 py-1 text-[#142820] text-xs focus:outline-none focus:ring-2 focus:ring-emerald-600"
             />
           </div>
 
@@ -504,7 +520,7 @@ export const PurchaseBillsPage: React.FC<PurchaseBillsPageProps> = ({
                 setSelectedVendor('ALL');
                 setSearchQuery('');
               }}
-              className="text-indigo-400 hover:text-indigo-300 underline text-xs ml-auto"
+              className="text-emerald-700 hover:text-emerald-900 font-semibold underline text-xs ml-auto"
             >
               Reset Filter
             </button>
@@ -513,21 +529,21 @@ export const PurchaseBillsPage: React.FC<PurchaseBillsPageProps> = ({
       </div>
 
       {/* Tabel Data Faktur Pembelian */}
-      <div className="bg-slate-900/60 border border-slate-800 rounded-2xl overflow-hidden backdrop-blur-sm shadow-xl">
+      <div className="bg-white border border-[#cbdcd0] rounded-2xl overflow-hidden shadow-sm">
         {loading ? (
-          <div className="p-12 text-center text-slate-400 text-xs flex items-center justify-center gap-2">
-            <RefreshCw className="w-4 h-4 animate-spin text-indigo-400" />
+          <div className="p-12 text-center text-slate-500 text-xs flex items-center justify-center gap-2">
+            <RefreshCw className="w-4 h-4 animate-spin text-emerald-700" />
             <span>Memuat data faktur pembelian...</span>
           </div>
         ) : filteredBills.length === 0 ? (
           <div className="p-12 text-center text-slate-500 text-xs space-y-2">
-            <Receipt className="w-8 h-8 text-slate-600 mx-auto" />
+            <Receipt className="w-8 h-8 text-slate-400 mx-auto" />
             <p>Tidak ada faktur pembelian yang sesuai dengan kriteria filter.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-300">
-              <thead className="bg-slate-950/70 text-slate-400 uppercase tracking-wider border-b border-slate-800 font-semibold">
+            <table className="w-full text-left text-xs border-collapse">
+              <thead className="bg-[#eaf1e8] text-[#142e20] uppercase tracking-wider border-b border-[#cbdcd0] font-bold">
                 <tr>
                   <th className="py-3 px-4">No Dokumen</th>
                   <th className="py-3 px-4">No Faktur Vendor</th>
@@ -540,25 +556,25 @@ export const PurchaseBillsPage: React.FC<PurchaseBillsPageProps> = ({
                   <th className="py-3 px-4 text-right">Aksi</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60">
+              <tbody className="divide-y divide-[#edf2ea]">
                 {filteredBills.map((bill) => (
-                  <tr key={bill.id} className="hover:bg-slate-800/40 transition-colors">
-                    <td className="py-3 px-4 font-mono font-medium text-white">
+                  <tr key={bill.id} className="hover:bg-[#f7faf6] transition-colors">
+                    <td className="py-3 px-4 font-mono font-bold text-[#142820]">
                       <button
                         type="button"
                         onClick={() => {
                           setSelectedBill(bill);
                           setShowDetailModal(true);
                         }}
-                        className="hover:underline text-indigo-400 hover:text-indigo-300 text-left font-mono"
+                        className="hover:underline text-emerald-800 hover:text-emerald-950 text-left font-mono"
                       >
                         {bill.noDokumen}
                       </button>
                     </td>
-                    <td className="py-3 px-4 font-mono text-slate-300">
+                    <td className="py-3 px-4 font-mono text-[#142820]">
                       {bill.noFakturVendor || '-'}
                     </td>
-                    <td className="py-3 px-4 font-mono text-slate-400">
+                    <td className="py-3 px-4 font-mono text-slate-700">
                       {bill.tanggal.slice(0, 10)}
                     </td>
                     <td className="py-3 px-4 font-mono">
@@ -567,7 +583,7 @@ export const PurchaseBillsPage: React.FC<PurchaseBillsPageProps> = ({
                           bill.status !== 'PAID' &&
                           bill.status !== 'VOID' &&
                           new Date(bill.jatuhTempo) < new Date()
-                            ? 'text-rose-400 font-bold'
+                            ? 'text-rose-600 font-bold'
                             : 'text-slate-400'
                         }
                       >
@@ -824,17 +840,19 @@ export const PurchaseBillsPage: React.FC<PurchaseBillsPageProps> = ({
                         const lineTotal = dpp + (dpp * Number(line.ppnRate || 0)) / 100;
 
                         return (
-                          <tr key={idx} className="hover:bg-slate-800/30">
+                          <React.Fragment key={idx}>
+                            <tr className="hover:bg-slate-50 transition-colors">
                             <td className="py-2 px-3">
                               <select
                                 value={line.itemType}
                                 onChange={(e) =>
                                   handleUpdateLine(idx, 'itemType', e.target.value as any)
                                 }
-                                className="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-xs text-slate-200"
+                                className="w-full bg-white border border-[#cbdcd0] rounded-lg px-2 py-1 text-xs text-[#142820]"
                               >
                                 <option value="SERVICE">Jasa / Biaya</option>
                                 <option value="STOCK">Barang STOK</option>
+                                <option value="ASSET">Aset Tetap / CIP</option>
                               </select>
                             </td>
 
@@ -844,7 +862,7 @@ export const PurchaseBillsPage: React.FC<PurchaseBillsPageProps> = ({
                                 placeholder="Nama barang / deskripsi pembelian..."
                                 value={line.deskripsi}
                                 onChange={(e) => handleUpdateLine(idx, 'deskripsi', e.target.value)}
-                                className="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+                                className="w-full bg-white border border-[#cbdcd0] rounded-lg px-2.5 py-1 text-xs text-[#142820] focus:outline-none focus:border-emerald-600"
                               />
                             </td>
 
@@ -857,7 +875,7 @@ export const PurchaseBillsPage: React.FC<PurchaseBillsPageProps> = ({
                                 onChange={(e) =>
                                   handleUpdateLine(idx, 'qty', parseFloat(e.target.value) || 0)
                                 }
-                                className="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-xs font-mono text-right text-slate-200 focus:outline-none focus:border-indigo-500"
+                                className="w-full bg-white border border-[#cbdcd0] rounded-lg px-2 py-1 text-xs font-mono text-right text-[#142820] focus:outline-none focus:border-emerald-600"
                               />
                             </td>
 
@@ -874,7 +892,7 @@ export const PurchaseBillsPage: React.FC<PurchaseBillsPageProps> = ({
                                     parseFloat(e.target.value) || 0,
                                   )
                                 }
-                                className="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-xs font-mono text-right text-slate-200 focus:outline-none focus:border-indigo-500"
+                                className="w-full bg-white border border-[#cbdcd0] rounded-lg px-2 py-1 text-xs font-mono text-right text-[#142820] focus:outline-none focus:border-emerald-600"
                               />
                             </td>
 
@@ -891,7 +909,7 @@ export const PurchaseBillsPage: React.FC<PurchaseBillsPageProps> = ({
                                     parseFloat(e.target.value) || 0,
                                   )
                                 }
-                                className="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-xs font-mono text-right text-slate-200 focus:outline-none focus:border-indigo-500"
+                                className="w-full bg-white border border-[#cbdcd0] rounded-lg px-2 py-1 text-xs font-mono text-right text-[#142820] focus:outline-none focus:border-emerald-600"
                               />
                             </td>
 
@@ -908,11 +926,11 @@ export const PurchaseBillsPage: React.FC<PurchaseBillsPageProps> = ({
                                     parseFloat(e.target.value) || 0,
                                   )
                                 }
-                                className="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-xs font-mono text-right text-slate-200 focus:outline-none focus:border-indigo-500"
+                                className="w-full bg-white border border-[#cbdcd0] rounded-lg px-2 py-1 text-xs font-mono text-right text-[#142820] focus:outline-none focus:border-emerald-600"
                               />
                             </td>
 
-                            <td className="py-2 px-3 text-right font-mono font-medium text-white">
+                            <td className="py-2 px-3 text-right font-mono font-medium text-[#142820]">
                               {formatNumber(lineTotal)}
                             </td>
 
@@ -921,13 +939,67 @@ export const PurchaseBillsPage: React.FC<PurchaseBillsPageProps> = ({
                                 <button
                                   type="button"
                                   onClick={() => handleRemoveLine(idx)}
-                                  className="text-slate-500 hover:text-rose-400 p-1 rounded"
+                                  className="text-slate-400 hover:text-rose-600 p-1 rounded"
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
                                 </button>
                               )}
                             </td>
                           </tr>
+
+                          {line.itemType === 'ASSET' && (
+                            <tr key={`asset-${idx}`} className="bg-emerald-50/60">
+                              <td colSpan={8} className="py-2 px-3 text-[11px] border-b border-[#cbdcd0]">
+                                <div className="flex flex-wrap items-center gap-3">
+                                  <span className="font-bold text-emerald-950 flex items-center gap-1">
+                                    ⚙️ Pengaturan Aset Tetap:
+                                  </span>
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="font-semibold text-slate-700">Kategori Aset:</span>
+                                    <select
+                                      value={line.assetCategoryId || ''}
+                                      onChange={(e) => handleUpdateLine(idx, 'assetCategoryId', e.target.value)}
+                                      className="bg-white border border-[#cbdcd0] rounded px-2 py-1 text-xs text-[#142820]"
+                                    >
+                                      <option value="">-- Pilih Kategori Aset --</option>
+                                      {assetCategories.map((c) => (
+                                        <option key={c.id} value={c.id}>
+                                          {c.kode} - {c.nama} ({c.jenis})
+                                        </option>
+                                      ))}
+                                    </select>
+                                  </div>
+                                  <label className="flex items-center gap-1.5 cursor-pointer font-semibold text-emerald-950">
+                                    <input
+                                      type="checkbox"
+                                      checked={!!line.kapitalisasiKeCip}
+                                      onChange={(e) => handleUpdateLine(idx, 'kapitalisasiKeCip', e.target.checked)}
+                                      className="rounded text-emerald-700 focus:ring-emerald-600 w-3.5 h-3.5"
+                                    />
+                                    Kapitalisasi ke CIP (Aset Dalam Penyelesaian)
+                                  </label>
+                                  {cipAssets.length > 0 && (
+                                    <div className="flex items-center gap-1.5 ml-auto">
+                                      <span className="font-semibold text-slate-700">Tambah Biaya ke Aset CIP:</span>
+                                      <select
+                                        value={line.assetId || ''}
+                                        onChange={(e) => handleUpdateLine(idx, 'assetId', e.target.value || undefined)}
+                                        className="bg-white border border-[#cbdcd0] rounded px-2 py-1 text-xs text-[#142820]"
+                                      >
+                                        <option value="">-- Buat Aset Baru --</option>
+                                        {cipAssets.map((a) => (
+                                          <option key={a.id} value={a.id}>
+                                            {a.noAset} - {a.nama}
+                                          </option>
+                                        ))}
+                                      </select>
+                                    </div>
+                                  )}
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                        </React.Fragment>
                         );
                       })}
                     </tbody>

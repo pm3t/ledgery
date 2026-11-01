@@ -72,6 +72,14 @@ export class CreateSalesInvoiceLineDto {
   @IsOptional()
   @IsString()
   sourceLineId?: string;
+
+  @IsOptional()
+  @IsString()
+  lineType?: string; // 'STANDARD' | 'PELEPASAN_ASET'
+
+  @IsOptional()
+  @IsString()
+  assetId?: string;
 }
 
 export class CreateSalesInvoiceDto {

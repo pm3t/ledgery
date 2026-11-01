@@ -41,6 +41,7 @@ import {
   ArrowDownLeft,
   ArrowUpRight,
   ArrowRightLeft,
+  Percent,
 } from 'lucide-react';
 import { Tenant, api, AppNotification } from '../services/api';
 import { AuthUser } from '../context/AuthContext';
@@ -89,8 +90,16 @@ export type TenantTab =
   | 'cash-receipts'
   | 'cash-disbursements'
   | 'cash-transfers'
+  | 'bank-reconciliation'
+  | 'bank-reconciliation-history'
   | 'cash-reports'
   | 'cash-opening-balance'
+  | 'fixed-assets'
+  | 'depreciation-run'
+  | 'asset-categories'
+  | 'fiscal-groups'
+  | 'asset-capitalization'
+  | 'asset-opening-balance'
   | 'asset-scan';
 
 interface LayoutProps {
@@ -150,6 +159,8 @@ export const Layout: React.FC<LayoutProps> = ({
           { id: 'cash-receipts', label: 'Penerimaan Kas/Bank', icon: ArrowDownLeft },
           { id: 'cash-disbursements', label: 'Pengeluaran & Voucher', icon: ArrowUpRight },
           { id: 'cash-transfers', label: 'Transfer & Kas Kecil', icon: ArrowRightLeft },
+          { id: 'bank-reconciliation', label: 'Rekonsiliasi Bank', icon: Scale },
+          { id: 'bank-reconciliation-history', label: 'Riwayat Rekonsiliasi', icon: History },
           { id: 'cash-reports', label: 'Buku & Posisi Kas', icon: FileSpreadsheet },
           { id: 'cash-opening-balance', label: 'Saldo Awal Kas/Bank', icon: UploadCloud },
         ],
@@ -271,9 +282,15 @@ export const Layout: React.FC<LayoutProps> = ({
       {
         id: 'fixed-asset',
         label: 'Aset Tetap (Fixed Assets)',
-        icon: QrCode,
-        colorClass: 'text-teal-400',
+        icon: Package,
+        colorClass: 'text-emerald-400',
         items: [
+          { id: 'fixed-assets', label: 'Daftar Aset Tetap', icon: Package },
+          { id: 'depreciation-run', label: 'Proses Penyusutan', icon: Calculator },
+          { id: 'asset-categories', label: 'Kategori Aset', icon: Layers },
+          { id: 'fiscal-groups', label: 'Kelompok Fiskal (Pajak)', icon: Percent },
+          { id: 'asset-capitalization', label: 'Kapitalisasi CIP', icon: Building2 },
+          { id: 'asset-opening-balance', label: 'Saldo Awal Aset', icon: UploadCloud },
           { id: 'asset-scan', label: 'Scan & Verifikasi Fisik', icon: QrCode },
         ],
       },

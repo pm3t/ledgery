@@ -30,6 +30,8 @@ import { AccountsPayableModule } from './accounts-payable/accounts-payable.modul
 import { InventoryModule } from './inventory/inventory.module';
 import { OrderManagementModule } from './order-management/order-management.module';
 import { CashBankModule } from './cash-bank/cash-bank.module';
+import { BankReconciliationModule } from './bank-reconciliation/bank-reconciliation.module';
+import { FixedAssetModule } from './fixed-asset/fixed-asset.module';
 
 // Modul Utama Aplikasi Backend Ledgery
 @Module({
@@ -65,6 +67,8 @@ import { CashBankModule } from './cash-bank/cash-bank.module';
     InventoryModule,
     OrderManagementModule,
     CashBankModule,
+    BankReconciliationModule,
+    FixedAssetModule,
   ],
 })
 export class AppModule {}

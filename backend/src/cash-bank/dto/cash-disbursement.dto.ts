@@ -11,9 +11,9 @@ import {
 import { Type } from 'class-transformer';
 
 export class CashDisbursementLineDto {
-  @IsNotEmpty({ message: 'Akun lawan biaya/pengeluaran wajib dipilih' })
+  @IsOptional()
   @IsString()
-  akunLawanId: string;
+  akunLawanId?: string;
 
   @IsNotEmpty({ message: 'Deskripsi baris pengeluaran wajib diisi' })
   @IsString()
@@ -26,6 +26,21 @@ export class CashDisbursementLineDto {
 
   @IsOptional()
   dimensions?: any;
+
+  @IsOptional()
+  @IsString()
+  lineType?: 'BIAYA' | 'ASET';
+
+  @IsOptional()
+  @IsString()
+  assetCategoryId?: string;
+
+  @IsOptional()
+  kapitalisasiKeCip?: boolean;
+
+  @IsOptional()
+  @IsString()
+  assetId?: string;
 }
 
 export class CreateCashDisbursementDto {

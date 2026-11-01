@@ -386,17 +386,17 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
   const getCategoryBadge = (kategori: string) => {
     switch (kategori) {
       case 'ASET':
-        return 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30';
+        return 'bg-blue-50 text-blue-700 border-blue-200';
       case 'LIABILITAS':
-        return 'bg-amber-500/10 text-amber-400 border-amber-500/30';
+        return 'bg-amber-50 text-amber-800 border-amber-200';
       case 'EKUITAS':
-        return 'bg-purple-500/10 text-purple-400 border-purple-500/30';
+        return 'bg-emerald-50 text-emerald-800 border-emerald-200';
       case 'PENDAPATAN':
-        return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
+        return 'bg-purple-50 text-purple-800 border-purple-200';
       case 'BEBAN':
-        return 'bg-rose-500/10 text-rose-400 border-rose-500/30';
+        return 'bg-rose-50 text-rose-700 border-rose-200';
       default:
-        return 'bg-slate-800 text-slate-400 border-slate-700';
+        return 'bg-[#edf2ea] text-[#142820] border-[#c9d8c8]';
     }
   };
 
@@ -409,17 +409,17 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
       {/* Header Halaman */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
-            <FolderTree className="w-7 h-7 text-indigo-400" />
+          <h2 className="text-2xl font-bold text-[#142820] tracking-tight flex items-center gap-2">
+            <FolderTree className="w-7 h-7 text-emerald-700" />
             Chart of Accounts (COA)
           </h2>
-          <p className="text-slate-400 text-sm mt-1">
-            Kelola struktur bagan akun standar untuk <span className="text-indigo-300 font-semibold">{currentTenant.nama_perusahaan}</span>
+          <p className="text-[#556c5e] text-sm mt-1">
+            Kelola struktur bagan akun standar untuk <span className="text-emerald-800 font-semibold">{currentTenant.nama_perusahaan}</span>
           </p>
         </div>
         <button
           onClick={handleOpenAddModal}
-          className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold px-4 py-2.5 rounded-xl shadow-lg shadow-indigo-600/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
+          className="inline-flex items-center gap-2 bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-bold px-4 py-2.5 rounded-xl shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98]"
         >
           <Plus className="w-4 h-4" />
           Tambah Kode Akun
@@ -427,7 +427,7 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
       </div>
 
       {/* Filter & Toolbar Pencarian + Saldo Selector */}
-      <div className="relative z-30 bg-slate-900/90 border border-slate-800 rounded-2xl p-4 space-y-3.5 backdrop-blur-md">
+      <div className="relative z-30 bg-white border border-[#cbdcd0] rounded-2xl p-4 space-y-3.5 shadow-sm">
         {/* Row 1: Kategori Tabs & Search */}
         <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
           {/* Filter Kategori Tabs */}
@@ -438,8 +438,8 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
                 onClick={() => setSelectedKategori(cat)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                   selectedKategori === cat
-                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
-                    : 'bg-slate-800/80 text-slate-400 hover:text-white hover:bg-slate-800'
+                    ? 'bg-emerald-700 text-white shadow-sm font-bold'
+                    : 'bg-[#edf2ea] text-[#142820] hover:bg-[#dbe7da] border border-[#c9d8c8]'
                 }`}
               >
                 {cat === 'ALL' ? 'Semua Kategori' : cat}
@@ -455,26 +455,26 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
               placeholder="Cari kode atau nama akun..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 text-slate-200 text-xs rounded-xl pl-9 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full bg-white border border-[#cbdcd0] text-[#142820] placeholder:text-[#71887b] text-xs rounded-xl pl-9 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-600"
             />
           </div>
         </div>
 
         {/* Row 2: Konfigurasi Perhitungan Kolom Saldo (As of vs Mutasi) */}
-        <div className="pt-3 border-t border-slate-800/70 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-xs">
+        <div className="pt-3 border-t border-[#edf2ea] flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-xs">
           <div className="flex flex-wrap items-center gap-2.5">
-            <span className="text-slate-400 font-medium flex items-center gap-1.5">
-              <ArrowRightLeft className="w-3.5 h-3.5 text-indigo-400" />
+            <span className="text-[#142820] font-semibold flex items-center gap-1.5">
+              <ArrowRightLeft className="w-3.5 h-3.5 text-emerald-700" />
               Pilihan Saldo:
             </span>
-            <div className="inline-flex p-0.5 bg-slate-950 rounded-xl border border-slate-800">
+            <div className="inline-flex p-0.5 bg-[#edf2ea] rounded-xl border border-[#cbdcd0]">
               <button
                 type="button"
                 onClick={() => setTipeSaldo('AS_OF')}
-                className={`px-3 py-1.5 rounded-lg font-semibold transition-all ${
+                className={`px-3 py-1.5 rounded-lg font-bold transition-all ${
                   tipeSaldo === 'AS_OF'
-                    ? 'bg-indigo-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200'
+                    ? 'bg-emerald-700 text-white shadow-sm'
+                    : 'text-[#142820] hover:text-emerald-800'
                 }`}
               >
                 As of (Default)
@@ -482,10 +482,10 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
               <button
                 type="button"
                 onClick={() => setTipeSaldo('MUTASI')}
-                className={`px-3 py-1.5 rounded-lg font-semibold transition-all ${
+                className={`px-3 py-1.5 rounded-lg font-bold transition-all ${
                   tipeSaldo === 'MUTASI'
-                    ? 'bg-indigo-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200'
+                    ? 'bg-emerald-700 text-white shadow-sm'
+                    : 'text-[#142820] hover:text-emerald-800'
                 }`}
               >
                 Mutasi
@@ -614,16 +614,16 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
       </div>
 
       {/* Tabel Data Akun */}
-      <div className="relative z-10 bg-slate-900/60 border border-slate-800 rounded-2xl overflow-hidden backdrop-blur-sm">
+      <div className="relative z-10 bg-white border border-[#cbdcd0] rounded-2xl overflow-hidden shadow-sm">
         {loading ? (
-          <div className="p-12 text-center text-slate-400 text-sm">Memuat data Chart of Accounts...</div>
+          <div className="p-12 text-center text-slate-500 text-sm">Memuat data Chart of Accounts...</div>
         ) : accounts.length === 0 ? (
-          <div className="p-12 text-center text-slate-400 text-sm">
+          <div className="p-12 text-center text-slate-500 text-sm">
             Belum ada kode akun yang terdaftar untuk tenant ini.
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm text-slate-800">
+            <table className="w-full text-left text-sm text-[#142820]">
               <thead className="bg-[#eaf1e8] text-[#142e20] text-xs uppercase tracking-wider border-b border-[#cbdcd0]">
                 <tr>
                   {visibleColumns.kode_akun && (
@@ -662,18 +662,18 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
                   )}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-200">
+              <tbody className="divide-y divide-[#edf2ea]">
                 {accounts.map((acc) => {
                   const isChild = !!acc.parentId;
                   return (
-                    <tr key={acc.id} className="hover:bg-emerald-50/40 transition-colors">
+                    <tr key={acc.id} className="hover:bg-[#f7faf6] transition-colors">
                       {visibleColumns.kode_akun && (
-                        <td className="py-3 px-4 font-mono font-bold text-slate-900">
+                        <td className="py-3 px-4 font-mono font-bold text-[#142820]">
                           <button
                             type="button"
                             onClick={() => handleOpenMutationModal(acc)}
                             className={`hover:underline flex items-center gap-1.5 text-left transition-colors font-mono font-bold ${
-                              isChild ? 'pl-4 text-emerald-700 hover:text-emerald-900' : 'text-slate-900 hover:text-emerald-700'
+                              isChild ? 'pl-4 text-emerald-800 hover:text-emerald-950' : 'text-[#142820] hover:text-emerald-800'
                             }`}
                             title="Klik untuk melihat kartu mutasi akun ini"
                           >
@@ -683,17 +683,17 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
                         </td>
                       )}
                       {visibleColumns.nama_akun && (
-                        <td className="py-3 px-4 font-medium text-slate-800">
+                        <td className="py-3 px-4 font-medium text-[#142820]">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className={isChild ? 'pl-2 text-slate-700 font-medium' : 'font-bold text-slate-900'}>
+                            <span className={isChild ? 'pl-2 text-slate-700 font-medium' : 'font-bold text-[#142820]'}>
                               {acc.nama_akun}
                             </span>
                             {acc.isControlAccount && (
                               <span
-                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30"
+                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-300"
                                 title="Akun Kontrol: Jurnal manual langsung diblokir"
                               >
-                                <ShieldAlert className="w-3 h-3 text-amber-400" /> Akun Kontrol
+                                <ShieldAlert className="w-3 h-3 text-amber-600" /> Akun Kontrol
                               </span>
                             )}
                           </div>
@@ -792,12 +792,12 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
                       {visibleColumns.status && (
                         <td className="py-3 px-4">
                           {acc.isActive ? (
-                            <span className="inline-flex items-center gap-1 text-xs text-emerald-400 font-medium">
-                              <CheckCircle2 className="w-3.5 h-3.5" /> Aktif
+                            <span className="inline-flex items-center gap-1 text-xs text-emerald-700 font-bold">
+                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Aktif
                             </span>
                           ) : (
                             <span className="inline-flex items-center gap-1 text-xs text-slate-500 font-medium">
-                              <XCircle className="w-3.5 h-3.5" /> Nonaktif
+                              <XCircle className="w-3.5 h-3.5 text-slate-400" /> Nonaktif
                             </span>
                           )}
                         </td>
@@ -883,23 +883,23 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
 
       {/* Modal Dialog Form Tambah / Edit */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
-              <h3 className="text-lg font-bold text-white">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm">
+          <div className="bg-white border border-[#cbdcd0] rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-center border-b border-[#edf2ea] pb-3">
+              <h3 className="text-lg font-bold text-[#142820]">
                 {editingAccount ? 'Edit Kode Akun' : 'Tambah Kode Akun Baru'}
               </h3>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800"
+                className="text-[#556c5e] hover:text-[#142820] p-1 rounded-lg hover:bg-[#edf2ea] transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {formError && (
-              <div className="p-3 bg-rose-950/50 border border-rose-800/50 rounded-xl text-xs text-rose-300 flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 flex-shrink-0" />
+              <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-700 flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 flex-shrink-0 text-rose-600" />
                 <span>{formError}</span>
               </div>
             )}
@@ -907,8 +907,8 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
             <form onSubmit={handleSubmitForm} className="space-y-4 text-xs">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block font-medium text-slate-300 mb-1">
-                    Kode Akun <span className="text-rose-400">*</span>
+                  <label className="block font-semibold text-[#142820] mb-1">
+                    Kode Akun <span className="text-rose-600">*</span>
                   </label>
                   <input
                     type="text"
@@ -916,18 +916,18 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
                     placeholder="Contoh: 100001"
                     value={formData.kode_akun}
                     onChange={(e) => setFormData({ ...formData, kode_akun: e.target.value })}
-                    className="w-full bg-slate-950 border border-slate-800 text-white rounded-xl px-3 py-2 focus:ring-2 focus:ring-indigo-500 font-mono"
+                    className="w-full bg-white border border-[#cbdcd0] text-[#142820] rounded-xl px-3 py-2 focus:ring-2 focus:ring-emerald-600 font-mono shadow-sm"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-medium text-slate-300 mb-1">
-                    Kategori <span className="text-rose-400">*</span>
+                  <label className="block font-semibold text-[#142820] mb-1">
+                    Kategori <span className="text-rose-600">*</span>
                   </label>
                   <select
                     value={formData.kategori}
                     onChange={(e) => setFormData({ ...formData, kategori: e.target.value as any })}
-                    className="w-full bg-slate-950 border border-slate-800 text-white rounded-xl px-3 py-2 focus:ring-2 focus:ring-indigo-500"
+                    className="w-full bg-white border border-[#cbdcd0] text-[#142820] rounded-xl px-3 py-2 focus:ring-2 focus:ring-emerald-600 shadow-sm"
                   >
                     <option value="ASET">ASET</option>
                     <option value="LIABILITAS">LIABILITAS</option>
@@ -939,8 +939,8 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
               </div>
 
               <div>
-                <label className="block font-medium text-slate-300 mb-1">
-                  Nama Akun <span className="text-rose-400">*</span>
+                <label className="block font-semibold text-[#142820] mb-1">
+                  Nama Akun <span className="text-rose-600">*</span>
                 </label>
                 <input
                   type="text"
@@ -948,18 +948,18 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
                   placeholder="Contoh: Kas Utama Operasional"
                   value={formData.nama_akun}
                   onChange={(e) => setFormData({ ...formData, nama_akun: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 text-white rounded-xl px-3 py-2 focus:ring-2 focus:ring-indigo-500"
+                  className="w-full bg-white border border-[#cbdcd0] text-[#142820] rounded-xl px-3 py-2 focus:ring-2 focus:ring-emerald-600 shadow-sm"
                 />
               </div>
 
               <div>
-                <label className="block font-medium text-slate-300 mb-1">
+                <label className="block font-semibold text-[#142820] mb-1">
                   Akun Induk (Opsional)
                 </label>
                 <select
                   value={formData.parentId}
                   onChange={(e) => setFormData({ ...formData, parentId: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 text-white rounded-xl px-3 py-2 focus:ring-2 focus:ring-indigo-500"
+                  className="w-full bg-white border border-[#cbdcd0] text-[#142820] rounded-xl px-3 py-2 focus:ring-2 focus:ring-emerald-600 shadow-sm"
                 >
                   <option value="">-- Tanpa Induk (Akun Utama) --</option>
                   {accounts
@@ -978,16 +978,16 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
                   id="isActiveToggle"
                   checked={formData.isActive}
                   onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                  className="rounded border-slate-700 bg-slate-950 text-indigo-600 focus:ring-indigo-500 w-4 h-4"
+                  className="rounded border-[#cbdcd0] text-emerald-700 focus:ring-emerald-600 w-4 h-4"
                 />
-                <label htmlFor="isActiveToggle" className="text-slate-300 font-medium cursor-pointer text-xs">
+                <label htmlFor="isActiveToggle" className="text-[#142820] font-semibold cursor-pointer text-xs">
                   Akun Aktif (Dapat digunakan dalam entri jurnal)
                 </label>
               </div>
 
               {/* Field Kategori Arus Kas (Metode Langsung) */}
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                <label className="block text-xs font-semibold text-[#142820] mb-1.5">
                   Kategori Arus Kas (Metode Langsung)
                 </label>
                 <select
@@ -998,22 +998,22 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
                       cashFlowCategory: e.target.value as '' | 'OPERASI' | 'INVESTASI' | 'PENDANAAN',
                     })
                   }
-                  className="w-full bg-slate-950 border border-slate-800 text-white rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500"
+                  className="w-full bg-white border border-[#cbdcd0] text-[#142820] rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-emerald-600 shadow-sm"
                 >
                   <option value="">- Tidak Ditentukan (Bukan Akun Kas/Lawan Arus Kas) -</option>
                   <option value="OPERASI">OPERASI (Aktivitas Operasional)</option>
                   <option value="INVESTASI">INVESTASI (Aktivitas Investasi / Perolehan Aset Tetap)</option>
                   <option value="PENDANAAN">PENDANAAN (Aktivitas Pendanaan / Modal / Pinjaman)</option>
                 </select>
-                <p className="text-[11px] text-slate-500 mt-1">
+                <p className="text-[11px] text-[#556c5e] mt-1">
                   Digunakan untuk mengklasifikasikan akun lawan pada laporan arus kas metode langsung.
                 </p>
               </div>
 
               {/* Field Tipe Akun Kontrol Subledger */}
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center gap-1.5">
-                  <ShieldAlert className="w-3.5 h-3.5 text-indigo-400" />
+                <label className="block text-xs font-semibold text-[#142820] mb-1.5 flex items-center gap-1.5">
+                  <ShieldAlert className="w-3.5 h-3.5 text-emerald-700" />
                   Tipe Akun Kontrol Sub Ledger
                 </label>
                 <select
@@ -1031,7 +1031,7 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
                           : formData.isControlAccount,
                     });
                   }}
-                  className="w-full bg-slate-950 border border-slate-800 text-white rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500"
+                  className="w-full bg-white border border-[#cbdcd0] text-[#142820] rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-emerald-600 shadow-sm"
                 >
                   <option value="NONE">NONE (Bukan Akun Kontrol Subledger)</option>
                   <option value="AR">AR (Akun Kontrol Piutang Usaha)</option>
@@ -1040,19 +1040,19 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
                   <option value="CASH_BANK">CASH_BANK (Akun Kas & Bank)</option>
                   <option value="FIXED_ASSET">FIXED_ASSET (Akun Harga Perolehan, Akumulasi, & CIP Aset Tetap)</option>
                 </select>
-                <p className="text-[11px] text-slate-500 mt-1">
+                <p className="text-[11px] text-[#556c5e] mt-1">
                   Menetapkan tipe akun kontrol akan mengarahkan posting otomatis dari modul subledger bersangkutan.
                 </p>
               </div>
 
               {/* Banner Info untuk Akun CASH_BANK */}
               {formData.controlType === 'CASH_BANK' && (
-                <div className="p-3 bg-teal-950/40 border border-teal-500/40 rounded-xl text-teal-200 text-xs space-y-1 animate-in fade-in">
-                  <div className="font-semibold text-teal-300 flex items-center gap-1.5">
-                    <Info className="w-4 h-4 text-teal-400" />
+                <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-900 text-xs space-y-1 animate-in fade-in">
+                  <div className="font-bold text-emerald-800 flex items-center gap-1.5">
+                    <Info className="w-4 h-4 text-emerald-700" />
                     Informasi Akun Kas & Bank (Auto-Capture)
                   </div>
-                  <p className="leading-relaxed text-teal-200/90">
+                  <p className="leading-relaxed text-emerald-900/90">
                     Direct posting tetap diizinkan agar integrasi jurnal mentah (seperti payroll Rekan HRIS) tetap berjalan lancar. Baris jurnal manual ke akun ini akan otomatis ditangkap ke buku kas. Anda tetap dapat mengunci direct posting secara manual bila diinginkan.
                   </p>
                 </div>
@@ -1060,19 +1060,19 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
 
               {/* Banner Peringatan Dampak Akun Kontrol Non-Cash */}
               {formData.controlType !== 'NONE' && formData.controlType !== 'CASH_BANK' && (
-                <div className="p-3 bg-amber-950/40 border border-amber-500/40 rounded-xl text-amber-200 text-xs space-y-1 animate-in fade-in">
-                  <div className="font-semibold text-amber-300 flex items-center gap-1.5">
-                    <AlertCircle className="w-4 h-4 text-amber-400" />
+                <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 text-xs space-y-1 animate-in fade-in">
+                  <div className="font-bold text-amber-800 flex items-center gap-1.5">
+                    <AlertCircle className="w-4 h-4 text-amber-600" />
                     Konfirmasi Dampak Akun Kontrol ({formData.controlType})
                   </div>
-                  <p className="leading-relaxed text-amber-200/80">
+                  <p className="leading-relaxed text-amber-900/90">
                     Direct posting manual dan entri jurnal mentah (API eksternal) ke akun ini akan otomatis <strong>DITOLAK</strong> oleh sistem. Posting ke akun ini hanya diizinkan melalui dokumen transaksi subledger.
                   </p>
                 </div>
               )}
 
               {/* Checkbox Direct Posting Lock (isControlAccount) */}
-              <div className="p-3 bg-slate-950/80 border border-slate-800 rounded-xl">
+              <div className="p-3.5 bg-[#edf2ea] border border-[#cbdcd0] rounded-xl">
                 <label
                   htmlFor="isControlAccountToggle"
                   className={`flex items-start gap-2.5 ${
@@ -1091,37 +1091,37 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
                     }
                     disabled={formData.controlType !== 'NONE' && formData.controlType !== 'CASH_BANK'}
                     onChange={(e) => setFormData({ ...formData, isControlAccount: e.target.checked })}
-                    className="rounded border-slate-700 bg-slate-900 text-amber-500 focus:ring-amber-500 w-4 h-4 mt-0.5 disabled:opacity-50"
+                    className="rounded border-[#cbdcd0] text-amber-600 focus:ring-amber-500 w-4 h-4 mt-0.5 disabled:opacity-50"
                   />
                   <div>
-                    <span className="text-xs font-semibold text-white flex items-center gap-1.5">
-                      <ShieldAlert className="w-3.5 h-3.5 text-amber-400" />
+                    <span className="text-xs font-bold text-[#142820] flex items-center gap-1.5">
+                      <ShieldAlert className="w-3.5 h-3.5 text-amber-600" />
                       Kunci Direct Posting (Akun Kontrol — Tolak Jurnal Mentah)
                       {formData.controlType !== 'NONE' && formData.controlType !== 'CASH_BANK' && (
-                        <span className="text-[10px] text-amber-400 font-normal italic">
+                        <span className="text-[10px] text-amber-700 font-normal italic">
                           (Terkunci otomatis oleh Tipe Kontrol {formData.controlType})
                         </span>
                       )}
                     </span>
-                    <p className="text-[11px] text-slate-400 mt-0.5 leading-relaxed">
+                    <p className="text-[11px] text-[#556c5e] mt-0.5 leading-relaxed">
                       Jika aktif, staf akuntansi dan integrasi luar tidak dapat memposting jurnal umum langsung ke akun ini untuk menjaga integritas saldo buku pembantu subledger.
                     </p>
                   </div>
                 </label>
               </div>
 
-              <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
+              <div className="flex justify-end gap-3 pt-4 border-t border-[#edf2ea]">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl"
+                  className="px-4 py-2 bg-[#edf2ea] hover:bg-[#dbe7da] text-[#142820] font-semibold rounded-xl border border-[#cbdcd0] transition-colors"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-600/30 disabled:opacity-50"
+                  className="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-xl shadow-sm disabled:opacity-50 transition-colors"
                 >
                   {submitting ? 'Menyimpan...' : 'Simpan Kode Akun'}
                 </button>
@@ -1133,37 +1133,37 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
 
       {/* Modal Mutasi Akun (Kartu Mutasi / Ledger) */}
       {isMutationModalOpen && mutationAccount && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-5xl w-full max-h-[92vh] flex flex-col shadow-2xl overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white border border-[#cbdcd0] rounded-2xl max-w-5xl w-full max-h-[92vh] flex flex-col shadow-2xl overflow-hidden">
             {/* Header Modal */}
-            <div className="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-950/70 shrink-0">
+            <div className="p-5 border-b border-[#cbdcd0] flex justify-between items-center bg-[#eaf1e8] shrink-0">
               <div className="flex items-center gap-3">
-                <div className="p-2.5 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-400">
+                <div className="p-2.5 bg-emerald-100 border border-emerald-300 rounded-xl text-emerald-800">
                   <History className="w-6 h-6" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2.5 flex-wrap">
-                    <h3 className="text-lg font-bold text-white">Mutasi Akun Buku Besar</h3>
-                    <span className="font-mono text-sm px-2.5 py-0.5 rounded-lg bg-emerald-950/80 border border-emerald-500/30 text-emerald-300 font-semibold">
+                    <h3 className="text-lg font-bold text-[#142820]">Mutasi Akun Buku Besar</h3>
+                    <span className="font-mono text-sm px-2.5 py-0.5 rounded-lg bg-emerald-50 border border-emerald-300 text-emerald-800 font-bold">
                       {mutationAccount.kode_akun}
                     </span>
-                    <span className="text-white font-semibold text-sm">
+                    <span className="text-[#142820] font-bold text-sm">
                       {mutationAccount.nama_akun}
                     </span>
                     <span
-                      className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border ${getCategoryBadge(
+                      className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold border ${getCategoryBadge(
                         mutationAccount.kategori,
                       )}`}
                     >
                       {mutationAccount.kategori}
                     </span>
                     {mutationAccount.isControlAccount && (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">
-                        <ShieldAlert className="w-3 h-3 text-amber-400" /> Akun Kontrol
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-300">
+                        <ShieldAlert className="w-3 h-3 text-amber-600" /> Akun Kontrol
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-slate-400 mt-1">
+                  <p className="text-xs text-[#556c5e] mt-0.5">
                     Kartu riwayat pergerakan debit, kredit, dan saldo berjalan akun ini
                   </p>
                 </div>
@@ -1171,65 +1171,65 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
               <button
                 type="button"
                 onClick={() => setIsMutationModalOpen(false)}
-                className="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition-colors"
+                className="text-[#556c5e] hover:text-[#142820] p-1.5 rounded-lg hover:bg-[#dbe7da] transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Filter Bar: Tanggal, Deskripsi Jurnal, Dimensi */}
-            <div className="p-4 bg-slate-950/50 border-b border-slate-800/80 shrink-0">
+            <div className="p-4 bg-[#f7faf6] border-b border-[#cbdcd0] shrink-0">
               <form onSubmit={handleApplyMutationFilters} className="space-y-3">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                   {/* Filter 1: Tanggal Dari */}
                   <div>
-                    <label className="block text-[11px] font-medium text-slate-400 mb-1 flex items-center gap-1">
-                      <Calendar className="w-3 h-3 text-emerald-400" /> Dari Tanggal
+                    <label className="block text-[11px] font-semibold text-[#142820] mb-1 flex items-center gap-1">
+                      <Calendar className="w-3 h-3 text-emerald-700" /> Dari Tanggal
                     </label>
                     <input
                       type="date"
                       value={mutationStartDate}
                       onChange={(e) => setMutationStartDate(e.target.value)}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500"
+                      className="w-full bg-white border border-[#cbdcd0] rounded-xl px-3 py-1.5 text-xs text-[#142820] font-medium focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 shadow-sm"
                     />
                   </div>
 
                   {/* Filter 2: Tanggal Sampai */}
                   <div>
-                    <label className="block text-[11px] font-medium text-slate-400 mb-1 flex items-center gap-1">
-                      <Calendar className="w-3 h-3 text-emerald-400" /> Sampai Tanggal
+                    <label className="block text-[11px] font-semibold text-[#142820] mb-1 flex items-center gap-1">
+                      <Calendar className="w-3 h-3 text-emerald-700" /> Sampai Tanggal
                     </label>
                     <input
                       type="date"
                       value={mutationEndDate}
                       onChange={(e) => setMutationEndDate(e.target.value)}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500"
+                      className="w-full bg-white border border-[#cbdcd0] rounded-xl px-3 py-1.5 text-xs text-[#142820] font-medium focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 shadow-sm"
                     />
                   </div>
 
                   {/* Filter 3: Deskripsi Jurnal */}
                   <div>
-                    <label className="block text-[11px] font-medium text-slate-400 mb-1 flex items-center gap-1">
-                      <Search className="w-3 h-3 text-emerald-400" /> Deskripsi Jurnal
+                    <label className="block text-[11px] font-semibold text-[#142820] mb-1 flex items-center gap-1">
+                      <Search className="w-3 h-3 text-emerald-700" /> Deskripsi Jurnal
                     </label>
                     <input
                       type="text"
                       placeholder="Cari keterangan..."
                       value={mutationDeskripsi}
                       onChange={(e) => setMutationDeskripsi(e.target.value)}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500"
+                      className="w-full bg-white border border-[#cbdcd0] rounded-xl px-3 py-1.5 text-xs text-[#142820] font-medium focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 shadow-sm"
                     />
                   </div>
 
                   {/* Filter 4: Dimensi */}
                   <div>
-                    <label className="block text-[11px] font-medium text-slate-400 mb-1 flex items-center gap-1">
-                      <Layers className="w-3 h-3 text-emerald-400" /> Dimensi
+                    <label className="block text-[11px] font-semibold text-[#142820] mb-1 flex items-center gap-1">
+                      <Layers className="w-3 h-3 text-emerald-700" /> Dimensi
                     </label>
                     <select
                       value={mutationDimensionValue}
                       onChange={(e) => setMutationDimensionValue(e.target.value)}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500"
+                      className="w-full bg-white border border-[#cbdcd0] rounded-xl px-3 py-1.5 text-xs text-[#142820] font-medium focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 shadow-sm"
                     >
                       <option value="">Semua Dimensi</option>
                       {dimensions.map((d) => (
@@ -1248,22 +1248,22 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
                 </div>
 
                 <div className="flex items-center justify-between pt-1">
-                  <span className="text-[11px] text-slate-400">
-                    Normal Balance: <strong className="text-emerald-400">{mutationData?.normalBalance || 'DEBIT'}</strong>
+                  <span className="text-[11px] text-[#556c5e]">
+                    Normal Balance: <strong className="text-emerald-800 font-bold">{mutationData?.normalBalance || 'DEBIT'}</strong>
                   </span>
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
                       onClick={handleResetMutationFilters}
                       disabled={mutationLoading}
-                      className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-medium transition-colors"
+                      className="px-3 py-1.5 bg-[#edf2ea] hover:bg-[#dbe7da] text-[#142820] font-semibold rounded-xl text-xs border border-[#cbdcd0] transition-colors"
                     >
                       Reset Filter
                     </button>
                     <button
                       type="submit"
                       disabled={mutationLoading}
-                      className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold shadow-md shadow-emerald-600/20 transition-colors flex items-center gap-1.5"
+                      className="px-4 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold shadow-sm transition-colors flex items-center gap-1.5"
                     >
                       {mutationLoading ? (
                         <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -1282,31 +1282,31 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
               {/* Summary Cards */}
               {mutationData && (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <div className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-3">
-                    <span className="text-[11px] font-medium text-slate-400">Jumlah Transaksi</span>
-                    <div className="text-base font-bold text-white mt-0.5">
+                  <div className="bg-white border border-[#cbdcd0] rounded-xl p-3 shadow-sm">
+                    <span className="text-[11px] font-semibold text-[#556c5e]">Jumlah Transaksi</span>
+                    <div className="text-base font-bold text-[#142820] mt-0.5">
                       {mutationData.totalMutasi}{' '}
-                      <span className="text-xs font-normal text-slate-400">mutasi</span>
+                      <span className="text-xs font-normal text-[#556c5e]">mutasi</span>
                     </div>
                   </div>
 
-                  <div className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-3">
-                    <span className="text-[11px] font-medium text-slate-400">Total Mutasi Debit</span>
-                    <div className="text-base font-bold text-emerald-400 mt-0.5 font-mono">
+                  <div className="bg-white border border-[#cbdcd0] rounded-xl p-3 shadow-sm">
+                    <span className="text-[11px] font-semibold text-emerald-800">Total Mutasi Debit</span>
+                    <div className="text-base font-bold text-emerald-700 mt-0.5 font-mono">
                       {(mutationData.totalDebit || 0).toLocaleString('id-ID')}
                     </div>
                   </div>
 
-                  <div className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-3">
-                    <span className="text-[11px] font-medium text-slate-400">Total Mutasi Kredit</span>
-                    <div className="text-base font-bold text-rose-400 mt-0.5 font-mono">
+                  <div className="bg-white border border-[#cbdcd0] rounded-xl p-3 shadow-sm">
+                    <span className="text-[11px] font-semibold text-rose-800">Total Mutasi Kredit</span>
+                    <div className="text-base font-bold text-rose-700 mt-0.5 font-mono">
                       {(mutationData.totalKredit || 0).toLocaleString('id-ID')}
                     </div>
                   </div>
 
-                  <div className="bg-emerald-950/20 border border-emerald-500/30 rounded-xl p-3">
-                    <span className="text-[11px] font-medium text-emerald-300">Saldo Akhir Berjalan</span>
-                    <div className="text-base font-bold text-emerald-400 mt-0.5 font-mono">
+                  <div className="bg-[#e6f4ea] border border-[#a3cfbb] rounded-xl p-3 shadow-sm">
+                    <span className="text-[11px] font-bold text-[#14532d]">Saldo Akhir Berjalan</span>
+                    <div className="text-base font-bold text-[#14532d] mt-0.5 font-mono">
                       {currentTenant?.mata_uang || 'IDR'}{' '}
                       {mutationData.saldoAkhir.toLocaleString('id-ID')}
                     </div>
@@ -1316,32 +1316,32 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
 
               {/* Error Banner */}
               {mutationError && (
-                <div className="p-3 bg-rose-500/10 border border-rose-500/30 rounded-xl text-xs text-rose-300 flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 shrink-0" />
+                <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-700 flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
                   <span>{mutationError}</span>
                 </div>
               )}
 
               {/* Tabel Mutasi Transaksi */}
-              <div className="border border-slate-800 rounded-xl overflow-hidden bg-slate-950 shadow-inner">
+              <div className="border border-[#cbdcd0] rounded-xl overflow-hidden bg-white shadow-sm">
                 <table className="w-full text-left text-xs border-collapse">
                   <thead>
-                    <tr className="bg-slate-900 border-b border-slate-800 text-slate-400 uppercase tracking-wider font-semibold">
-                      <th className="py-2.5 px-3 min-w-[95px]">Tanggal</th>
-                      <th className="py-2.5 px-3 min-w-[130px]">No. Voucher</th>
-                      <th className="py-2.5 px-3 min-w-[200px]">Keterangan Jurnal</th>
-                      <th className="py-2.5 px-3 min-w-[170px]">Dimensi</th>
-                      <th className="py-2.5 px-3 text-right text-emerald-400/90 min-w-[110px]">Debit</th>
-                      <th className="py-2.5 px-3 text-right text-rose-400/90 min-w-[110px]">Kredit</th>
-                      <th className="py-2.5 px-3.5 text-right text-indigo-300 font-bold min-w-[125px]">Saldo Berjalan</th>
+                    <tr className="bg-[#eaf1e8] border-b border-[#cbdcd0] text-[#142e20] uppercase tracking-wider font-bold">
+                      <th className="py-2.5 px-3 min-w-[95px] font-bold text-[#142e20]">Tanggal</th>
+                      <th className="py-2.5 px-3 min-w-[130px] font-bold text-[#142e20]">No. Voucher</th>
+                      <th className="py-2.5 px-3 min-w-[200px] font-bold text-[#142e20]">Keterangan Jurnal</th>
+                      <th className="py-2.5 px-3 min-w-[170px] font-bold text-[#142e20]">Dimensi</th>
+                      <th className="py-2.5 px-3 text-right text-emerald-800 font-bold min-w-[110px]">Debit</th>
+                      <th className="py-2.5 px-3 text-right text-rose-800 font-bold min-w-[110px]">Kredit</th>
+                      <th className="py-2.5 px-3.5 text-right text-[#14532d] font-bold min-w-[125px]">Saldo Berjalan</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-800/60">
+                  <tbody className="divide-y divide-[#edf2ea]">
                     {mutationLoading ? (
                       <tr>
-                        <td colSpan={7} className="py-12 text-center text-slate-400">
+                        <td colSpan={7} className="py-12 text-center text-slate-500">
                           <div className="flex flex-col items-center justify-center gap-2">
-                            <Loader2 className="w-6 h-6 animate-spin text-emerald-400" />
+                            <Loader2 className="w-6 h-6 animate-spin text-emerald-700" />
                             <span>Memuat mutasi akun...</span>
                           </div>
                         </td>
@@ -1350,7 +1350,7 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
                       <tr>
                         <td colSpan={7} className="py-12 text-center text-slate-500">
                           <div className="flex flex-col items-center justify-center gap-2">
-                            <History className="w-7 h-7 text-slate-600" />
+                            <History className="w-7 h-7 text-slate-400" />
                             <span>Tidak ada riwayat mutasi transaksi untuk akun ini dengan filter yang dipilih.</span>
                           </div>
                         </td>
@@ -1359,16 +1359,16 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
                       mutationData.mutasi.map((m) => {
                         const dims = m.dimensions || [];
                         return (
-                          <tr key={m.id} className="hover:bg-slate-900/50 transition-colors">
-                            <td className="py-2.5 px-3 text-slate-300 font-mono">
+                          <tr key={m.id} className="hover:bg-[#f7faf6] transition-colors">
+                            <td className="py-2.5 px-3 text-[#142820] font-mono font-medium">
                               {new Date(m.tanggal).toLocaleDateString('id-ID')}
                             </td>
-                            <td className="py-2.5 px-3 font-mono font-medium text-indigo-400">
+                            <td className="py-2.5 px-3 font-mono font-bold text-emerald-800">
                               {m.no_voucher}
                             </td>
-                            <td className="py-2.5 px-3 text-slate-200">
+                            <td className="py-2.5 px-3 text-[#142820] font-medium">
                               <div>{m.deskripsi}</div>
-                              <span className="text-[10px] text-slate-500">
+                              <span className="text-[10px] text-[#556c5e]">
                                 {m.sumber_aplikasi}
                               </span>
                             </td>
@@ -1378,41 +1378,41 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
                                   {dims.map((d, dIdx) => (
                                     <span
                                       key={dIdx}
-                                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium bg-indigo-500/10 text-indigo-300 border border-indigo-500/20"
+                                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-[#edf2ea] text-[#142820] border border-[#cbdcd0]"
                                     >
-                                      <span className="text-slate-400">{d.dimensionName}:</span>
-                                      <span className="font-semibold text-slate-200">
+                                      <span className="text-[#556c5e]">{d.dimensionName}:</span>
+                                      <span className="font-bold text-[#142820]">
                                         {d.valueName}
                                         {d.valueCode && (
-                                          <span className="text-indigo-400 ml-0.5">({d.valueCode})</span>
+                                          <span className="text-emerald-800 ml-0.5">({d.valueCode})</span>
                                         )}
                                       </span>
                                     </span>
                                   ))}
                                 </div>
                               ) : (
-                                <span className="text-slate-600 text-[11px] italic">-</span>
+                                <span className="text-slate-400 text-[11px] italic">-</span>
                               )}
                             </td>
-                            <td className="py-2.5 px-3 text-right font-mono font-medium">
+                            <td className="py-2.5 px-3 text-right font-mono font-bold">
                               {m.debit > 0 ? (
-                                <span className="text-emerald-400">
+                                <span className="text-emerald-700">
                                   {m.debit.toLocaleString('id-ID')}
                                 </span>
                               ) : (
-                                <span className="text-slate-600">-</span>
+                                <span className="text-slate-400">-</span>
                               )}
                             </td>
-                            <td className="py-2.5 px-3 text-right font-mono font-medium">
+                            <td className="py-2.5 px-3 text-right font-mono font-bold">
                               {m.kredit > 0 ? (
-                                <span className="text-rose-400">
+                                <span className="text-rose-700">
                                   {m.kredit.toLocaleString('id-ID')}
                                 </span>
                               ) : (
-                                <span className="text-slate-600">-</span>
+                                <span className="text-slate-400">-</span>
                               )}
                             </td>
-                            <td className="py-2.5 px-3.5 text-right font-mono font-bold text-slate-100">
+                            <td className="py-2.5 px-3.5 text-right font-mono font-bold text-[#142820]">
                               {m.saldo_berjalan.toLocaleString('id-ID')}
                             </td>
                           </tr>
@@ -1425,14 +1425,14 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
             </div>
 
             {/* Modal Footer */}
-            <div className="p-4 bg-slate-950/80 border-t border-slate-800 flex justify-between items-center shrink-0">
-              <span className="text-xs text-slate-500">
+            <div className="p-4 bg-[#f7faf6] border-t border-[#cbdcd0] flex justify-between items-center shrink-0">
+              <span className="text-xs text-[#556c5e]">
                 Data diperbarui secara realtime dari jurnal akuntansi yang telah diposting.
               </span>
               <button
                 type="button"
                 onClick={() => setIsMutationModalOpen(false)}
-                className="px-5 py-2 text-sm font-medium text-slate-200 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-xl transition-colors"
+                className="px-5 py-2 text-sm font-bold text-[#142820] hover:bg-[#dbe7da] bg-[#edf2ea] rounded-xl border border-[#cbdcd0] transition-colors"
               >
                 Tutup
               </button>

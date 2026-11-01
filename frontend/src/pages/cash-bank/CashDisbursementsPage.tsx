@@ -21,6 +21,8 @@ import {
   CashBankAccount,
   ChartOfAccount,
   CashDocStatus,
+  AssetCategory,
+  FixedAsset,
 } from '../../services/api';
 
 /**
@@ -31,6 +33,8 @@ export const CashDisbursementsPage: React.FC = () => {
   const [disbursements, setDisbursements] = useState<CashDisbursement[]>([]);
   const [accounts, setAccounts] = useState<CashBankAccount[]>([]);
   const [coaList, setCoaList] = useState<ChartOfAccount[]>([]);
+  const [assetCategories, setAssetCategories] = useState<AssetCategory[]>([]);
+  const [cipAssets, setCipAssets] = useState<FixedAsset[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<'ALL' | 'STANDARD' | 'PETTY_VOUCHER'>('ALL');
@@ -62,14 +66,18 @@ export const CashDisbursementsPage: React.FC = () => {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [disbRes, accRes, coaRes] = await Promise.all([
+      const [disbRes, accRes, coaRes, catRes, cipRes] = await Promise.all([
         api.getCashDisbursements(),
         api.getCashAccounts(),
         api.getCoa(),
+        api.getAssetCategories ? api.getAssetCategories().catch(() => []) : Promise.resolve([]),
+        api.getFixedAssets ? api.getFixedAssets({ status: 'CIP' }).catch(() => []) : Promise.resolve([]),
       ]);
       setDisbursements(Array.isArray(disbRes) ? disbRes : []);
       setAccounts(Array.isArray(accRes) ? accRes : []);
       setCoaList(Array.isArray(coaRes) ? coaRes : []);
+      setAssetCategories(Array.isArray(catRes) ? catRes : []);
+      setCipAssets(Array.isArray(cipRes) ? cipRes : []);
     } catch (err: any) {
       console.error('Gagal memuat data pengeluaran kas:', err);
     } finally {
@@ -136,9 +144,14 @@ export const CashDisbursementsPage: React.FC = () => {
       return;
     }
 
-    const invalidLine = formData.lines.find((l) => !l.akunLawanId || l.jumlah <= 0);
+    const invalidLine = formData.lines.find((l: any) => {
+      if (l.lineType === 'ASET') {
+        return !l.assetCategoryId || l.jumlah <= 0;
+      }
+      return !l.akunLawanId || l.jumlah <= 0;
+    });
     if (invalidLine) {
-      setFormError('Semua baris rincian harus memiliki akun lawan dan nominal lebih dari 0');
+      setFormError('Semua baris rincian harus valid (akun beban/kategori aset dan nominal > 0)');
       return;
     }
 
@@ -151,10 +164,14 @@ export const CashDisbursementsPage: React.FC = () => {
         kurs: Number(formData.kurs),
         catatan: formData.catatan,
         docVariant: formData.docVariant,
-        lines: formData.lines.map((l) => ({
-          akunLawanId: l.akunLawanId,
+        lines: formData.lines.map((l: any) => ({
+          akunLawanId: l.lineType === 'ASET' ? undefined : l.akunLawanId,
           deskripsi: l.deskripsi || formData.catatan || 'Pengeluaran Kas/Bank',
           jumlah: Number(l.jumlah),
+          lineType: l.lineType || 'BIAYA',
+          assetCategoryId: l.assetCategoryId || undefined,
+          kapitalisasiKeCip: l.kapitalisasiKeCip || undefined,
+          assetId: l.assetId || undefined,
         })),
       });
       setIsModalOpen(false);
@@ -529,56 +546,116 @@ export const CashDisbursementsPage: React.FC = () => {
                 </div>
 
                 <div className="space-y-2">
-                  {formData.lines.map((line, idx) => (
-                    <div key={idx} className="grid grid-cols-12 gap-2 p-2.5 bg-slate-50 border border-slate-200 rounded-xl items-center">
-                      <div className="col-span-5">
-                        <select
-                          required
-                          value={line.akunLawanId}
-                          onChange={(e) => handleLineChange(idx, 'akunLawanId', e.target.value)}
-                          className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-600 text-[11px]"
-                        >
-                          <option value="">-- Pilih Akun Beban --</option>
-                          {coaList.map((c) => (
-                            <option key={c.id} value={c.id}>
-                              {c.kode_akun} - {c.nama_akun} ({c.kategori})
-                            </option>
-                          ))}
-                        </select>
+                  {formData.lines.map((line: any, idx) => (
+                    <div key={idx} className="p-2.5 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+                      <div className="grid grid-cols-12 gap-2 items-center">
+                        <div className="col-span-2">
+                          <select
+                            value={line.lineType || 'BIAYA'}
+                            onChange={(e) => handleLineChange(idx, 'lineType', e.target.value)}
+                            className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-slate-900 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-600 text-[11px]"
+                          >
+                            <option value="BIAYA">Beban</option>
+                            <option value="ASET">Aset / CIP</option>
+                          </select>
+                        </div>
+
+                        <div className="col-span-4">
+                          {line.lineType === 'ASET' ? (
+                            <select
+                              required
+                              value={line.assetCategoryId || ''}
+                              onChange={(e) => handleLineChange(idx, 'assetCategoryId', e.target.value)}
+                              className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-600 text-[11px]"
+                            >
+                              <option value="">-- Pilih Kategori Aset --</option>
+                              {assetCategories.map((c) => (
+                                <option key={c.id} value={c.id}>
+                                  {c.kode} - {c.nama} ({c.jenis})
+                                </option>
+                              ))}
+                            </select>
+                          ) : (
+                            <select
+                              required
+                              value={line.akunLawanId || ''}
+                              onChange={(e) => handleLineChange(idx, 'akunLawanId', e.target.value)}
+                              className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-600 text-[11px]"
+                            >
+                              <option value="">-- Pilih Akun Beban --</option>
+                              {coaList.map((c) => (
+                                <option key={c.id} value={c.id}>
+                                  {c.kode_akun} - {c.nama_akun} ({c.kategori})
+                                </option>
+                              ))}
+                            </select>
+                          )}
+                        </div>
+
+                        <div className="col-span-3">
+                          <input
+                            type="text"
+                            placeholder="Deskripsi..."
+                            value={line.deskripsi || ''}
+                            onChange={(e) => handleLineChange(idx, 'deskripsi', e.target.value)}
+                            className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-600 text-[11px]"
+                          />
+                        </div>
+
+                        <div className="col-span-2">
+                          <input
+                            type="number"
+                            required
+                            min={1}
+                            placeholder="Nominal"
+                            value={line.jumlah || ''}
+                            onChange={(e) => handleLineChange(idx, 'jumlah', Number(e.target.value))}
+                            className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-900 font-mono text-right focus:outline-none focus:ring-2 focus:ring-emerald-600 text-[11px]"
+                          />
+                        </div>
+
+                        <div className="col-span-1 text-center">
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveLine(idx)}
+                            disabled={formData.lines.length <= 1}
+                            className="text-slate-400 hover:text-rose-600 disabled:opacity-30 p-1"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       </div>
 
-                      <div className="col-span-4">
-                        <input
-                          type="text"
-                          placeholder="Deskripsi baris..."
-                          value={line.deskripsi}
-                          onChange={(e) => handleLineChange(idx, 'deskripsi', e.target.value)}
-                          className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-600 text-[11px]"
-                        />
-                      </div>
-
-                      <div className="col-span-2">
-                        <input
-                          type="number"
-                          required
-                          min={1}
-                          placeholder="Nominal"
-                          value={line.jumlah || ''}
-                          onChange={(e) => handleLineChange(idx, 'jumlah', Number(e.target.value))}
-                          className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-900 font-mono text-right focus:outline-none focus:ring-2 focus:ring-emerald-600 text-[11px]"
-                        />
-                      </div>
-
-                      <div className="col-span-1 text-center">
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveLine(idx)}
-                          disabled={formData.lines.length <= 1}
-                          className="text-slate-400 hover:text-rose-600 disabled:opacity-30 p-1"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
+                      {line.lineType === 'ASET' && (
+                        <div className="flex flex-wrap items-center gap-3 pt-1 text-[11px] text-emerald-950 bg-emerald-50/60 p-2 rounded-lg">
+                          <label className="flex items-center gap-1.5 cursor-pointer font-semibold">
+                            <input
+                              type="checkbox"
+                              checked={!!line.kapitalisasiKeCip}
+                              onChange={(e) => handleLineChange(idx, 'kapitalisasiKeCip', e.target.checked)}
+                              className="rounded text-emerald-700 focus:ring-emerald-600 w-3.5 h-3.5"
+                            />
+                            Kapitalisasi ke CIP (Proyek Berjalan)
+                          </label>
+                          {cipAssets.length > 0 && (
+                            <div className="flex items-center gap-1.5 ml-auto">
+                              <span className="font-semibold text-slate-700">Tambah Biaya ke Aset CIP:</span>
+                              <select
+                                value={line.assetId || ''}
+                                onChange={(e) => handleLineChange(idx, 'assetId', e.target.value || undefined)}
+                                className="bg-white border border-emerald-300 rounded px-2 py-0.5 text-xs text-slate-900"
+                              >
+                                <option value="">-- Buat Aset CIP Baru --</option>
+                                {cipAssets.map((a) => (
+                                  <option key={a.id} value={a.id}>
+                                    {a.noAset} - {a.nama}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>

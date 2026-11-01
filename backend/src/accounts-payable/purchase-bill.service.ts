@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { SubledgerPostingService } from '../subledger/subledger-posting.service';
-import { DocumentNumberingService } from '../subledger/document-numbering.service';
+import { DocumentNumberingService, SubledgerDocType } from '../subledger/document-numbering.service';
 import { AccountingPeriodService } from '../accounting-period/accounting-period.service';
 import { DefaultInventoryReceiptService } from './inventory-receipt.service';
 import {
@@ -182,6 +182,10 @@ export class PurchaseBillService {
             dimensions: l.dimensions || null,
             sourceLineType: l.sourceLineType || null,
             sourceLineId: l.sourceLineId || null,
+            lineType: l.lineType || 'BIAYA',
+            assetCategoryId: l.assetCategoryId || null,
+            kapitalisasiKeCip: l.kapitalisasiKeCip || false,
+            assetId: l.assetId || null,
           })),
         },
       },
@@ -447,6 +451,138 @@ export class PurchaseBillService {
           });
 
           nonGrDiskon += lineDiskon;
+        }
+      } else if (line.lineType === 'ASET' || line.assetCategoryId) {
+        // =========================================================================
+        // PEROLEHAN & PENAMBAHAN NILAI ASET TETAP (MODUL 21)
+        // =========================================================================
+        if (line.assetId) {
+          // Penambahan biaya ke aset CIP yang sudah ada
+          const cipAsset = await this.prisma.fixedAsset.findFirst({
+            where: { id: line.assetId, tenantId },
+            include: { category: { include: { akunCip: true } } },
+          });
+          if (!cipAsset) {
+            throw new BadRequestException(`Aset CIP dengan ID ${line.assetId} tidak ditemukan.`);
+          }
+          if (cipAsset.status !== 'CIP') {
+            throw new BadRequestException(`Penambahan biaya hanya diperbolehkan untuk aset berstatus CIP.`);
+          }
+
+          entries.push({
+            kode_akun: cipAsset.category.akunCip.kode_akun,
+            tipe: 'DEBIT',
+            jumlah: lineGross,
+            dimensions: dims,
+          });
+
+          nonGrDiskon += lineDiskon;
+
+          // Perbarui harga perolehan aset CIP
+          const addedAmount = lineNet * Number(bill.kurs);
+          await this.prisma.fixedAsset.update({
+            where: { id: cipAsset.id },
+            data: {
+              hargaPerolehanAsli: { increment: lineNet },
+              hargaPerolehan: { increment: addedAmount },
+            },
+          });
+
+          await this.prisma.assetEvent.create({
+            data: {
+              assetId: cipAsset.id,
+              tipe: 'PENAMBAHAN_NILAI',
+              tanggal: new Date(bill.tanggal),
+              data: {
+                billId: bill.id,
+                noDokumen: bill.noDokumen,
+                penambahanAsli: lineNet,
+                penambahanFungsional: addedAmount,
+                keterangan: line.deskripsi,
+              },
+              createdBy: user?.userId || 'SYSTEM',
+            },
+          });
+        } else {
+          // Perolehan Aset Baru (DRAFT atau CIP)
+          const category = await this.prisma.assetCategory.findFirst({
+            where: { id: line.assetCategoryId!, tenantId },
+            include: { akunAset: true, akunCip: true, fiscalGroup: true },
+          });
+          if (!category) {
+            throw new BadRequestException(`Kategori aset tidak valid.`);
+          }
+
+          const targetAcc = line.kapitalisasiKeCip ? category.akunCip : category.akunAset;
+
+          entries.push({
+            kode_akun: targetAcc.kode_akun,
+            tipe: 'DEBIT',
+            jumlah: lineGross,
+            dimensions: dims,
+          });
+
+          nonGrDiskon += lineDiskon;
+
+          // Buat N kartu aset (N = qty)
+          const qtyN = Math.max(1, Math.floor(Number(line.qty)));
+          const unitNetPrice = lineNet / qtyN;
+          const unitFunctionalPrice = unitNetPrice * Number(bill.kurs);
+          const assetStatus = line.kapitalisasiKeCip ? 'CIP' : 'DRAFT';
+
+          for (let u = 0; u < qtyN; u++) {
+            const noAset = await this.documentNumberingService.getNextNumber(
+              tenantId,
+              SubledgerDocType.ASSET,
+            );
+            const tagCode = noAset;
+
+            const createdAsset = await this.prisma.fixedAsset.create({
+              data: {
+                tenantId,
+                noAset,
+                tagCode,
+                categoryId: category.id,
+                nama: qtyN > 1 ? `${line.deskripsi} (${u + 1}/${qtyN})` : line.deskripsi,
+                deskripsi: line.deskripsi,
+                status: assetStatus as any,
+                tanggalPerolehan: new Date(bill.tanggal),
+                mata_uang: bill.mata_uang,
+                kurs: bill.kurs,
+                hargaPerolehanAsli: unitNetPrice,
+                hargaPerolehan: unitFunctionalPrice,
+                nilaiResidu: 0,
+                umurManfaatBulan: category.umurManfaatBulan,
+                metodeKomersial: category.metodeKomersial,
+                faktorSaldoMenurun: category.faktorSaldoMenurun,
+                fiscalGroupId: category.fiscalGroupId,
+                metodeFiskal: category.metodeFiskal,
+                dimensions: dims ? (dims as any) : null,
+                statusLabel: 'BELUM_DILABEL',
+                sumberAplikasi: 'PURCHASE_BILL',
+                sourceDocType: 'PURCHASE_BILL_LINE',
+                sourceDocId: line.id,
+                createdBy: user?.userId || 'SYSTEM',
+              },
+            });
+
+            await this.prisma.assetEvent.create({
+              data: {
+                assetId: createdAsset.id,
+                tipe: 'PEROLEHAN',
+                tanggal: new Date(bill.tanggal),
+                data: {
+                  billId: bill.id,
+                  noDokumen: bill.noDokumen,
+                  unitIndex: u + 1,
+                  totalUnits: qtyN,
+                  hargaPerolehan: unitFunctionalPrice,
+                  status: assetStatus,
+                },
+                createdBy: user?.userId || 'SYSTEM',
+              },
+            });
+          }
         }
       } else {
         // Non-stok (jasa / beban operasional)

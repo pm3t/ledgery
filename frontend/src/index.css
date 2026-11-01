@@ -47,32 +47,25 @@ body {
    ========================================================================= */
 
 /* 1. Canvas & Workspace */
-.bg-slate-950:not(aside *):not(aside) {
+.bg-slate-950:not(aside *):not(aside),
+[class*="bg-slate-950"]:not(aside *):not(aside) {
   background-color: #f4f6f0 !important;
 }
 
 /* 2. Kartu, Panel, & Kontainer Putih Bersih Alami */
 .bg-slate-900:not(aside *):not(aside),
-.bg-slate-900\/50:not(aside *):not(aside),
-.bg-slate-900\/60:not(aside *):not(aside),
-.bg-slate-900\/70:not(aside *):not(aside),
-.bg-slate-900\/80:not(aside *):not(aside),
-.bg-slate-900\/90:not(aside *):not(aside) {
+[class*="bg-slate-900"]:not(aside *):not(aside),
+[class*="bg-slate-800"]:not(button):not(aside *):not(aside) {
   background-color: #ffffff !important;
-  border-color: #e2e8df !important;
+  border-color: #cbdcd0 !important;
   box-shadow: 0 1px 3px 0 rgba(20, 40, 28, 0.04), 0 1px 2px -1px rgba(20, 40, 28, 0.04) !important;
 }
 
 /* 3. Border Alami Lembut (Batu / Kayu / Tanah Halus) */
-.border-slate-800:not(aside *):not(aside),
-.border-slate-800\/50:not(aside *):not(aside),
-.border-slate-800\/60:not(aside *):not(aside),
-.border-slate-800\/70:not(aside *):not(aside),
-.border-slate-800\/80:not(aside *):not(aside),
-.border-slate-700:not(aside *):not(aside),
-.border-slate-700\/60:not(aside *):not(aside),
-.border-slate-700\/80:not(aside *):not(aside) {
-  border-color: #e2e8df !important;
+[class*="border-slate-800"]:not(aside *):not(aside),
+[class*="border-slate-700"]:not(aside *):not(aside),
+[class*="border-slate-900"]:not(aside *):not(aside) {
+  border-color: #cbdcd0 !important;
 }
 
 /* 4. Tipografi & Teks Kontras Alami */
@@ -175,11 +168,8 @@ button[class*="bg-slate-"]:not([class*="bg-indigo"]):not([class*="bg-emerald"]):
 button[class*="bg-zinc-"]:not([class*="bg-indigo"]):not([class*="bg-emerald"]):not(aside *),
 button[class*="bg-gray-"]:not([class*="bg-indigo"]):not([class*="bg-emerald"]):not(aside *),
 button[class*="bg-stone-"]:not([class*="bg-indigo"]):not([class*="bg-emerald"]):not(aside *),
-.bg-slate-800:not(aside *):not(button[class*="bg-indigo"]):not(button[class*="bg-emerald"]),
-.bg-slate-800\/80:not(aside *):not(button[class*="bg-indigo"]):not(button[class*="bg-emerald"]),
-.bg-slate-800\/60:not(aside *):not(button[class*="bg-indigo"]):not(button[class*="bg-emerald"]),
-.bg-slate-950\/60:not(aside *):not(button[class*="bg-indigo"]):not(button[class*="bg-emerald"]),
-.bg-slate-950\/80:not(aside *):not(button[class*="bg-indigo"]):not(button[class*="bg-emerald"]) {
+button[class*="text-slate-"]:not([class*="bg-indigo"]):not([class*="bg-emerald"]):not(aside *),
+[class*="bg-slate-800"]:not(button[class*="bg-indigo"]):not(button[class*="bg-emerald"]):not(aside *) {
   background-color: #edf2ea !important;
   color: #142820 !important; /* Deep Pine Charcoal - kontras tinggi, sangat tajam & jelas */
   border: 1px solid #c9d8c8 !important;

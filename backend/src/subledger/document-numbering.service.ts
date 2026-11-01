@@ -33,6 +33,7 @@ export enum SubledgerDocType {
   ASSET_DISPOSAL = 'ASSET_DISPOSAL',
   ASSET_IMPAIRMENT = 'ASSET_IMPAIRMENT',
   ASSET_TRANSFER = 'ASSET_TRANSFER',
+  ASSET_COST_ADDITION = 'ASSET_COST_ADDITION',
   DEPRECIATION_RUN = 'DEPRECIATION_RUN',
   VERIFICATION_SESSION = 'VERIFICATION_SESSION',
 }
@@ -66,6 +67,7 @@ export const DEFAULT_DOC_PREFIXES: Record<string, string> = {
   ASSET_DISPOSAL: 'ADSP',
   ASSET_IMPAIRMENT: 'AIMP',
   ASSET_TRANSFER: 'ATRF',
+  ASSET_COST_ADDITION: 'ACST',
   DEPRECIATION_RUN: 'DEPR',
   VERIFICATION_SESSION: 'VERIF',
 };
@@ -87,6 +89,15 @@ export class DocumentNumberingService {
    * @param defaultPrefix Prefix jika belum dikonfigurasi (default diambil dari DEFAULT_DOC_PREFIXES atau sama dengan docType)
    * @param customYear Tahun transaksi (default tahun saat ini)
    */
+  async getNextNumber(
+    tenantId: string,
+    docType: string,
+    defaultPrefix?: string,
+    customYear?: number,
+  ): Promise<string> {
+    return this.generateNextNumber(tenantId, docType, defaultPrefix, customYear);
+  }
+
   async generateNextNumber(
     tenantId: string,
     docType: string,

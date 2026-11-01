@@ -46,13 +46,23 @@ import { DeliveryOrdersPage } from './pages/order-management/DeliveryOrdersPage'
 import { OrderReportsPage } from './pages/order-management/OrderReportsPage';
 import { SubledgerReconciliationPage } from './pages/SubledgerReconciliationPage';
 
-// Cash & Bank Pages (Modul 19)
+// Cash & Bank Pages (Modul 19 & 20)
 import { CashAccountsPage } from './pages/cash-bank/CashAccountsPage';
 import { CashReceiptsPage } from './pages/cash-bank/CashReceiptsPage';
 import { CashDisbursementsPage } from './pages/cash-bank/CashDisbursementsPage';
 import { CashTransfersPage } from './pages/cash-bank/CashTransfersPage';
+import { BankReconciliationPage } from './pages/cash-bank/BankReconciliationPage';
+import { BankReconciliationHistoryPage } from './pages/cash-bank/BankReconciliationHistoryPage';
 import { CashReportsPage } from './pages/cash-bank/CashReportsPage';
 import { CashOpeningBalancePage } from './pages/cash-bank/CashOpeningBalancePage';
+
+// Fixed Asset Pages (Modul 21 & 22)
+import { FixedAssetsListPage } from './pages/fixed-asset/FixedAssetsListPage';
+import { AssetCategoriesPage } from './pages/fixed-asset/AssetCategoriesPage';
+import { FiscalGroupsPage } from './pages/fixed-asset/FiscalGroupsPage';
+import { AssetCapitalizationPage } from './pages/fixed-asset/AssetCapitalizationPage';
+import { AssetOpeningBalancePage } from './pages/fixed-asset/AssetOpeningBalancePage';
+import { DepreciationRunPage } from './pages/fixed-asset/DepreciationRunPage';
 
 // Admin Pages
 import { AdminLayout } from './layouts/AdminLayout';
@@ -108,8 +118,16 @@ type TenantTab =
   | 'cash-receipts'
   | 'cash-disbursements'
   | 'cash-transfers'
+  | 'bank-reconciliation'
+  | 'bank-reconciliation-history'
   | 'cash-reports'
   | 'cash-opening-balance'
+  | 'fixed-assets'
+  | 'depreciation-run'
+  | 'asset-categories'
+  | 'fiscal-groups'
+  | 'asset-capitalization'
+  | 'asset-opening-balance'
   | 'asset-scan';
 type AdminTab = 'tenants' | 'billing' | 'audit' | 'api-keys' | 'user-management';
 
@@ -356,8 +374,16 @@ export function App() {
       {activeTab === 'cash-receipts' && <CashReceiptsPage />}
       {activeTab === 'cash-disbursements' && <CashDisbursementsPage />}
       {activeTab === 'cash-transfers' && <CashTransfersPage />}
+      {activeTab === 'bank-reconciliation' && <BankReconciliationPage onNavigateToHistory={() => setActiveTab('bank-reconciliation-history')} />}
+      {activeTab === 'bank-reconciliation-history' && <BankReconciliationHistoryPage onNavigateToNewRecon={() => setActiveTab('bank-reconciliation')} />}
       {activeTab === 'cash-reports' && <CashReportsPage />}
       {activeTab === 'cash-opening-balance' && <CashOpeningBalancePage />}
+      {activeTab === 'fixed-assets' && <FixedAssetsListPage />}
+      {activeTab === 'depreciation-run' && <DepreciationRunPage currentTenant={currentTenant} />}
+      {activeTab === 'asset-categories' && <AssetCategoriesPage />}
+      {activeTab === 'fiscal-groups' && <FiscalGroupsPage />}
+      {activeTab === 'asset-capitalization' && <AssetCapitalizationPage />}
+      {activeTab === 'asset-opening-balance' && <AssetOpeningBalancePage currentTenant={currentTenant} />}
       {activeTab === 'asset-scan' && (
         <div className="max-w-4xl mx-auto p-6 space-y-6">
           <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center space-y-4">

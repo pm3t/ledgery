@@ -72,6 +72,21 @@ export class CreatePurchaseBillLineDto {
   @IsOptional()
   @IsString()
   sourceLineId?: string;
+
+  @IsOptional()
+  @IsString()
+  lineType?: 'BARANG' | 'JASA' | 'BIAYA' | 'ASET';
+
+  @IsOptional()
+  @IsString()
+  assetCategoryId?: string;
+
+  @IsOptional()
+  kapitalisasiKeCip?: boolean;
+
+  @IsOptional()
+  @IsString()
+  assetId?: string;
 }
 
 export class CreatePurchaseBillDto {

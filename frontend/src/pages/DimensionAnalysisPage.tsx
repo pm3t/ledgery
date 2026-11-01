@@ -168,10 +168,10 @@ export const DimensionAnalysisPage: React.FC<Props> = ({ currentTenant }) => {
               <SlidersHorizontal className="w-6 h-6" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
+              <h1 className="text-2xl font-bold tracking-tight text-[#142820] flex items-center gap-2">
                 Analisa Per Dimensi
               </h1>
-              <p className="text-sm text-slate-400">
+              <p className="text-sm text-[#556c5e]">
                 Matriks perbandingan saldo akun berdasarkan dimensi analitik (Cost Center, Area, Project, dll.)
               </p>
             </div>
@@ -183,16 +183,16 @@ export const DimensionAnalysisPage: React.FC<Props> = ({ currentTenant }) => {
           <button
             onClick={fetchReport}
             disabled={loading || !selectedDimensionId}
-            className="flex items-center gap-2 px-3.5 py-2 bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 hover:text-white border border-slate-700 rounded-xl text-sm font-medium transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-3.5 py-2 bg-white hover:bg-[#edf2ea] text-[#142820] border border-[#cbdcd0] rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 shadow-sm"
             title="Refresh Data"
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-indigo-400' : ''}`} />
+            <RefreshCw className={`w-4 h-4 text-emerald-700 ${loading ? 'animate-spin' : ''}`} />
             Refresh
           </button>
           <button
             onClick={handleExportExcel}
             disabled={!reportData || loading}
-            className="flex items-center gap-2 px-3.5 py-2 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 rounded-xl text-sm font-medium transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-3.5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-sm font-bold transition-colors disabled:opacity-50 shadow-sm"
           >
             <Download className="w-4 h-4" />
             Export Excel
@@ -200,7 +200,7 @@ export const DimensionAnalysisPage: React.FC<Props> = ({ currentTenant }) => {
           <button
             onClick={handlePrint}
             disabled={!reportData || loading}
-            className="flex items-center gap-2 px-3.5 py-2 bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 hover:text-white border border-slate-700 rounded-xl text-sm font-medium transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-3.5 py-2 bg-white hover:bg-[#edf2ea] text-[#142820] border border-[#cbdcd0] rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 shadow-sm"
           >
             <Printer className="w-4 h-4" />
             Cetak PDF
@@ -398,10 +398,10 @@ export const DimensionAnalysisPage: React.FC<Props> = ({ currentTenant }) => {
       {/* Matrix Table Container */}
       <div
         id="printable-dimension-matrix"
-        className="bg-slate-900/70 border border-slate-800/80 rounded-2xl overflow-hidden backdrop-blur-sm shadow-xl"
+        className="bg-white border border-[#cbdcd0] rounded-2xl overflow-hidden shadow-sm"
       >
         {/* Printable Header (Visible only when printed) */}
-        <div className="hidden print:block p-4 border-b border-slate-200">
+        <div className="hidden print:block p-4 border-b border-[#cbdcd0]">
           <h2 className="text-lg font-bold">{currentTenant?.nama_perusahaan}</h2>
           <h3 className="text-base font-semibold">
             ANALISA PER DIMENSI: {currentDimObj?.nama_dimension.toUpperCase()}
@@ -436,22 +436,22 @@ export const DimensionAnalysisPage: React.FC<Props> = ({ currentTenant }) => {
                     className="py-3 px-3.5 text-right min-w-[130px] border-r border-[#cbdcd0] bg-[#eaf1e8]"
                   >
                     <div className="font-bold text-[#142e20] truncate">{col.nama}</div>
-                    <div className="text-[10px] text-emerald-800 font-mono tracking-normal font-semibold">{col.kode}</div>
+                    <div className="text-[10px] text-emerald-800 font-mono tracking-normal font-bold">{col.kode}</div>
                   </th>
                 ))}
 
                 {/* Unassigned Dimension Column */}
                 {reportData?.hasUnassigned && (
-                  <th className="py-3 px-3.5 text-right min-w-[130px] border-r border-[#cbdcd0] bg-[#fef9c3] text-[#854d0e]">
-                    <div className="font-bold truncate text-[#854d0e]">Tanpa Dimensi</div>
-                    <div className="text-[10px] text-[#a16207] font-mono tracking-normal font-bold">UNASSIGNED</div>
+                  <th className="py-3 px-3.5 text-right min-w-[130px] border-r border-[#cbdcd0] bg-[#fef3c7] text-[#92400e]">
+                    <div className="font-bold truncate text-[#92400e]">Tanpa Dimensi</div>
+                    <div className="text-[10px] text-[#b45309] font-mono tracking-normal font-bold">UNASSIGNED</div>
                   </th>
                 )}
 
                 {/* Row Total Column */}
-                <th className="py-3 px-4 text-right min-w-[140px] bg-[#ecfdf5] text-[#065f46] font-bold">
-                  <div>TOTAL</div>
-                  <div className="text-[10px] text-[#047857] tracking-normal font-medium">Seluruh Kolom</div>
+                <th className="py-3 px-4 text-right min-w-[140px] bg-[#dcfce7] text-[#14532d] font-bold">
+                  <div className="font-bold text-[#14532d]">TOTAL</div>
+                  <div className="text-[10px] text-[#166534] tracking-normal font-bold">Seluruh Kolom</div>
                 </th>
               </tr>
             </thead>
@@ -509,11 +509,11 @@ export const DimensionAnalysisPage: React.FC<Props> = ({ currentTenant }) => {
                       className="hover:bg-[#f7faf6] transition-colors group"
                     >
                       {/* Sticky Left: Kode Akun */}
-                      <td className="py-2.5 px-3.5 sticky left-0 z-10 bg-white group-hover:bg-[#f7faf6] font-mono text-slate-900 font-bold border-r border-[#cbdcd0]">
+                      <td className="py-2.5 px-3.5 sticky left-0 z-10 bg-white group-hover:bg-[#f7faf6] font-mono text-[#142820] font-bold border-r border-[#cbdcd0]">
                         <div className="flex items-center gap-1.5">
                           {row.coa.kode_akun}
                           {row.coa.isControlAccount && (
-                            <span className="text-[10px] text-amber-600" title="Akun Kontrol / Subledger">
+                            <span className="text-[10px] text-amber-700" title="Akun Kontrol / Subledger">
                               🛡️
                             </span>
                           )}
@@ -521,7 +521,7 @@ export const DimensionAnalysisPage: React.FC<Props> = ({ currentTenant }) => {
                       </td>
 
                       {/* Sticky Left: Nama Akun */}
-                      <td className="py-2.5 px-3.5 sticky left-[100px] z-10 bg-white group-hover:bg-[#f7faf6] text-slate-900 font-semibold border-r border-[#cbdcd0] truncate max-w-[240px]">
+                      <td className="py-2.5 px-3.5 sticky left-[100px] z-10 bg-white group-hover:bg-[#f7faf6] text-[#142820] font-bold border-r border-[#cbdcd0] truncate max-w-[240px]">
                         {row.coa.nama_akun}
                       </td>
 
@@ -530,14 +530,14 @@ export const DimensionAnalysisPage: React.FC<Props> = ({ currentTenant }) => {
                         <span
                           className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
                             row.coa.kategori === 'ASET'
-                              ? 'bg-blue-50 text-blue-800 border border-blue-200'
+                              ? 'bg-blue-50 text-blue-700 border border-blue-200'
                               : row.coa.kategori === 'LIABILITAS'
-                              ? 'bg-orange-50 text-orange-800 border border-orange-200'
+                              ? 'bg-amber-50 text-amber-800 border border-amber-200'
                               : row.coa.kategori === 'EKUITAS'
                               ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
                               : row.coa.kategori === 'PENDAPATAN'
                               ? 'bg-purple-50 text-purple-800 border border-purple-200'
-                              : 'bg-rose-50 text-rose-800 border border-rose-200'
+                              : 'bg-rose-50 text-rose-700 border border-rose-200'
                           }`}
                         >
                           {row.coa.kategori}
@@ -554,8 +554,8 @@ export const DimensionAnalysisPage: React.FC<Props> = ({ currentTenant }) => {
                               val === 0
                                 ? 'text-slate-400'
                                 : val < 0
-                                ? 'text-rose-600 font-semibold'
-                                : 'text-slate-900 font-semibold'
+                                ? 'text-rose-700 font-bold'
+                                : 'text-[#142820] font-bold'
                             }`}
                           >
                             {formatRupiah(val)}
@@ -566,12 +566,12 @@ export const DimensionAnalysisPage: React.FC<Props> = ({ currentTenant }) => {
                       {/* Matrix Value Cell for Unassigned */}
                       {reportData.hasUnassigned && (
                         <td
-                          className={`py-2.5 px-3.5 text-right font-mono border-r border-[#cbdcd0] bg-amber-50/50 ${
+                          className={`py-2.5 px-3.5 text-right font-mono border-r border-[#cbdcd0] bg-[#fffbeb] ${
                             (row.values['UNASSIGNED'] || 0) === 0
                               ? 'text-slate-400'
                               : (row.values['UNASSIGNED'] || 0) < 0
-                              ? 'text-rose-600 font-semibold'
-                              : 'text-amber-900 font-bold'
+                              ? 'text-rose-700 font-bold'
+                              : 'text-[#92400e] font-bold'
                           }`}
                         >
                           {formatRupiah(row.values['UNASSIGNED'] || 0)}
@@ -580,12 +580,12 @@ export const DimensionAnalysisPage: React.FC<Props> = ({ currentTenant }) => {
 
                       {/* Row Total */}
                       <td
-                        className={`py-2.5 px-4 text-right font-mono font-bold bg-emerald-50/50 ${
+                        className={`py-2.5 px-4 text-right font-mono font-bold bg-[#f0fdf4] ${
                           row.total === 0
                             ? 'text-slate-400'
                             : row.total < 0
-                            ? 'text-rose-600'
-                            : 'text-emerald-900'
+                            ? 'text-rose-700'
+                            : 'text-[#14532d]'
                         }`}
                       >
                         {formatRupiah(row.total)}
@@ -603,10 +603,10 @@ export const DimensionAnalysisPage: React.FC<Props> = ({ currentTenant }) => {
                   <td className="py-3 px-3.5 sticky left-0 z-30 bg-[#eaf1e8] border-r border-[#cbdcd0] font-bold text-[#142e20]">
                     TOTAL
                   </td>
-                  <td className="py-3 px-3.5 sticky left-[100px] z-30 bg-[#eaf1e8] border-r border-[#cbdcd0] text-[#142e20] text-xs font-semibold">
+                  <td className="py-3 px-3.5 sticky left-[100px] z-30 bg-[#eaf1e8] border-r border-[#cbdcd0] text-[#142e20] text-xs font-bold">
                     Ringkasan Seluruh Akun
                   </td>
-                  <td className="py-3 px-3 border-r border-[#cbdcd0] text-center text-slate-400">
+                  <td className="py-3 px-3 border-r border-[#cbdcd0] text-center text-slate-500 font-bold">
                     -
                   </td>
 
@@ -617,7 +617,7 @@ export const DimensionAnalysisPage: React.FC<Props> = ({ currentTenant }) => {
                       <td
                         key={col.id}
                         className={`py-3 px-3.5 text-right font-mono border-r border-[#cbdcd0] font-bold ${
-                          colTotal < 0 ? 'text-rose-600' : 'text-slate-900'
+                          colTotal < 0 ? 'text-rose-700' : 'text-[#142820]'
                         }`}
                       >
                         {formatRupiah(colTotal)}
@@ -630,7 +630,7 @@ export const DimensionAnalysisPage: React.FC<Props> = ({ currentTenant }) => {
                     <td
                       className={`py-3 px-3.5 text-right font-mono border-r border-[#cbdcd0] bg-[#fef3c7] font-bold ${
                         (reportData.columnTotals['UNASSIGNED'] || 0) < 0
-                          ? 'text-rose-600'
+                          ? 'text-rose-700'
                           : 'text-[#92400e]'
                       }`}
                     >
@@ -640,10 +640,10 @@ export const DimensionAnalysisPage: React.FC<Props> = ({ currentTenant }) => {
 
                   {/* Grand Total */}
                   <td
-                    className={`py-3 px-4 text-right font-mono font-bold text-sm bg-[#d1fae5] ${
+                    className={`py-3 px-4 text-right font-mono font-bold text-sm bg-[#dcfce7] ${
                       reportData.grandTotal < 0
-                        ? 'text-rose-600'
-                        : 'text-[#065f46]'
+                        ? 'text-rose-700'
+                        : 'text-[#14532d]'
                     }`}
                   >
                     {formatRupiah(reportData.grandTotal)}

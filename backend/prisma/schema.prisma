@@ -116,6 +116,21 @@ model Tenant {
   cashReceipts       CashReceipt[]
   cashDisbursements  CashDisbursement[]
   cashTransfers      CashTransfer[]
+  bankStatementImports BankStatementImport[]
+  bankStatementLines   BankStatementLine[]
+  bankReconciliations  BankReconciliation[]
+  bankImportTemplates  BankImportTemplate[]
+  fiscalDepreciationGroups FiscalDepreciationGroup[]
+  assetCategories          AssetCategory[]
+  fixedAssets              FixedAsset[]
+  assetCapitalizations     AssetCapitalization[]
+  depreciationRuns         AssetDepreciationRun[]
+  assetDepreciationEntries AssetDepreciationEntry[]
+  assetEstimateChanges     AssetEstimateChange[]
+  assetCostAdditions       AssetCostAddition[]
+  assetTransfers           AssetTransfer[]
+  assetImpairments         AssetImpairment[]
+  assetDisposals           AssetDisposal[]
 }
 
 // Model Chart of Accounts (Daftar Kode Akun)
@@ -157,6 +172,15 @@ model ChartOfAccount {
   cashReceiptLines      CashReceiptLine[]
   cashDisbursementLines CashDisbursementLine[]
   cashTransfersBiaya    CashTransfer[]
+  catAkunAset                 AssetCategory[] @relation("CatAkunAset")
+  catAkunAkumulasi            AssetCategory[] @relation("CatAkunAkumulasi")
+  catAkunBeban                AssetCategory[] @relation("CatAkunBeban")
+  catAkunCip                  AssetCategory[] @relation("CatAkunCip")
+  catAkunLabaRugiPelepasan    AssetCategory[] @relation("CatAkunLabaRugiPelepasan")
+  catAkunRugiPenurunanNilai   AssetCategory[] @relation("CatAkunRugiPenurunanNilai")
+  catAkunAkumulasiPenurunanNilai AssetCategory[] @relation("CatAkunAkumulasiPenurunanNilai")
+  catAkunRugiPenghapusan      AssetCategory[] @relation("CatAkunRugiPenghapusan")
+  costAdditionAccounts        AssetCostAddition[]
 
   @@unique([tenantId, kode_akun])
 }
@@ -249,6 +273,10 @@ model Journal {
   cashReceipts           CashReceipt[]          @relation("CashReceiptJournal")
   cashDisbursements      CashDisbursement[]     @relation("CashDisbursementJournal")
   cashTransfers          CashTransfer[]         @relation("CashTransferJournal")
+  depreciationRuns       AssetDepreciationRun[]
+  assetCostAdditions     AssetCostAddition[]
+  assetImpairments       AssetImpairment[]
+  assetDisposals         AssetDisposal[]
 
   // Constraint
   @@unique([tenantId, no_voucher])
@@ -495,7 +523,9 @@ model AccountingPeriod {
   reopenedBy      String?
 
   // Relasi
-  fiscalYear      FiscalYear   @relation(fields: [fiscalYearId], references: [id], onDelete: Cascade)
+  fiscalYear         FiscalYear               @relation(fields: [fiscalYearId], references: [id], onDelete: Cascade)
+  depreciationRuns   AssetDepreciationRun[]
+  chargedDeprEntries AssetDepreciationEntry[]
 
   @@unique([fiscalYearId, nomor_periode])
 }
@@ -742,6 +772,8 @@ model SalesInvoiceLine {
   jumlah           Decimal         @default(0) @db.Decimal(19, 4)
   akunPendapatanId String?
   dimensions       Json?
+  lineType         String?         @default("STANDARD") // "STANDARD" | "PELEPASAN_ASET"
+  assetId          String?
   sourceLineType   SourceLineType?
   sourceLineId     String?
   createdAt        DateTime        @default(now())
@@ -749,6 +781,8 @@ model SalesInvoiceLine {
 
   invoice        SalesInvoice    @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
   akunPendapatan ChartOfAccount? @relation(fields: [akunPendapatanId], references: [id], onDelete: SetNull)
+  asset          FixedAsset?     @relation(fields: [assetId], references: [id], onDelete: SetNull)
+  disposals      AssetDisposal[]
 
   @@index([invoiceId])
 }
@@ -985,9 +1019,13 @@ model PurchaseBillLine {
   jumlah         Decimal             @default(0) @db.Decimal(19, 4)
   akunBiayaId    String?
   dimensions     Json?
-  sourceLineType BillSourceLineType?
-  sourceLineId   String?
-  createdAt      DateTime            @default(now())
+  sourceLineType    BillSourceLineType?
+  sourceLineId      String?
+  lineType          String?             @default("BIAYA") // "BARANG" | "JASA" | "BIAYA" | "ASET"
+  assetCategoryId   String?
+  kapitalisasiKeCip Boolean             @default(false)
+  assetId           String?
+  createdAt         DateTime            @default(now())
   updatedAt      DateTime            @updatedAt
 
   bill      PurchaseBill    @relation(fields: [billId], references: [id], onDelete: Cascade)
@@ -1786,6 +1824,11 @@ model CashBankAccount {
   transfersTo      CashTransfer[]       @relation("TransferKe")
   customerReceipts CustomerReceipt[]
   vendorPayments   VendorPayment[]
+  statementImports BankStatementImport[]
+  statementLines   BankStatementLine[]
+  bankReconciliations BankReconciliation[]
+  importTemplates  BankImportTemplate[]
+  assetDisposals   AssetDisposal[]
 
   @@unique([tenantId, kode])
   @@unique([tenantId, chartOfAccountId])
@@ -1813,6 +1856,8 @@ model CashBankEntry {
   cashBankAccount    CashBankAccount        @relation(fields: [cashBankAccountId], references: [id], onDelete: Cascade)
   journalEntry       JournalEntry?          @relation(fields: [journalEntryId], references: [id], onDelete: SetNull)
   journal            Journal?               @relation(fields: [journalId], references: [id], onDelete: SetNull)
+  reconciliation     BankReconciliation?    @relation(fields: [reconciliationId], references: [id], onDelete: SetNull)
+  matches            BankMatch[]
 
   @@index([tenantId, cashBankAccountId, tanggal])
   @@index([tenantId, sourceType])
@@ -1896,16 +1941,20 @@ model CashDisbursement {
 }
 
 model CashDisbursementLine {
-  id          String           @id @default(uuid())
-  headerId    String
-  akunLawanId String
-  deskripsi   String
-  jumlah      Decimal          @db.Decimal(19, 4)
-  dimensions  Json?
-  createdAt   DateTime         @default(now())
+  id                String           @id @default(uuid())
+  headerId          String
+  akunLawanId       String?
+  deskripsi         String
+  jumlah            Decimal          @db.Decimal(19, 4)
+  dimensions        Json?
+  lineType          String?          @default("BIAYA") // "BIAYA" | "ASET"
+  assetCategoryId   String?
+  kapitalisasiKeCip Boolean          @default(false)
+  assetId           String?
+  createdAt         DateTime         @default(now())
 
-  header      CashDisbursement @relation(fields: [headerId], references: [id], onDelete: Cascade)
-  akunLawan   ChartOfAccount   @relation(fields: [akunLawanId], references: [id])
+  header            CashDisbursement @relation(fields: [headerId], references: [id], onDelete: Cascade)
+  akunLawan         ChartOfAccount?  @relation(fields: [akunLawanId], references: [id])
 
   @@index([headerId])
 }
@@ -1943,6 +1992,635 @@ model CashTransfer {
   @@unique([tenantId, idempotencyKey])
   @@index([tenantId, tanggal])
 }
+
+// =========================================================================
+// MODUL 20: REKONSILIASI BANK (BANK RECONCILIATION)
+// =========================================================================
+
+enum BankMatchStatus {
+  UNMATCHED
+  MATCHED
+  ADJUSTED
+  IGNORED
+}
+
+enum BankReconStatus {
+  DRAFT
+  SELESAI
+  DIBUKA_KEMBALI
+}
+
+enum BankImportNominalMode {
+  DEBIT_KREDIT_TERPISAH
+  SATU_KOLOM_BERTANDA
+}
+
+model BankStatementImport {
+  id                 String              @id @default(uuid())
+  tenantId           String
+  cashBankAccountId  String
+  namaFile           String
+  periodeAwal        DateTime
+  periodeAkhir       DateTime
+  saldoAwal          Decimal             @db.Decimal(19, 4)
+  saldoAkhir         Decimal             @db.Decimal(19, 4)
+  importedBy         String
+  importedAt         DateTime            @default(now())
+
+  tenant             Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  cashBankAccount    CashBankAccount     @relation(fields: [cashBankAccountId], references: [id], onDelete: Cascade)
+  lines              BankStatementLine[]
+
+  @@index([tenantId, cashBankAccountId, importedAt])
+}
+
+model BankStatementLine {
+  id                String            @id @default(uuid())
+  importId          String
+  tenantId          String
+  cashBankAccountId String
+  tanggal           DateTime
+  keterangan        String
+  referensi         String?
+  debit             Decimal           @default(0) @db.Decimal(19, 4)
+  kredit            Decimal           @default(0) @db.Decimal(19, 4)
+  saldo             Decimal?          @db.Decimal(19, 4)
+  dedupeHash        String
+  matchStatus       BankMatchStatus   @default(UNMATCHED)
+  ignoreReason      String?
+  externalRef       String?
+  createdAt         DateTime          @default(now())
+
+  import            BankStatementImport @relation(fields: [importId], references: [id], onDelete: Cascade)
+  tenant            Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  cashBankAccount   CashBankAccount     @relation(fields: [cashBankAccountId], references: [id], onDelete: Cascade)
+  matches           BankMatch[]
+
+  @@unique([cashBankAccountId, dedupeHash])
+  @@index([tenantId, cashBankAccountId, tanggal])
+  @@index([tenantId, matchStatus])
+}
+
+model BankReconciliation {
+  id                 String           @id @default(uuid())
+  tenantId           String
+  cashBankAccountId  String
+  tanggalAkhir       DateTime
+  saldoRekeningKoran Decimal          @db.Decimal(19, 4)
+  saldoBuku          Decimal          @db.Decimal(19, 4)
+  selisih            Decimal          @db.Decimal(19, 4)
+  status             BankReconStatus  @default(DRAFT)
+  completedBy        String?
+  completedAt        DateTime?
+  reopenedBy         String?
+  reopenedAt         DateTime?
+  reopenReason       String?
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  tenant             Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  cashBankAccount    CashBankAccount  @relation(fields: [cashBankAccountId], references: [id], onDelete: Cascade)
+  matches            BankMatch[]
+  entries            CashBankEntry[]
+
+  @@index([tenantId, cashBankAccountId, tanggalAkhir])
+}
+
+model BankMatch {
+  id                String             @id @default(uuid())
+  reconciliationId  String?
+  statementLineId   String
+  cashBankEntryId   String
+  jumlahAlokasi     Decimal            @db.Decimal(19, 4)
+  createdAt         DateTime           @default(now())
+
+  reconciliation    BankReconciliation? @relation(fields: [reconciliationId], references: [id], onDelete: Cascade)
+  statementLine     BankStatementLine  @relation(fields: [statementLineId], references: [id], onDelete: Cascade)
+  cashBankEntry     CashBankEntry      @relation(fields: [cashBankEntryId], references: [id], onDelete: Cascade)
+
+  @@index([statementLineId])
+  @@index([cashBankEntryId])
+  @@index([reconciliationId])
+}
+
+model BankImportTemplate {
+  id                String                @id @default(uuid())
+  tenantId          String
+  cashBankAccountId String
+  pemetaanKolom     Json
+  formatTanggal     String
+  pemisahDesimal    String                @default(",")
+  pemisahRibuan     String                @default(".")
+  modeNominal       BankImportNominalMode @default(DEBIT_KREDIT_TERPISAH)
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+
+  tenant            Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  cashBankAccount   CashBankAccount       @relation(fields: [cashBankAccountId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, cashBankAccountId])
+}
+
+// =========================================================================
+// MODUL 21: SUB LEDGER ASET TETAP (FIXED ASSET FOUNDATION & CIP)
+// =========================================================================
+
+enum FiscalGroupType {
+  BUKAN_BANGUNAN
+  BANGUNAN
+}
+
+enum AssetCategoryType {
+  BERWUJUD
+  TAK_BERWUJUD
+}
+
+enum DepreciationMethod {
+  GARIS_LURUS
+  SALDO_MENURUN
+}
+
+enum FiscalStartRule {
+  BULAN_PEROLEHAN
+  BULAN_PRODUKSI_KOMERSIAL
+}
+
+enum FixedAssetStatus {
+  DRAFT
+  CIP
+  AKTIF
+  DISUSUTKAN_PENUH
+  DIJUAL
+  DIHAPUSKAN
+}
+
+enum AssetEventType {
+  PEROLEHAN
+  KAPITALISASI
+  PENAMBAHAN_NILAI
+  PENYUSUTAN
+  PERUBAHAN_ESTIMASI
+  MUTASI
+  PENURUNAN_NILAI
+  PELEPASAN
+  PENGHAPUSAN
+  VOID
+}
+
+enum AssetLabelStatus {
+  BELUM_DILABEL
+  TERCETAK
+  TERPASANG
+  RUSAK_HILANG
+}
+
+enum AssetCapitalizationStatus {
+  DRAFT
+  POSTED
+  VOID
+}
+
+// Kelompok Penyusutan Fiskal (PMK 72/2023)
+// Nilai ini dapat diedit oleh Tenant / Super Admin, bukan konstanta mati
+model FiscalDepreciationGroup {
+  id                String            @id @default(uuid())
+  tenantId          String
+  kode              String
+  nama              String
+  jenis             FiscalGroupType
+  masaManfaatBulan  Int
+  tarifGarisLurus   Decimal           @db.Decimal(5, 2) // % per tahun (mis. 25.00)
+  tarifSaldoMenurun Decimal?          @db.Decimal(5, 2) // % per tahun (mis. 50.00), null untuk bangunan
+  isSeed            Boolean           @default(false)
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  tenant            Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  categories        AssetCategory[]
+  fixedAssets       FixedAsset[]
+
+  @@unique([tenantId, kode])
+  @@index([tenantId])
+}
+
+// Master Kategori Aset Tetap
+model AssetCategory {
+  id                            String             @id @default(uuid())
+  tenantId                      String
+  kode                          String
+  nama                          String
+  jenis                         AssetCategoryType  @default(BERWUJUD)
+  dapatDisusutkan               Boolean            @default(true)
+  metodeKomersial               DepreciationMethod @default(GARIS_LURUS)
+  faktorSaldoMenurun            Float              @default(2.0)
+  umurManfaatBulan              Int                @default(48)
+  nilaiResiduPersen             Float?             @default(0)
+  nilaiResiduNominal            Decimal?           @db.Decimal(19, 4)
+  fiscalGroupId                 String?
+  metodeFiskal                  DepreciationMethod @default(GARIS_LURUS)
+  aturanMulaiFiskal             FiscalStartRule    @default(BULAN_PEROLEHAN)
+  akunAsetId                    String
+  akunAkumulasiId               String
+  akunBebanId                   String
+  akunCipId                     String
+  akunLabaRugiPelepasanId       String
+  akunRugiPenurunanNilaiId      String
+  akunAkumulasiPenurunanNilaiId String?
+  akunRugiPenghapusanId         String
+  isActive                      Boolean            @default(true)
+  createdAt                     DateTime           @default(now())
+  updatedAt                     DateTime           @updatedAt
+
+  tenant                        Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  fiscalGroup                   FiscalDepreciationGroup? @relation(fields: [fiscalGroupId], references: [id], onDelete: SetNull)
+  akunAset                      ChartOfAccount     @relation("CatAkunAset", fields: [akunAsetId], references: [id])
+  akunAkumulasi                 ChartOfAccount     @relation("CatAkunAkumulasi", fields: [akunAkumulasiId], references: [id])
+  akunBeban                     ChartOfAccount     @relation("CatAkunBeban", fields: [akunBebanId], references: [id])
+  akunCip                       ChartOfAccount     @relation("CatAkunCip", fields: [akunCipId], references: [id])
+  akunLabaRugiPelepasan         ChartOfAccount     @relation("CatAkunLabaRugiPelepasan", fields: [akunLabaRugiPelepasanId], references: [id])
+  akunRugiPenurunanNilai        ChartOfAccount     @relation("CatAkunRugiPenurunanNilai", fields: [akunRugiPenurunanNilaiId], references: [id])
+  akunAkumulasiPenurunanNilai   ChartOfAccount?    @relation("CatAkunAkumulasiPenurunanNilai", fields: [akunAkumulasiPenurunanNilaiId], references: [id])
+  akunRugiPenghapusan           ChartOfAccount     @relation("CatAkunRugiPenghapusan", fields: [akunRugiPenghapusanId], references: [id])
+  fixedAssets                   FixedAsset[]
+  capitalizations               AssetCapitalization[]
+
+  @@unique([tenantId, kode])
+  @@index([tenantId])
+}
+
+// Kartu Induk Aset Tetap (Fixed Asset Register)
+model FixedAsset {
+  id                      String             @id @default(uuid())
+  tenantId                String
+  noAset                  String
+  tagCode                 String
+  categoryId              String
+  nama                    String
+  deskripsi               String?
+  status                  FixedAssetStatus   @default(DRAFT)
+  tanggalPerolehan        DateTime
+  tanggalMulaiDigunakan   DateTime?
+  mata_uang               String
+  kurs                    Decimal            @default(1.0) @db.Decimal(19, 6)
+  hargaPerolehanAsli      Decimal            @db.Decimal(19, 4)
+  hargaPerolehan          Decimal            @db.Decimal(19, 4)
+  nilaiResidu             Decimal            @default(0) @db.Decimal(19, 4)
+  umurManfaatBulan        Int                @default(48)
+  metodeKomersial         DepreciationMethod @default(GARIS_LURUS)
+  faktorSaldoMenurun      Float              @default(2.0)
+  fiscalGroupId           String?
+  metodeFiskal            DepreciationMethod @default(GARIS_LURUS)
+  fiskalMulaiTanggal      DateTime?
+  fiskalUmurOverrideBulan Int?
+  dimensions              Json?
+  statusLabel             AssetLabelStatus   @default(BELUM_DILABEL)
+  externalRef             String?
+  sumberAplikasi          String             @default("MANUAL")
+  sourceDocType           String?
+  sourceDocId             String?
+  createdBy               String?
+  createdAt               DateTime           @default(now())
+  updatedAt               DateTime           @updatedAt
+
+  // Kolom Denormalisasi Akuntansi (Diperbarui Atomik per Run Penyusutan & Penambahan Nilai)
+  akumulasiKomersial      Decimal            @default(0) @db.Decimal(19, 4)
+  akumulasiFiskal         Decimal            @default(0) @db.Decimal(19, 4)
+  nilaiTercatat           Decimal            @default(0) @db.Decimal(19, 4)
+  nilaiSisaBukuFiskal     Decimal            @default(0) @db.Decimal(19, 4)
+
+  tenant                  Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  category                AssetCategory      @relation(fields: [categoryId], references: [id])
+  fiscalGroup             FiscalDepreciationGroup? @relation(fields: [fiscalGroupId], references: [id], onDelete: SetNull)
+  events                  AssetEvent[]
+  attachments             AssetAttachment[]
+  capitalizations         AssetCapitalization[]
+  depreciationEntries     AssetDepreciationEntry[]
+  estimateChanges         AssetEstimateChange[]
+  costAdditions           AssetCostAddition[]
+  dimensionHistories      AssetDimensionHistory[]
+  transfers               AssetTransfer[]
+  impairments             AssetImpairment[]
+  disposals               AssetDisposal[]
+  salesInvoiceLines       SalesInvoiceLine[]
+
+  @@unique([tenantId, noAset])
+  @@unique([tenantId, tagCode])
+  @@unique([tenantId, externalRef])
+  @@index([tenantId, status])
+  @@index([tenantId, categoryId])
+}
+
+// Catatan Linimasa & Riwayat Transaksi Aset (Audit Trail)
+model AssetEvent {
+  id         String         @id @default(uuid())
+  assetId    String
+  tipe       AssetEventType
+  tanggal    DateTime
+  data       Json
+  journalId  String?
+  createdBy  String?
+  createdAt  DateTime       @default(now())
+
+  asset      FixedAsset     @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@index([assetId])
+  @@index([tipe])
+}
+
+// Lampiran File Bukti / Dokumen Aset
+model AssetAttachment {
+  id         String     @id @default(uuid())
+  assetId    String
+  namaFile   String
+  tipe       String
+  ukuran     Int
+  storageKey String
+  uploadedBy String?
+  createdAt  DateTime   @default(now())
+
+  asset      FixedAsset @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@index([assetId])
+}
+
+// Dokumen Kapitalisasi Aset CIP ke Aset Tetap Aktif
+model AssetCapitalization {
+  id                    String                    @id @default(uuid())
+  tenantId              String
+  noDokumen             String
+  tanggal               DateTime
+  assetId               String
+  categoryId            String
+  tanggalMulaiDigunakan DateTime
+  status                AssetCapitalizationStatus @default(DRAFT)
+  journalId             String?
+  createdBy             String?
+  createdAt             DateTime                  @default(now())
+  updatedAt             DateTime                  @updatedAt
+
+  tenant                Tenant                    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  asset                 FixedAsset                @relation(fields: [assetId], references: [id])
+  category              AssetCategory             @relation(fields: [categoryId], references: [id])
+
+  @@unique([tenantId, noDokumen])
+  @@index([tenantId])
+  @@index([assetId])
+}
+
+// ==========================================
+// MODUL 22: MESIN & PROSES PENYUSUTAN ASET
+// ==========================================
+
+enum AssetDepreciationRunStatus {
+  POSTED
+  REVERSED
+}
+
+enum DepreciationBook {
+  KOMERSIAL
+  FISKAL
+  OPENING_KOMERSIAL
+  OPENING_FISKAL
+}
+
+enum DepreciationEntryStatus {
+  AKTIF
+  REVERSED
+}
+
+// Dokumen Batch Proses Penyusutan Bulanan
+model AssetDepreciationRun {
+  id             String                     @id @default(uuid())
+  tenantId       String
+  noDokumen      String
+  periodId       String
+  status         AssetDepreciationRunStatus @default(POSTED)
+  totalKomersial Decimal                    @db.Decimal(19, 4)
+  totalFiskal    Decimal                    @default(0) @db.Decimal(19, 4)
+  journalId      String?
+  createdBy      String?
+  postedAt       DateTime                   @default(now())
+  reversedAt     DateTime?
+  reversedBy     String?
+  createdAt      DateTime                   @default(now())
+  updatedAt      DateTime                   @updatedAt
+
+  tenant         Tenant                     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  period         AccountingPeriod           @relation(fields: [periodId], references: [id])
+  journal        Journal?                   @relation(fields: [journalId], references: [id], onDelete: SetNull)
+  entries        AssetDepreciationEntry[]
+
+  @@unique([tenantId, noDokumen])
+  @@index([tenantId, periodId])
+}
+
+// Entri Penyusutan Buku Paralel (Komersial & Fiskal)
+model AssetDepreciationEntry {
+  id                   String                  @id @default(uuid())
+  tenantId             String
+  assetId              String
+  runId                String?
+  buku                 DepreciationBook        @default(KOMERSIAL)
+  periodeBukuTahun     Int                     @default(2026)
+  periodeBukuBulan     Int                     @default(1)
+  periodeBebanId       String?
+  jumlah               Decimal                 @default(0) @db.Decimal(19, 4)
+  akumulasiSetelah     Decimal                 @default(0) @db.Decimal(19, 4)
+  nilaiTercatatSetelah Decimal                 @default(0) @db.Decimal(19, 4)
+  isCatchUp            Boolean                 @default(false)
+  status               DepreciationEntryStatus @default(AKTIF)
+
+  // Field pelengkap untuk histori & saldo awal
+  periode              String?                 // YYYY-MM
+  tanggal              DateTime?
+  jumlahKomersial      Decimal?                @default(0) @db.Decimal(19, 4)
+  jumlahFiskal         Decimal?                @default(0) @db.Decimal(19, 4)
+  akumulasiKomersial   Decimal?                @default(0) @db.Decimal(19, 4)
+  akumulasiFiskal      Decimal?                @default(0) @db.Decimal(19, 4)
+  nilaiBukuKomersial   Decimal?                @default(0) @db.Decimal(19, 4)
+  nilaiBukuFiskal      Decimal?                @default(0) @db.Decimal(19, 4)
+  isOpening            Boolean                 @default(false)
+  journalId            String?
+  createdAt            DateTime                @default(now())
+
+  tenant               Tenant                  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  asset                FixedAsset              @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  run                  AssetDepreciationRun?   @relation(fields: [runId], references: [id], onDelete: SetNull)
+  periodeBeban         AccountingPeriod?       @relation(fields: [periodeBebanId], references: [id], onDelete: SetNull)
+
+  @@unique([assetId, periodeBukuTahun, periodeBukuBulan, buku, status])
+  @@index([tenantId, assetId])
+  @@index([tenantId, runId])
+  @@index([tenantId, periodeBukuTahun, periodeBukuBulan])
+}
+
+// Riwayat Perubahan Estimasi Akuntansi Aset (Masa Manfaat, Residu, Metode)
+model AssetEstimateChange {
+  id                  String              @id @default(uuid())
+  tenantId            String
+  assetId             String
+  berlakuMulaiPeriode String              // YYYY-MM
+  umurBaruBulan       Int?
+  sisaUmurBulan       Int?
+  residuBaru          Decimal?            @db.Decimal(19, 4)
+  metodeBaru          DepreciationMethod?
+  alasan              String
+  createdBy           String?
+  createdAt           DateTime            @default(now())
+
+  tenant              Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  asset               FixedAsset          @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, assetId])
+}
+
+// Penambahan Nilai / Pengeluaran Lanjutan yang Dikapitalisasi (Subsequent Expenditure)
+model AssetCostAddition {
+  id                  String              @id @default(uuid())
+  tenantId            String
+  noDokumen           String
+  assetId             String
+  tanggal             DateTime
+  jumlah              Decimal             @db.Decimal(19, 4)
+  akunLawanId         String?
+  sumber              String?             // KAS, HUTANG, MANUAL
+  journalId           String?
+  status              String              @default("POSTED") // POSTED, VOID
+  deskripsi           String?
+  createdBy           String?
+  createdAt           DateTime            @default(now())
+
+  tenant              Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  asset               FixedAsset          @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  akunLawan           ChartOfAccount?     @relation(fields: [akunLawanId], references: [id])
+  journal             Journal?            @relation(fields: [journalId], references: [id], onDelete: SetNull)
+
+  @@unique([tenantId, noDokumen])
+  @@index([tenantId, assetId])
+}
+
+// =========================================================================
+// MODUL 23: PERISTIWA SIKLUS HIDUP ASET LANJUTAN (MUTASI, IMPAIRMENT, PELEPASAN)
+// =========================================================================
+
+enum AssetTransferStatus {
+  POSTED
+  VOID
+}
+
+enum ImpairmentAccumulationMode {
+  AKUMULASI_PENYUSUTAN
+  AKUMULASI_PENURUNAN_NILAI
+}
+
+enum AssetImpairmentStatus {
+  POSTED
+  VOID
+}
+
+enum AssetDisposalType {
+  JUAL_FAKTUR
+  JUAL_TUNAI
+  HAPUS
+}
+
+enum AssetDisposalStatus {
+  POSTED
+  VOID
+}
+
+// Riwayat Perubahan Dimensi Analitik Aset (Cost Center, Project, dsb)
+model AssetDimensionHistory {
+  id           String      @id @default(uuid())
+  assetId      String
+  berlakuMulai DateTime
+  dimensions   Json
+  alasan       String?
+  createdBy    String?
+  createdAt    DateTime    @default(now())
+
+  asset        FixedAsset  @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@index([assetId, berlakuMulai])
+}
+
+// Dokumen Mutasi / Transfer Lokasi & Dimensi Aset
+model AssetTransfer {
+  id          String              @id @default(uuid())
+  tenantId    String
+  noDokumen   String
+  assetId     String
+  tanggal     DateTime
+  dari        Json                // Dimension lama
+  ke          Json                // Dimension baru
+  alasan      String
+  status      AssetTransferStatus @default(POSTED)
+  createdBy   String?
+  createdAt   DateTime            @default(now())
+
+  tenant      Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  asset       FixedAsset          @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, noDokumen])
+  @@index([tenantId, assetId])
+}
+
+// Dokumen Penurunan Nilai Aset (Impairment)
+model AssetImpairment {
+  id             String                     @id @default(uuid())
+  tenantId       String
+  noDokumen      String
+  assetId        String
+  tanggal        DateTime
+  jumlah         Decimal                    @db.Decimal(19, 4)
+  alasan         String
+  modeAkumulasi  ImpairmentAccumulationMode @default(AKUMULASI_PENYUSUTAN)
+  status         AssetImpairmentStatus      @default(POSTED)
+  journalId      String?
+  createdBy      String?
+  createdAt      DateTime                   @default(now())
+
+  tenant         Tenant                     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  asset          FixedAsset                 @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  journal        Journal?                   @relation(fields: [journalId], references: [id], onDelete: SetNull)
+
+  @@unique([tenantId, noDokumen])
+  @@index([tenantId, assetId])
+}
+
+// Dokumen Pelepasan & Penghapusan Aset Tetap (Disposal / Write-off)
+model AssetDisposal {
+  id                         String              @id @default(uuid())
+  tenantId                   String
+  noDokumen                  String
+  assetId                    String
+  tanggal                    DateTime
+  tipe                       AssetDisposalType
+  alasan                     String
+  hargaJual                  Decimal?            @db.Decimal(19, 4)
+  salesInvoiceLineId         String?
+  cashBankAccountId          String?
+  nilaiTercatatSaatPelepasan Decimal             @db.Decimal(19, 4)
+  labaRugi                   Decimal             @db.Decimal(19, 4)
+  fiskalSisaBuku             Decimal             @db.Decimal(19, 4)
+  fiskalLabaRugi             Decimal             @db.Decimal(19, 4)
+  status                     AssetDisposalStatus @default(POSTED)
+  journalId                  String?
+  createdBy                  String?
+  createdAt                  DateTime            @default(now())
+
+  tenant                     Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  asset                      FixedAsset          @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  cashBankAccount            CashBankAccount?    @relation(fields: [cashBankAccountId], references: [id], onDelete: SetNull)
+  salesInvoiceLine           SalesInvoiceLine?   @relation(fields: [salesInvoiceLineId], references: [id], onDelete: SetNull)
+  journal                    Journal?            @relation(fields: [journalId], references: [id], onDelete: SetNull)
+
+  @@unique([tenantId, noDokumen])
+  @@index([tenantId, assetId])
+}
+
+
+
 
 
 

@@ -449,10 +449,12 @@ export interface IntegrationLog {
 // Helper fetch bawaan dengan penanganan error terpusat
 async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
-  const headers = new Headers({
-    'Content-Type': 'application/json',
-    ...options.headers,
-  });
+  const headers = new Headers(options.headers);
+
+  // Jangan set application/json jika body adalah FormData agar browser menyematkan multipart boundary
+  if (!(options.body instanceof FormData) && !headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json');
+  }
 
   // Sematkan JWT access token ke header Authorization jika tersedia
   const token = localStorage.getItem('access_token');
@@ -1234,6 +1236,139 @@ export const api = {
     if (filter?.endDate) q.append('endDate', filter.endDate);
     return request<any>(`/cash-bank/reports/cash-flow-direct?${q.toString()}`);
   },
+
+  // --- REKONSILIASI BANK API (MODUL 20) ---
+  getBankImportTemplate: (cashBankAccountId: string) =>
+    request<BankImportTemplate | null>(`/bank-reconciliation/templates/${cashBankAccountId}`),
+  saveBankImportTemplate: (payload: any) =>
+    request<BankImportTemplate>('/bank-reconciliation/templates', { method: 'POST', body: JSON.stringify(payload) }),
+  uploadBankStatement: (cashBankAccountId: string, file: File, templateConfig?: any) => {
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('cashBankAccountId', cashBankAccountId);
+    if (templateConfig) {
+      fd.append('templateConfig', JSON.stringify(templateConfig));
+    }
+    return request<any>('/bank-reconciliation/upload-statement', { method: 'POST', body: fd });
+  },
+  importBankStatementLines: (payload: any) =>
+    request<any>('/bank-reconciliation/import-lines', { method: 'POST', body: JSON.stringify(payload) }),
+  getBankStatementLines: (cashBankAccountId: string, filter?: { matchStatus?: string; startDate?: string; endDate?: string }) => {
+    const q = new URLSearchParams();
+    if (filter?.matchStatus) q.append('matchStatus', filter.matchStatus);
+    if (filter?.startDate) q.append('startDate', filter.startDate);
+    if (filter?.endDate) q.append('endDate', filter.endDate);
+    return request<BankStatementLine[]>(`/bank-reconciliation/statement-lines/${cashBankAccountId}?${q.toString()}`);
+  },
+  getBankBookEntries: (cashBankAccountId: string, tanggalAkhir?: string) => {
+    const q = new URLSearchParams();
+    if (tanggalAkhir) q.append('tanggalAkhir', tanggalAkhir);
+    return request<CashBankEntry[]>(`/bank-reconciliation/book-entries/${cashBankAccountId}?${q.toString()}`);
+  },
+  getBankAutoMatchRecommendations: (cashBankAccountId: string) =>
+    request<BankAutoMatchRecommendation[]>(`/bank-reconciliation/auto-match-recommendations/${cashBankAccountId}`),
+  batchAcceptBankMatches: (payload: { matches: Array<{ statementLineId: string; cashBankEntryIds: string[] }> }) =>
+    request<any>('/bank-reconciliation/batch-accept-matches', { method: 'POST', body: JSON.stringify(payload) }),
+  manualMatchBank: (payload: { statementLineId: string; allocations: Array<{ cashBankEntryId: string; jumlahAlokasi: number }> }) =>
+    request<any>('/bank-reconciliation/manual-match', { method: 'POST', body: JSON.stringify(payload) }),
+  unmatchBank: (statementLineId: string) =>
+    request<any>(`/bank-reconciliation/unmatch/${statementLineId}`, { method: 'POST' }),
+  ignoreBankStatementLine: (statementLineId: string, reason: string) =>
+    request<any>(`/bank-reconciliation/ignore-line/${statementLineId}`, { method: 'POST', body: JSON.stringify({ reason }) }),
+  unignoreBankStatementLine: (statementLineId: string) =>
+    request<any>(`/bank-reconciliation/unignore-line/${statementLineId}`, { method: 'POST' }),
+  createBankAdjustmentDoc: (payload: { statementLineId: string; akunLawanId: string; keterangan?: string }) =>
+    request<any>('/bank-reconciliation/adjustment-doc', { method: 'POST', body: JSON.stringify(payload) }),
+  getBankReconSummary: (cashBankAccountId: string, tanggalAkhir: string, saldoRekeningKoran?: number) => {
+    const q = new URLSearchParams({ tanggalAkhir });
+    if (saldoRekeningKoran !== undefined) q.append('saldoRekeningKoran', String(saldoRekeningKoran));
+    return request<BankReconciliationSummary>(`/bank-reconciliation/summary/${cashBankAccountId}?${q.toString()}`);
+  },
+  completeBankReconciliation: (payload: { cashBankAccountId: string; tanggalAkhir: string; saldoRekeningKoran: number }) =>
+    request<any>('/bank-reconciliation/complete', { method: 'POST', body: JSON.stringify(payload) }),
+  reopenBankReconciliation: (id: string, reason: string) =>
+    request<any>(`/bank-reconciliation/reopen/${id}`, { method: 'POST', body: JSON.stringify({ reason }) }),
+  getBankReconciliationHistory: (cashBankAccountId?: string) => {
+    const q = new URLSearchParams();
+    if (cashBankAccountId) q.append('cashBankAccountId', cashBankAccountId);
+    return request<BankReconciliation[]>(`/bank-reconciliation/history?${q.toString()}`);
+  },
+  getBankReconciliationDetail: (id: string) =>
+    request<any>(`/bank-reconciliation/detail/${id}`),
+
+  // ==========================================
+  // 9. FIXED ASSET & CIP (MODUL 21)
+  // ==========================================
+  getFiscalGroups: () =>
+    request<FiscalDepreciationGroup[]>('/fixed-assets/fiscal-groups'),
+  getFiscalGroup: (id: string) =>
+    request<FiscalDepreciationGroup>(`/fixed-assets/fiscal-groups/${id}`),
+  createFiscalGroup: (payload: any) =>
+    request<FiscalDepreciationGroup>('/fixed-assets/fiscal-groups', { method: 'POST', body: JSON.stringify(payload) }),
+  updateFiscalGroup: (id: string, payload: any) =>
+    request<FiscalDepreciationGroup>(`/fixed-assets/fiscal-groups/${id}`, { method: 'PUT', body: JSON.stringify(payload) }),
+  deleteFiscalGroup: (id: string) =>
+    request<any>(`/fixed-assets/fiscal-groups/${id}`, { method: 'DELETE' }),
+  seedFiscalGroups: (specificIndustries = false) =>
+    request<any>(`/fixed-assets/fiscal-groups/seed?specificIndustries=${specificIndustries}`, { method: 'POST' }),
+
+  getAssetCategories: () =>
+    request<AssetCategory[]>('/fixed-assets/categories'),
+  getAssetCategory: (id: string) =>
+    request<AssetCategory>(`/fixed-assets/categories/${id}`),
+  createAssetCategory: (payload: any) =>
+    request<AssetCategory>('/fixed-assets/categories', { method: 'POST', body: JSON.stringify(payload) }),
+  updateAssetCategory: (id: string, payload: any) =>
+    request<AssetCategory>(`/fixed-assets/categories/${id}`, { method: 'PUT', body: JSON.stringify(payload) }),
+  deleteAssetCategory: (id: string) =>
+    request<any>(`/fixed-assets/categories/${id}`, { method: 'DELETE' }),
+
+  getFixedAssets: (filters?: { status?: string; categoryId?: string; searchQuery?: string; externalRef?: string }) => {
+    const q = new URLSearchParams();
+    if (filters?.status) q.append('status', filters.status);
+    if (filters?.categoryId) q.append('categoryId', filters.categoryId);
+    if (filters?.searchQuery) q.append('searchQuery', filters.searchQuery);
+    if (filters?.externalRef) q.append('externalRef', filters.externalRef);
+    return request<FixedAsset[]>(`/fixed-assets?${q.toString()}`);
+  },
+  getFixedAsset: (id: string) =>
+    request<FixedAsset>(`/fixed-assets/${id}`),
+  createFixedAsset: (payload: any) =>
+    request<FixedAsset>('/fixed-assets', { method: 'POST', body: JSON.stringify(payload) }),
+  updateFixedAsset: (id: string, payload: any) =>
+    request<FixedAsset>(`/fixed-assets/${id}`, { method: 'PUT', body: JSON.stringify(payload) }),
+  activateFixedAsset: (id: string, payload: { tanggalMulaiDigunakan: string; umurManfaatBulan?: number; nilaiResidu?: number }) =>
+    request<FixedAsset>(`/fixed-assets/${id}/activate`, { method: 'POST', body: JSON.stringify(payload) }),
+  capitalizeCip: (id: string, payload: { categoryId: string; tanggal: string; tanggalMulaiDigunakan: string }) =>
+    request<any>(`/fixed-assets/${id}/capitalize`, { method: 'POST', body: JSON.stringify(payload) }),
+  duplicateNAsset: (id: string, n: number) =>
+    request<any>(`/fixed-assets/${id}/duplicate-n`, { method: 'POST', body: JSON.stringify({ n }) }),
+  importAssetOpeningBalance: (payload: { items: any[] }) =>
+    request<any>('/fixed-assets/opening-balance', { method: 'POST', body: JSON.stringify(payload) }),
+  uploadAssetAttachment: (id: string, payload: { namaFile: string; tipe: string; fileBase64: string }) =>
+    request<any>(`/fixed-assets/${id}/attachments`, { method: 'POST', body: JSON.stringify(payload) }),
+  getAssetTimeline: (id: string) =>
+    request<any[]>(`/fixed-assets/${id}/timeline`),
+
+  // ==========================================
+  // MODUL 22: PROSES PENYUSUTAN BULANAN & JADWAL
+  // ==========================================
+  getDepreciationRuns: () =>
+    request<AssetDepreciationRun[]>('/fixed-assets/depreciation/runs'),
+  getDepreciationPreview: (periodId: string) =>
+    request<DepreciationPreviewResult>(`/fixed-assets/depreciation/preview?periodId=${periodId}`),
+  postDepreciationRun: (periodId: string) =>
+    request<any>('/fixed-assets/depreciation/runs', { method: 'POST', body: JSON.stringify({ periodId }) }),
+  reverseDepreciationRun: (runId: string) =>
+    request<any>(`/fixed-assets/depreciation/runs/${runId}/reverse`, { method: 'POST' }),
+  getAssetSchedule: (assetId: string) =>
+    request<AssetDepreciationSchedule>(`/fixed-assets/${assetId}/schedule`),
+  addAssetCostAddition: (assetId: string, payload: { tanggal: string; jumlah: number; akunLawanId: string; deskripsi?: string; dimensions?: any }) =>
+    request<any>(`/fixed-assets/${assetId}/cost-additions`, { method: 'POST', body: JSON.stringify(payload) }),
+  recordAssetEstimateChange: (assetId: string, payload: { berlakuMulaiPeriode: string; umurBaruBulan?: number; sisaUmurBulan?: number; residuBaru?: number; metodeBaru?: string; alasan: string }) =>
+    request<any>(`/fixed-assets/${assetId}/estimate-changes`, { method: 'POST', body: JSON.stringify(payload) }),
+  verifyAndSyncAssetBalances: (assetId?: string) =>
+    request<any>(`/fixed-assets/verify-sync${assetId ? `?assetId=${assetId}` : ''}`, { method: 'POST' }),
 };
 
 export type SalesInvoiceStatus = 'DRAFT' | 'POSTED' | 'PARTIAL' | 'PAID' | 'VOID';
@@ -2180,6 +2315,362 @@ export interface CashBankEntry {
   createdAt: string;
   cashBankAccount?: CashBankAccount;
 }
+
+// --- MODUL 20: REKONSILIASI BANK INTERFACES ---
+export type BankMatchStatus = 'UNMATCHED' | 'MATCHED' | 'ADJUSTED' | 'IGNORED';
+export type BankReconStatus = 'DRAFT' | 'SELESAI' | 'DIBUKA_KEMBALI';
+export type BankImportNominalMode = 'DEBIT_KREDIT_TERPISAH' | 'SATU_KOLOM_BERTANDA';
+
+export interface BankImportTemplate {
+  id: string;
+  tenantId: string;
+  cashBankAccountId: string;
+  pemetaanKolom: {
+    tanggalCol: number;
+    keteranganCol: number;
+    referensiCol?: number;
+    debitCol?: number;
+    kreditCol?: number;
+    nominalCol?: number;
+    saldoCol?: number;
+    startRow?: number;
+  };
+  formatTanggal: string;
+  pemisahDesimal: string;
+  pemisahRibuan: string;
+  modeNominal: BankImportNominalMode;
+}
+
+export interface BankStatementLine {
+  id: string;
+  importId: string;
+  tenantId: string;
+  cashBankAccountId: string;
+  tanggal: string;
+  keterangan: string;
+  referensi?: string | null;
+  debit: number;
+  kredit: number;
+  saldo?: number | null;
+  dedupeHash: string;
+  matchStatus: BankMatchStatus;
+  ignoreReason?: string | null;
+  externalRef?: string | null;
+  createdAt: string;
+  matches?: Array<{
+    id: string;
+    statementLineId: string;
+    cashBankEntryId: string;
+    jumlahAlokasi: number;
+    cashBankEntry?: CashBankEntry;
+  }>;
+}
+
+export interface BankAutoMatchRecommendation {
+  statementLineId: string;
+  matchType: 'EXACT' | 'SUGGESTED' | 'GROUP_SUGGESTED' | 'NONE';
+  confidenceScore: number;
+  matchedEntryIds: string[];
+  totalAllocated: number;
+  reason: string;
+  statementLine?: BankStatementLine;
+  matchedEntries?: CashBankEntry[];
+}
+
+export interface BankReconciliationSummary {
+  tanggalAkhir: string;
+  saldoRekeningKoran: number;
+  saldoBuku: number;
+  itemBeredar: {
+    setoranDalamPerjalanan: {
+      total: number;
+      items: CashBankEntry[];
+    };
+    cekBelumCair: {
+      total: number;
+      items: CashBankEntry[];
+    };
+  };
+  saldoBankDisesuaikan: number;
+  selisih: number;
+  unmatchedStmtCount: number;
+  canComplete: boolean;
+}
+
+export interface BankReconciliation {
+  id: string;
+  tenantId: string;
+  cashBankAccountId: string;
+  tanggalAkhir: string;
+  saldoRekeningKoran: number;
+  saldoBuku: number;
+  selisih: number;
+  status: BankReconStatus;
+  completedBy?: string | null;
+  completedAt?: string | null;
+  reopenedBy?: string | null;
+  reopenedAt?: string | null;
+  reopenReason?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  cashBankAccount?: {
+    kode: string;
+    nama: string;
+    namaBank?: string;
+    noRekening?: string;
+  };
+  matches?: any[];
+}
+
+// =========================================================================
+// FIXED ASSET INTERFACES (MODUL 21)
+// =========================================================================
+
+export type FiscalGroupType = 'BUKAN_BANGUNAN' | 'BANGUNAN';
+export type AssetCategoryType = 'BERWUJUD' | 'TAK_BERWUJUD';
+export type DepreciationMethod = 'GARIS_LURUS' | 'SALDO_MENURUN';
+export type FiscalStartRule = 'BULAN_PEROLEHAN' | 'BULAN_PRODUKSI_KOMERSIAL';
+export type FixedAssetStatus = 'DRAFT' | 'CIP' | 'AKTIF' | 'DISUSUTKAN_PENUH' | 'DIJUAL' | 'DIHAPUSKAN';
+export type AssetLabelStatus = 'BELUM_DILABEL' | 'TERCETAK' | 'TERPASANG' | 'RUSAK_HILANG';
+export type AssetEventType =
+  | 'PEROLEHAN'
+  | 'KAPITALISASI'
+  | 'PENAMBAHAN_NILAI'
+  | 'PENYUSUTAN'
+  | 'PERUBAHAN_ESTIMASI'
+  | 'MUTASI'
+  | 'PENURUNAN_NILAI'
+  | 'PELEPASAN'
+  | 'PENGHAPUSAN'
+  | 'VOID';
+
+export interface FiscalDepreciationGroup {
+  id: string;
+  tenantId: string;
+  kode: string;
+  nama: string;
+  jenis: FiscalGroupType;
+  masaManfaatBulan: number;
+  tarifGarisLurus: number;
+  tarifSaldoMenurun: number | null;
+  isSeed: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface AssetCategory {
+  id: string;
+  tenantId: string;
+  kode: string;
+  nama: string;
+  jenis: AssetCategoryType;
+  dapatDisusutkan: boolean;
+  metodeKomersial: DepreciationMethod;
+  faktorSaldoMenurun: number;
+  umurManfaatBulan: number;
+  nilaiResiduPersen: number | null;
+  nilaiResiduNominal: number | null;
+  fiscalGroupId: string | null;
+  metodeFiskal: DepreciationMethod;
+  aturanMulaiFiskal: FiscalStartRule;
+  akunAsetId: string;
+  akunAkumulasiId: string;
+  akunBebanId: string;
+  akunCipId: string;
+  akunLabaRugiPelepasanId: string;
+  akunRugiPenurunanNilaiId: string;
+  akunAkumulasiPenurunanNilaiId?: string | null;
+  akunRugiPenghapusanId: string;
+  isActive: boolean;
+  fiscalGroup?: FiscalDepreciationGroup;
+  akunAset?: ChartOfAccount;
+  akunAkumulasi?: ChartOfAccount;
+  akunBeban?: ChartOfAccount;
+  akunCip?: ChartOfAccount;
+}
+
+export interface FixedAsset {
+  id: string;
+  tenantId: string;
+  noAset: string;
+  tagCode: string;
+  categoryId: string;
+  nama: string;
+  deskripsi?: string | null;
+  status: FixedAssetStatus;
+  tanggalPerolehan: string;
+  tanggalMulaiDigunakan?: string | null;
+  mata_uang: string;
+  kurs: number;
+  hargaPerolehanAsli: number;
+  hargaPerolehan: number;
+  nilaiResidu: number;
+  umurManfaatBulan: number;
+  metodeKomersial: DepreciationMethod;
+  faktorSaldoMenurun: number;
+  fiscalGroupId?: string | null;
+  metodeFiskal: DepreciationMethod;
+  fiskalMulaiTanggal?: string | null;
+  fiskalUmurOverrideBulan?: number | null;
+  dimensions?: any;
+  statusLabel: AssetLabelStatus;
+  externalRef?: string | null;
+  sumberAplikasi: string;
+  sourceDocType?: string | null;
+  sourceDocId?: string | null;
+  createdBy?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  category?: AssetCategory;
+  fiscalGroup?: FiscalDepreciationGroup;
+  events?: AssetEvent[];
+  attachments?: AssetAttachment[];
+  capitalizations?: any[];
+  depreciationEntries?: any[];
+}
+
+export interface AssetEvent {
+  id: string;
+  assetId: string;
+  tipe: AssetEventType;
+  tanggal: string;
+  data: any;
+  journalId?: string | null;
+  createdBy?: string | null;
+  createdAt: string;
+}
+
+export interface AssetAttachment {
+  id: string;
+  assetId: string;
+  namaFile: string;
+  tipe: string;
+  ukuran: number;
+  storageKey: string;
+  uploadedBy?: string | null;
+  createdAt: string;
+}
+
+export interface OpeningBalanceReconResult {
+  kategoriKode: string;
+  kategoriNama: string;
+  jumlahUnit: number;
+  subledgerPerolehan: number;
+  glPerolehan: number;
+  selisihPerolehan: number;
+  subledgerAkumulasi: number;
+  glAkumulasi: number;
+  selisihAkumulasi: number;
+  status: 'COCOK' | 'BELUM_REKONSILIASI';
+}
+
+// ==========================================
+// MODUL 22 INTERFACES
+// ==========================================
+
+export interface DepreciationScheduleItem {
+  tahun: number;
+  bulan: number;
+  periodeStr: string;
+  beban: number | null;
+  akumulasi: number | null;
+  nilaiTercatat: number | null;
+  keterangan: string;
+  isPosted?: boolean;
+  runNoDokumen?: string | null;
+  entryId?: string | null;
+}
+
+export interface AssetDepreciationSchedule {
+  assetId: string;
+  noAset: string;
+  nama: string;
+  komersial: DepreciationScheduleItem[];
+  fiskal: DepreciationScheduleItem[];
+  komersialDisusutkanPenuh: boolean;
+  fiskalDisusutkanPenuh: boolean;
+}
+
+export interface DepreciationPreviewItem {
+  assetId: string;
+  noAset: string;
+  nama: string;
+  kategoriNama: string;
+  hargaPerolehan: number;
+  nilaiTercatatSebelum: number;
+  komersialBeban: number;
+  fiskalBeban: number;
+  nilaiTercatatSetelah: number;
+  isCatchUp: boolean;
+  catchUpBulanCount: number;
+  akunBebanId: string;
+  akunAkumulasiId: string;
+  dimensions?: any;
+}
+
+export interface GlJournalLinePreview {
+  kodeAkun: string;
+  namaAkun: string;
+  tipe: 'DEBIT' | 'KREDIT';
+  jumlah: number;
+  dimensions?: any;
+}
+
+export interface DepreciationPreviewResult {
+  period: {
+    id: string;
+    nama: string;
+    nomor_periode: number;
+    tanggal_mulai: string;
+    tanggal_selesai: string;
+  };
+  totalKomersial: number;
+  totalFiskal: number;
+  totalAssetsCount: number;
+  catchUpAssetsCount: number;
+  assets: DepreciationPreviewItem[];
+  glJournalPreview: {
+    debitLines: GlJournalLinePreview[];
+    creditLines: GlJournalLinePreview[];
+    isBalanced: boolean;
+  };
+  warnings: string[];
+}
+
+export interface AssetDepreciationRun {
+  id: string;
+  tenantId: string;
+  noDokumen: string;
+  periodId: string;
+  status: 'POSTED' | 'REVERSED';
+  totalKomersial: number;
+  totalFiskal: number;
+  journalId?: string | null;
+  createdBy?: string | null;
+  postedAt: string;
+  reversedAt?: string | null;
+  reversedBy?: string | null;
+  createdAt: string;
+  period?: {
+    id: string;
+    nomor_periode: number;
+    status: string;
+    tanggal_mulai: string;
+    tanggal_selesai: string;
+    fiscalYear?: {
+      nama_tahun_buku: string;
+    };
+  };
+  journal?: {
+    id: string;
+    no_voucher: string;
+    status: string;
+  };
+  _count?: {
+    entries: number;
+  };
+}
+
 
 
 

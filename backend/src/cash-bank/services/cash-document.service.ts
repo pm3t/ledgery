@@ -284,10 +284,14 @@ export class CashDocumentService {
         createdBy: userId || null,
         lines: {
           create: dto.lines.map((l) => ({
-            akunLawanId: l.akunLawanId,
+            akunLawanId: l.akunLawanId || null,
             deskripsi: l.deskripsi,
             jumlah: Number(l.jumlah),
             dimensions: l.dimensions || null,
+            lineType: l.lineType || 'BIAYA',
+            assetCategoryId: l.assetCategoryId || null,
+            kapitalisasiKeCip: l.kapitalisasiKeCip || false,
+            assetId: l.assetId || null,
           })),
         },
       },
@@ -326,12 +330,133 @@ export class CashDocumentService {
     const entries: any[] = [];
 
     for (const line of disbursement.lines) {
-      entries.push({
-        kode_akun: line.akunLawan.kode_akun,
-        tipe: 'DEBIT',
-        jumlah: Number(line.jumlah),
-        dimensions: line.dimensions as any,
-      });
+      if (line.lineType === 'ASET' || line.assetCategoryId) {
+        // =========================================================================
+        // PEROLEHAN & PENAMBAHAN NILAI ASET TETAP LEWAT KAS/BANK (MODUL 21)
+        // =========================================================================
+        if (line.assetId) {
+          // Penambahan biaya ke aset CIP yang sudah ada
+          const cipAsset = await this.prisma.fixedAsset.findFirst({
+            where: { id: line.assetId, tenantId },
+            include: { category: { include: { akunCip: true } } },
+          });
+          if (!cipAsset) {
+            throw new BadRequestException(`Aset CIP dengan ID ${line.assetId} tidak ditemukan.`);
+          }
+          if (cipAsset.status !== 'CIP') {
+            throw new BadRequestException(`Penambahan biaya hanya diperbolehkan untuk aset berstatus CIP.`);
+          }
+
+          entries.push({
+            kode_akun: cipAsset.category.akunCip.kode_akun,
+            tipe: 'DEBIT',
+            jumlah: Number(line.jumlah),
+            dimensions: line.dimensions as any,
+          });
+
+          const amt = Number(line.jumlah) * Number(disbursement.kurs);
+          await this.prisma.fixedAsset.update({
+            where: { id: cipAsset.id },
+            data: {
+              hargaPerolehanAsli: { increment: Number(line.jumlah) },
+              hargaPerolehan: { increment: amt },
+            },
+          });
+
+          await this.prisma.assetEvent.create({
+            data: {
+              assetId: cipAsset.id,
+              tipe: 'PENAMBAHAN_NILAI',
+              tanggal: disbursement.tanggal,
+              data: {
+                disbursementId: disbursement.id,
+                noDokumen: disbursement.noDokumen,
+                penambahanAsli: Number(line.jumlah),
+                penambahanFungsional: amt,
+                keterangan: line.deskripsi,
+              },
+            },
+          });
+        } else {
+          // Perolehan Aset Baru Tunai (DRAFT atau CIP)
+          const category = await this.prisma.assetCategory.findFirst({
+            where: { id: line.assetCategoryId!, tenantId },
+            include: { akunAset: true, akunCip: true, fiscalGroup: true },
+          });
+          if (!category) {
+            throw new BadRequestException('Kategori aset tidak valid.');
+          }
+
+          const targetAcc = line.kapitalisasiKeCip ? category.akunCip : category.akunAset;
+
+          entries.push({
+            kode_akun: targetAcc.kode_akun,
+            tipe: 'DEBIT',
+            jumlah: Number(line.jumlah),
+            dimensions: line.dimensions as any,
+          });
+
+          const noAset = await this.docNumbering.getNextNumber(
+            tenantId,
+            SubledgerDocType.ASSET,
+          );
+          const tagCode = noAset;
+          const assetStatus = line.kapitalisasiKeCip ? 'CIP' : 'DRAFT';
+          const functionalPrice = Number(line.jumlah) * Number(disbursement.kurs);
+
+          const createdAsset = await this.prisma.fixedAsset.create({
+            data: {
+              tenantId,
+              noAset,
+              tagCode,
+              categoryId: category.id,
+              nama: line.deskripsi,
+              deskripsi: line.deskripsi,
+              status: assetStatus as any,
+              tanggalPerolehan: disbursement.tanggal,
+              mata_uang: disbursement.mata_uang,
+              kurs: disbursement.kurs,
+              hargaPerolehanAsli: Number(line.jumlah),
+              hargaPerolehan: functionalPrice,
+              nilaiResidu: 0,
+              umurManfaatBulan: category.umurManfaatBulan,
+              metodeKomersial: category.metodeKomersial,
+              faktorSaldoMenurun: category.faktorSaldoMenurun,
+              fiscalGroupId: category.fiscalGroupId,
+              metodeFiskal: category.metodeFiskal,
+              dimensions: line.dimensions || null,
+              statusLabel: 'BELUM_DILABEL',
+              sumberAplikasi: 'CASH_DISBURSEMENT',
+              sourceDocType: 'CASH_DISBURSEMENT_LINE',
+              sourceDocId: line.id,
+            },
+          });
+
+          await this.prisma.assetEvent.create({
+            data: {
+              assetId: createdAsset.id,
+              tipe: 'PEROLEHAN',
+              tanggal: disbursement.tanggal,
+              data: {
+                disbursementId: disbursement.id,
+                noDokumen: disbursement.noDokumen,
+                hargaPerolehan: functionalPrice,
+                status: assetStatus,
+              },
+            },
+          });
+        }
+      } else {
+        if (!line.akunLawan) {
+          throw new BadRequestException(`Akun lawan tidak ditemukan pada baris "${line.deskripsi}".`);
+        }
+        entries.push({
+          kode_akun: line.akunLawan.kode_akun,
+          tipe: 'DEBIT',
+          jumlah: Number(line.jumlah),
+          dimensions: line.dimensions as any,
+        });
+      }
     }
 
     entries.push({
