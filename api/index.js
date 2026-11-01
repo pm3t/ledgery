@@ -14,6 +14,10 @@ require('class-validator');
 require('passport');
 require('passport-jwt');
 require('rxjs');
+require('xlsx');
+require('pdf-lib');
+require('qrcode');
+require('bwip-js');
 
 const fs = require('fs');
 const path = require('path');
