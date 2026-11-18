@@ -837,45 +837,7 @@ export const ChartOfAccountsPage: React.FC<ChartOfAccountsPageProps> = ({ curren
                 })}
               </tbody>
               {/* Footer Total Saldo */}
-              {accounts.length > 0 && visibleColumns.saldo && (
-                <tfoot className="bg-[#edf3ec] border-t-2 border-[#cbdcd0] font-bold text-xs text-[#142e20]">
-                  <tr>
-                    {['kode_akun', 'nama_akun', 'kategori', 'parent'].filter(
-                      (k) => visibleColumns[k as keyof ColumnVisibility],
-                    ).length > 0 && (
-                      <td
-                        colSpan={
-                          ['kode_akun', 'nama_akun', 'kategori', 'parent'].filter(
-                            (k) => visibleColumns[k as keyof ColumnVisibility],
-                          ).length
-                        }
-                        className="py-3 px-4 text-[#142e20]"
-                      >
-                        Total ({accounts.length} Akun Ditampilkan)
-                      </td>
-                    )}
-                    <td className="py-3 px-4 text-right font-mono text-[#142e20] font-bold text-sm">
-                      {formatSaldo(
-                        accounts.reduce(
-                          (sum, a) => sum + (balanceMap[a.id] || 0),
-                          0,
-                        ),
-                      )}
-                    </td>
-                    {['status', 'aksi'].filter(
-                      (k) => visibleColumns[k as keyof ColumnVisibility],
-                    ).length > 0 && (
-                      <td
-                        colSpan={
-                          ['status', 'aksi'].filter(
-                            (k) => visibleColumns[k as keyof ColumnVisibility],
-                          ).length
-                        }
-                      ></td>
-                    )}
-                  </tr>
-                </tfoot>
-              )}
+
             </table>
           </div>
         )}
