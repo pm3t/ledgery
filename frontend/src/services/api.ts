@@ -473,16 +473,39 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
     headers,
   });
 
-  const data = await response.json();
+  let data: any = null;
+  const contentType = response.headers.get('content-type') || '';
+
+  if (contentType.includes('application/json')) {
+    try {
+      data = await response.json();
+    } catch {
+      data = null;
+    }
+  } else {
+    const rawText = await response.text();
+    if (!response.ok) {
+      // Jika server mengembalikan HTML (mis. Vercel 500 error page), ekstrak info bersih tanpa melempar SyntaxError JSON
+      throw new Error(
+        `Server Error (${response.status}): ${
+          rawText.length > 250 ? rawText.slice(0, 250) + '...' : rawText || 'Tidak ada respon dari server'
+        }`,
+      );
+    }
+    data = rawText;
+  }
 
   if (!response.ok) {
-    const errorMsg = Array.isArray(data.message)
-      ? data.message.join(', ')
-      : data.message || 'Terjadi kesalahan pada server';
+    const errorMsg =
+      data && typeof data === 'object'
+        ? Array.isArray(data.message)
+          ? data.message.join(', ')
+          : data.message || data.error || 'Terjadi kesalahan pada server'
+        : `Terjadi kesalahan pada server (${response.status})`;
     throw new Error(errorMsg);
   }
 
-  return data.data !== undefined ? data.data : data;
+  return data?.data !== undefined ? data.data : data;
 }
 
 export const api = {
