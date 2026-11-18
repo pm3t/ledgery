@@ -1,16 +1,30 @@
 import { Injectable, Logger } from '@nestjs/common';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as os from 'os';
 import { randomUUID } from 'crypto';
 
 @Injectable()
 export class AssetStorageService {
   private readonly logger = new Logger(AssetStorageService.name);
-  private readonly uploadDir = path.resolve(process.cwd(), 'uploads', 'assets');
+  private readonly uploadDir: string;
 
   constructor() {
-    if (!fs.existsSync(this.uploadDir)) {
-      fs.mkdirSync(this.uploadDir, { recursive: true });
+    // Di lingkungan serverless (Vercel / AWS Lambda), filesystem root /var/task bersifat read-only.
+    // Gunakan direktori sementara /tmp yang berstatus writable.
+    const isServerless = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
+    this.uploadDir =
+      process.env.UPLOAD_DIR ||
+      (isServerless
+        ? path.join(os.tmpdir(), 'uploads', 'assets')
+        : path.resolve(process.cwd(), 'uploads', 'assets'));
+
+    try {
+      if (!fs.existsSync(this.uploadDir)) {
+        fs.mkdirSync(this.uploadDir, { recursive: true });
+      }
+    } catch (err: any) {
+      this.logger.warn(`Peringatan: Gagal membuat direktori upload (${this.uploadDir}): ${err.message}`);
     }
   }
 
@@ -27,7 +41,15 @@ export class AssetStorageService {
     const storageKey = `${Date.now()}-${randomUUID()}${ext}`;
     const filePath = path.join(this.uploadDir, storageKey);
 
-    await fs.promises.writeFile(filePath, fileBuffer);
+    try {
+      if (!fs.existsSync(this.uploadDir)) {
+        fs.mkdirSync(this.uploadDir, { recursive: true });
+      }
+      await fs.promises.writeFile(filePath, fileBuffer);
+    } catch (err: any) {
+      this.logger.error(`Gagal menyimpan file ke ${filePath}: ${err.message}`);
+      throw err;
+    }
 
     return {
       storageKey,
